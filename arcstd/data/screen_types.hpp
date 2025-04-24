@@ -4,23 +4,18 @@
 #include "data/plane.hpp"
 #include "math/rect.hpp"
 
-#include <string_view>
-
-namespace bibstd::system
+namespace bibstd::util
 {
 
 ///
-/// Screen common definitions.
+/// This class contains common definitions for screen related code.
 ///
-struct screen_base
+struct screen_types final
 {
   // Typedefs
   using screen_rect_type = math::rect<std::int32_t>;
   using screen_coordinates_type = screen_rect_type::coordinates_type;
   using pixel_plane_type = data::plane<data::pixel>;
-
-  // Constants
-  static constexpr std::string_view log_channel = "system_screen";
 };
 
-} // namespace bibstd::system
+} // namespace bibstd::util
