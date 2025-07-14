@@ -1,14 +1,12 @@
 #pragma once
 
-#include "util/scoped_guard.hpp"
-
 namespace bibstd::system
 {
 
 ///
-/// Hotkey base class for all system implementations.
+/// Hotkey common class for all system implementations.
 ///
-struct hotkey_base
+struct hotkey_common final
 {
   // Typedefs
   enum class key

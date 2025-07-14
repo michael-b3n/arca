@@ -1,31 +1,16 @@
-#pragma once
-
-#include "system/windows.hpp"
+#include "system/open_browser.hpp"
+#include "system/windows/win.hpp"
 #include "util/exception.hpp"
 
 #include <combaseapi.h>
 #include <shellapi.h>
 
-#include <string_view>
-
 namespace bibstd::system
 {
 
 ///
-/// Filesystem class for windows implementation.
 ///
-struct open_browser final
-{
-  ///
-  /// Open URL in the default web browser.
-  /// \return true if successful, false otherwise
-  ///
-  static inline auto open(const std::string& url) -> bool;
-};
-
-///
-///
-inline auto open_browser::open(const std::string& url) -> bool
+auto open_browser::open(const std::string& url) -> bool
 {
   const int wchar_count = MultiByteToWideChar(CP_UTF8, 0, url.c_str(), -1, NULL, 0);
   std::wstring url_wstr(wchar_count, L'\0');
