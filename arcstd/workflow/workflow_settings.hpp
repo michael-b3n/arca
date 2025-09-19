@@ -1,40 +1,40 @@
 #pragma once
 
-#include "core/core_settings_common.hpp"
 #include "util/exception.hpp"
 #include "util/property_tree.hpp"
+#include "workflow/workflow_settings_common.hpp"
 
 #include <map>
 #include <memory>
 #include <mutex>
 #include <string>
 
-namespace bibstd::core
+namespace bibstd::workflow
 {
 
 ///
-/// Core setting. This class owns setting objects. This core is thread safe and static.
-/// There can be multiple cores of the same type but all settings are shared.
+/// Workflow setting. This class owns setting objects. This workflow is thread safe and static.
+/// There can be multiple workflows of the same type but all settings are shared.
 /// \tparam ...Args List of all settings types.
 ///
-class core_settings final
+class workflow_settings final
 {
 public: // Typedefs
-  using common_type = core_settings_common;
+  using common_type = workflow_settings_common;
 
 public: // Structors
-  core_settings(std::string&& parent);
+  workflow_settings(std::string&& parent);
 
 public: // Accessors
   ///
-  /// Access all created settings of this core.
+  /// Access all created settings of this workflow.
   /// \return list of all created settings
   ///
-  auto settings() -> std::vector<common_type::setting_non_owning_ptr_variant_type>;
+  auto type_erased_settings() -> std::vector<common_type::setting_non_owning_ptr_variant_type>;
 
 public: // Modifiers
   ///
-  /// Create a new setting owned by this core.
+  /// Create a new setting owned by this workflow.
   /// \param value_path Value path must be unique
   /// \param value_name Name of setting
   /// \param default_value Default value of setting
@@ -55,7 +55,7 @@ private: // Variables
 ///
 ///
 template<typename T>
-auto core_settings::create_setting(const std::string& value_path, const std::string& value_name, T&& default_value)
+auto workflow_settings::create_setting(const std::string& value_path, const std::string& value_name, T&& default_value)
   -> common_type::setting_non_owning_ptr_type<T>
   requires meta::contains_v<common_type::setting_types, T>
 {
@@ -72,4 +72,4 @@ auto core_settings::create_setting(const std::string& value_path, const std::str
   return prop_ptr;
 }
 
-} // namespace bibstd::core
+} // namespace bibstd::workflow

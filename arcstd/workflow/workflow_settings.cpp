@@ -1,21 +1,21 @@
-#include "core/core_settings.hpp"
+#include "workflow/workflow_settings.hpp"
 
 #include <algorithm>
 #include <ranges>
 
-namespace bibstd::core
+namespace bibstd::workflow
 {
 
 ///
 ///
-core_settings::core_settings(std::string&& parent)
+workflow_settings::workflow_settings(std::string&& parent)
   : parent_{std::move(parent)}
 {
 }
 
 ///
 ///
-auto core_settings::settings() -> std::vector<common_type::setting_non_owning_ptr_variant_type>
+auto workflow_settings::type_erased_settings() -> std::vector<common_type::setting_non_owning_ptr_variant_type>
 {
   const auto lock = std::lock_guard(mtx_);
   auto retval = std::vector<common_type::setting_non_owning_ptr_variant_type>(property_map_.size());
@@ -28,4 +28,4 @@ auto core_settings::settings() -> std::vector<common_type::setting_non_owning_pt
   return retval;
 }
 
-} // namespace bibstd::core
+} // namespace bibstd::workflow
