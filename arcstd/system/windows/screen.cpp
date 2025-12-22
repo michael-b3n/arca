@@ -1,71 +1,31 @@
-#pragma once
-
-#include "system/windows.hpp"
-#include "util/boost_numeric_cast.hpp"
-#include "util/exception.hpp"
-#include "util/log.hpp"
-#include "util/screen_types.hpp"
+#include "bibstd/system/screen.hpp"
+#include "bibstd/system/windows/win.hpp"
+#include "bibstd/util/boost_numeric_cast.hpp"
+#include "bibstd/util/exception.hpp"
+#include "bibstd/util/log.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <expected>
 #include <mutex>
-#include <optional>
 #include <ranges>
 
 namespace bibstd::system
 {
 
 ///
-/// Screen capture class for windows implementation.
 ///
-class screen final
+auto screen::init() -> bool
 {
-public: // Typedefs
-  using screen_rect_type = util::screen_types::screen_rect_type;
-  using screen_coordinates_type = util::screen_types::screen_coordinates_type;
-  using pixel_plane_type = util::screen_types::pixel_plane_type;
-
-public: // Static accessors
-  ///
-  /// Get the virtual screen metrics.
-  /// The metrics are given in the screen coordinate system, where the origin is on the top left corner.
-  /// \return screen metrics
-  ///
-  [[nodiscard]] static inline auto metrics() -> screen_rect_type;
-
-  ///
-  /// Get the cursor position in virtual screen coordinate system.
-  /// The cursor is givin in the screen coordinate system, where the origin is on the top left corner.
-  /// \return screen metrics
-  ///
-  [[nodiscard]] static inline auto cursor_position() -> screen_coordinates_type;
-
-  ///
-  /// Get the window size at a given position. If no window is found, std::nullopt is returned.
-  /// \param coordinates Screen coordinates
-  /// \return screen rectangle
-  ///
-  [[nodiscard]] static inline auto window_at(screen_coordinates_type coordinates) -> std::optional<screen_rect_type>;
-
-  ///
-  /// Capture screen in region defined by a rectangle. The rectangle shall be in the
-  /// screen coordinate system, where the origin is on the top left corner.
-  /// \param rect Rectangle of screen area that shall be captured
-  /// \param pxi Pixels object to save the captured pixels. The pixels are saved in
-  /// the canonical coordinate system where the origin is on the bottom left corner.
-  /// The first line of pixels (bottom left to right) are saved first within the pixels data.
-  ///
-  [[nodiscard]] static inline auto capture(screen_rect_type rect, pixel_plane_type& pix) -> bool;
-};
-
-///
-///
-inline auto screen::metrics() -> screen_rect_type
-{
-  // This should be set with a application manifest. This did not work
   // We set the Dpi awareness explicitly for this process.
+  return SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+}
+
+///
+///
+auto screen::metrics() -> screen_rect_type
+{
   SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
   const auto x = GetSystemMetrics(SM_XVIRTUALSCREEN);
   const auto y = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -76,25 +36,21 @@ inline auto screen::metrics() -> screen_rect_type
 
 ///
 ///
-inline auto screen::cursor_position() -> screen_coordinates_type
+auto screen::cursor_position() -> screen_coordinates_type
 {
   POINT point;
-  // This should be set with a application manifest. This did not work
-  // We set the Dpi awareness explicitly for this process.
   SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
   if(!GetCursorPos(&point))
   {
-    THROW_EXCEPTION(util::exception("failed to get cursor position"));
+    THROW_EXCEPTION("failed to get cursor position");
   }
   return screen_coordinates_type(point.x, point.y);
 }
 
 ///
 ///
-inline auto screen::window_at(const screen_coordinates_type coordinates) -> std::optional<screen_rect_type>
+auto screen::window_at(const screen_coordinates_type coordinates) -> std::optional<screen_rect_type>
 {
-  // This should be set with a application manifest. This did not work
-  // We set the Dpi awareness explicitly for this process.
   SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
   const auto hwnd = WindowFromPoint(POINT{coordinates.x(), coordinates.y()});
   if(hwnd != nullptr)
@@ -110,7 +66,7 @@ inline auto screen::window_at(const screen_coordinates_type coordinates) -> std:
 
 ///
 ///
-inline auto screen::capture(const screen_rect_type rect, pixel_plane_type& pix) -> bool
+auto screen::capture(const screen_rect_type rect, pixel_plane_type& pix) -> bool
 {
   static std::mutex mtx;
   static std::vector<std::byte> pixels_bytes;

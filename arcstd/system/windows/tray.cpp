@@ -1,46 +1,19 @@
-#pragma once
-
-#include "app_framework/active_worker.hpp"
-#include "app_framework/thread_pool.hpp"
-#include "system/tray_base.hpp"
-#include "util/log.hpp"
-#include "util/string.hpp"
-#include "util/visit_helper.hpp"
-
-#include <tray.hpp>
+#include "bibstd/system/tray.hpp"
+#include "bibstd/framework/thread_pool.hpp"
+#include "bibstd/util/log.hpp"
+#include "bibstd/util/visit_helper.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <future>
-#include <memory>
-#include <ranges>
-#include <source_location>
 
 namespace bibstd::system
 {
 
 ///
-/// Tray class for windows implementation.
 ///
-class tray final : public tray_base
+auto tray::init(const icon_buffer icon, std::vector<entry_type>&& entries) -> util::scoped_guard
 {
-public: // Static modifiers
-  static inline auto init(icon_buffer icon, std::vector<entry_type>&& entries) -> util::scoped_guard;
-
-private: // Static helpers
-  static auto get_message() -> void;
-
-private:
-  inline static std::unique_ptr<app_framework::active_worker> worker_{};
-  inline static std::unique_ptr<Tray::Tray> tray_{nullptr};
-  inline static std::map<int, std::function<void()>> callback_map_{};
-};
-
-///
-///
-inline auto tray::init(const icon_buffer icon, std::vector<entry_type>&& entries) -> util::scoped_guard
-{
-  worker_ = std::make_unique<app_framework::active_worker>();
+  worker_ = std::make_unique<framework::active_worker>();
   std::promise<void> promise{};
   auto future = promise.get_future();
   worker_->queue_task(
@@ -51,7 +24,7 @@ inline auto tray::init(const icon_buffer icon, std::vector<entry_type>&& entries
         return [callback]()
         {
           auto f = callback;
-          app_framework::thread_pool::queue_task(std::move(f));
+          framework::thread_pool::queue_task(std::move(f));
         };
       };
       const auto toggle_callback_wrapper = [](const auto& callback)
@@ -59,7 +32,7 @@ inline auto tray::init(const icon_buffer icon, std::vector<entry_type>&& entries
         return [callback](bool flag)
         {
           auto f = callback(flag);
-          app_framework::thread_pool::queue_task(std::move(f));
+          framework::thread_pool::queue_task(std::move(f));
         };
       };
       tray_ = std::make_unique<Tray::Tray>("system_tray_identifier", Tray::Icon(icon.buffer));

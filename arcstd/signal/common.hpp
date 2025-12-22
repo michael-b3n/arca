@@ -5,7 +5,7 @@
 #include <mutex>
 #include <vector>
 
-namespace bibstd::util
+namespace bibstd::signal
 {
 
 ///
@@ -15,6 +15,12 @@ namespace bibstd::util
 ///
 template<typename T>
 using signal_type = boost::signals2::signal<T>;
+
+///
+/// Type alias for connection type from boost::signals2.
+/// A connection can be used to disconnect a slot from a signal.
+///
+using connection_type = boost::signals2::connection;
 
 ///
 /// Boost::signals2 scoped connection type.
@@ -54,4 +60,4 @@ private: // Variables
   std::vector<scoped_connection_type> connections_;
 };
 
-} // namespace bibstd::util
+} // namespace bibstd::signal
