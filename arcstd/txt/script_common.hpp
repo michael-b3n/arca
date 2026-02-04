@@ -17,7 +17,7 @@ namespace bibstd::txt
 ///
 /// Chars struct containing special char lists.
 ///
-class chars final
+class script_common final
 {
 public: // Typedefs
   ///
@@ -40,24 +40,6 @@ public: // Typedefs
   };
 
 public: // Constants
-  ///
-  /// All alphabet letter chars in an array.
-  ///
-  static constexpr auto letters = std::array{
-    std::string_view("A"), std::string_view("a"), std::string_view("B"), std::string_view("b"), std::string_view("C"),
-    std::string_view("c"), std::string_view("D"), std::string_view("d"), std::string_view("E"), std::string_view("e"),
-    std::string_view("F"), std::string_view("f"), std::string_view("G"), std::string_view("g"), std::string_view("H"),
-    std::string_view("h"), std::string_view("I"), std::string_view("i"), std::string_view("J"), std::string_view("j"),
-    std::string_view("K"), std::string_view("k"), std::string_view("L"), std::string_view("l"), std::string_view("M"),
-    std::string_view("m"), std::string_view("N"), std::string_view("n"), std::string_view("O"), std::string_view("o"),
-    std::string_view("P"), std::string_view("p"), std::string_view("Q"), std::string_view("q"), std::string_view("R"),
-    std::string_view("r"), std::string_view("S"), std::string_view("s"), std::string_view("T"), std::string_view("t"),
-    std::string_view("U"), std::string_view("u"), std::string_view("V"), std::string_view("v"), std::string_view("W"),
-    std::string_view("w"), std::string_view("X"), std::string_view("x"), std::string_view("Y"), std::string_view("y"),
-    std::string_view("Z"), std::string_view("z"), std::string_view("Ä"), std::string_view("ä"), std::string_view("Ö"),
-    std::string_view("ö"), std::string_view("Ü"), std::string_view("ü"),
-  };
-
   ///
   /// All whitespace chars in an array.
   ///
@@ -113,14 +95,16 @@ public: // Constants
     std::string_view("\xEF\xBC\x8D"), // fullwidth hyphen-minus
   };
 
+public: // Static methods
   ///
   /// Checks if char in string at given index is of provided chars category.
+  /// \param letters List of string views that defines the available letters
   /// \param string_view String view
   /// \param index to check the character
   /// \param char_category Category of char that shall be checked
   /// \return optional string view of the char or std::nullopt if category does not match
   ///
-  static constexpr auto is_char(std::string_view string_view, std::size_t index, category char_category)
+  static constexpr auto is_char(const auto& letters, std::string_view string_view, std::size_t index, category char_category)
     -> std::optional<std::string_view>;
 
   ///
@@ -138,29 +122,31 @@ public: // Constants
 
   ///
   /// Determines the category of the char in string at given index.
-  /// \param string_view String view
+  /// \param letters List of string views that defines the available letters
+  /// \param string_view String view data to get character info from
   /// \param index to check the character
   /// \return category of the char
   ///
-  static constexpr auto char_info(std::string_view string_view, std::size_t index) -> std::optional<char_data>;
+  static constexpr auto char_info(const auto& letters, std::string_view string_view, std::size_t index)
+    -> std::optional<char_data>;
 
   ///
   /// Calls function for each char in string_view. The char is classified to a category and passed to the function.
   /// \param string_view String view to iterate over
   /// \param function Function to call for each char of specified category
   ///
-  template<typename Function>
+  template<typename L, typename Function>
     requires(std::is_invocable_v<Function, const std::string_view, const std::size_t, const category>)
-  static constexpr auto for_each_char(std::string_view string_view, Function&& function) -> void;
+  static constexpr auto for_each_char(const L& letters, std::string_view string_view, Function&& function) -> void;
 
   ///
   /// Calls function for each char in string_view. The char is classified to a category and passed to the function.
   /// \param string_view String view to iterate over
   /// \param function Function to call for each char of specified category
   ///
-  template<typename Function>
+  template<typename L, typename Function>
     requires(std::is_invocable_r_v<bool, Function, const std::string_view, const std::size_t, const category>)
-  static constexpr auto for_each_char_while(std::string_view string_view, Function&& function) -> void;
+  static constexpr auto for_each_char_while(const L& letters, std::string_view string_view, Function&& function) -> void;
 
 private: // Implementation
   static constexpr auto is_equal_impl(std::string_view string_view, std::size_t index, std::string_view character)
@@ -170,8 +156,9 @@ private: // Implementation
 
 ///
 ///
-constexpr auto chars::is_char(const std::string_view string_view, const std::size_t index, const category char_category)
-  -> std::optional<std::string_view>
+constexpr auto script_common::is_char(
+  const auto& letters, const std::string_view string_view, const std::size_t index, const category char_category
+) -> std::optional<std::string_view>
 {
   if(index < string_view.size())
   {
@@ -196,7 +183,7 @@ constexpr auto chars::is_char(const std::string_view string_view, const std::siz
 ///
 template<typename T>
   requires std::equality_comparable_with<typename T::value_type, std::string_view>
-constexpr auto chars::contains(const T& chars, const std::string_view string_view, const std::size_t index)
+constexpr auto script_common::contains(const T& chars, const std::string_view string_view, const std::size_t index)
   -> std::optional<std::string_view>
 {
   if(index < string_view.size())
@@ -220,24 +207,25 @@ constexpr auto chars::contains(const T& chars, const std::string_view string_vie
 
 ///
 ///
-constexpr auto chars::char_info(std::string_view string_view, std::size_t index) -> std::optional<char_data>
+constexpr auto script_common::char_info(const auto& letters, std::string_view string_view, std::size_t index)
+  -> std::optional<char_data>
 {
   // clang-format off
-  if(const auto result = is_char(string_view, index, category::letter); result) { return char_data{category::letter, result->size()}; }
-  if(const auto result = is_char(string_view, index, category::whitespace); result) { return char_data{category::whitespace, result->size()}; }
-  if(const auto result = is_char(string_view, index, category::line); result) { return char_data{category::line, result->size()}; }
-  if(const auto result = is_char(string_view, index, category::fullstop); result) { return char_data{category::fullstop, result->size()}; }
-  if(const auto result = is_char(string_view, index, category::digit); result) { return char_data{category::digit, result->size()}; }
-  if(const auto result = is_char(string_view, index, category::other); result) { return char_data{category::other, result->size()}; }
+  if(const auto result = is_char(letters, string_view, index, category::letter); result) { return char_data{category::letter, result->size()}; }
+  if(const auto result = is_char(letters, string_view, index, category::whitespace); result) { return char_data{category::whitespace, result->size()}; }
+  if(const auto result = is_char(letters, string_view, index, category::line); result) { return char_data{category::line, result->size()}; }
+  if(const auto result = is_char(letters, string_view, index, category::fullstop); result) { return char_data{category::fullstop, result->size()}; }
+  if(const auto result = is_char(letters, string_view, index, category::digit); result) { return char_data{category::digit, result->size()}; }
+  if(const auto result = is_char(letters, string_view, index, category::other); result) { return char_data{category::other, result->size()}; }
   // clang-format on
   return std::nullopt;
 }
 
 ///
 ///
-template<typename Function>
-  requires(std::is_invocable_v<Function, const std::string_view, const std::size_t, const chars::category>)
-constexpr auto chars::for_each_char(const std::string_view string_view, Function&& function) -> void
+template<typename L, typename Function>
+  requires(std::is_invocable_v<Function, const std::string_view, const std::size_t, const script_common::category>)
+constexpr auto script_common::for_each_char(const L& letters, const std::string_view string_view, Function&& function) -> void
 {
   auto counter = std::size_t{0};
   std::ranges::for_each(
@@ -245,7 +233,7 @@ constexpr auto chars::for_each_char(const std::string_view string_view, Function
       std::views::take_while([&](const auto i) { return counter < string_view.size(); }),
     [&]([[maybe_unused]] const auto)
     {
-      const auto data = char_info(string_view, counter);
+      const auto data = char_info(letters, string_view, counter);
       if(data)
       {
         function(string_view.substr(counter, data->char_size), counter, data->char_category);
@@ -262,9 +250,10 @@ constexpr auto chars::for_each_char(const std::string_view string_view, Function
 
 ///
 ///
-template<typename Function>
-  requires(std::is_invocable_r_v<bool, Function, const std::string_view, const std::size_t, const chars::category>)
-constexpr auto chars::for_each_char_while(const std::string_view string_view, Function&& function) -> void
+template<typename L, typename Function>
+  requires(std::is_invocable_r_v<bool, Function, const std::string_view, const std::size_t, const script_common::category>)
+constexpr auto script_common::for_each_char_while(const L& letters, const std::string_view string_view, Function&& function)
+  -> void
 {
   auto counter = std::size_t{0};
   std::ranges::for_each(
@@ -272,7 +261,7 @@ constexpr auto chars::for_each_char_while(const std::string_view string_view, Fu
       std::views::take_while([&](const auto i) { return counter < string_view.size(); }),
     [&]([[maybe_unused]] const auto)
     {
-      const auto data = char_info(string_view, counter);
+      const auto data = char_info(letters, string_view, counter);
       if(data)
       {
         if(function(string_view.substr(counter, data->char_size), counter, data->char_category))
@@ -295,7 +284,8 @@ constexpr auto chars::for_each_char_while(const std::string_view string_view, Fu
 
 ///
 ///
-constexpr auto chars::is_equal_impl(const std::string_view string_view, const std::size_t index, const std::string_view c)
+constexpr auto
+script_common::is_equal_impl(const std::string_view string_view, const std::size_t index, const std::string_view c)
   -> std::optional<std::string_view>
 {
   if(index + c.size() > string_view.size())
@@ -308,7 +298,7 @@ constexpr auto chars::is_equal_impl(const std::string_view string_view, const st
 
 ///
 ///
-constexpr auto chars::is_digit_impl(const std::string_view string_view, const std::size_t index)
+constexpr auto script_common::is_digit_impl(const std::string_view string_view, const std::size_t index)
   -> std::optional<std::string_view>
 {
   return std::isdigit(static_cast<unsigned char>(string_view.at(index))) ? std::make_optional(string_view.substr(index, 1))
