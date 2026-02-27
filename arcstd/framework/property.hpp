@@ -3,12 +3,12 @@
 #include <functional>
 #include <mutex>
 
-namespace bibstd::util
+namespace bibstd::framework
 {
 
 ///
 /// Thread safe property created from property tree. The value will synchronize with the tree on modification.
-/// The `property_tree` object can access private members of this class \see `util::property_tree`.
+/// The `property_tree` object can access private members of this class \see `framework::property_tree`.
 ///
 template<typename T>
 class property final
@@ -166,4 +166,4 @@ auto property<T>::exchange(const value_type& new_value) -> value_type
   return old_value;
 }
 
-} // namespace bibstd::util
+} // namespace bibstd::framework

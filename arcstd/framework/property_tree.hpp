@@ -1,14 +1,14 @@
 #pragma once
 
+#include "bibstd/framework/property.hpp"
+#include "bibstd/framework/property_parser.hpp"
 #include "bibstd/util/exception.hpp"
-#include "bibstd/util/property.hpp"
-#include "bibstd/util/property_parser.hpp"
 
 #include <filesystem>
 #include <memory>
 #include <mutex>
 
-namespace bibstd::util
+namespace bibstd::framework
 {
 
 ///
@@ -72,4 +72,4 @@ auto property_tree::create_property(const property_path_type& path, T&& default_
   return prop;
 }
 
-} // namespace bibstd::util
+} // namespace bibstd::framework
