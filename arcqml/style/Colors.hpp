@@ -4,8 +4,20 @@
 #include <QObject>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace bibqml
+namespace aba::qml
 {
+namespace detail
+{
+
+///
+/// Helper function to convert a hex color string to a QColor object.
+/// The input string should be in the format "#RRGGBBAA" or "#RRGGBB".
+/// \param color The hex color string to convert
+/// \return The corresponding QColor object
+///
+auto toQColor(std::string color) -> QColor;
+
+} // namespace detail
 
 ///
 /// QML Colors singleton.
@@ -24,6 +36,13 @@ class Colors final : public QObject
   Q_PROPERTY(QColor hover MEMBER hover_ NOTIFY hoverChanged)
   Q_PROPERTY(QColor pressed MEMBER pressed_ NOTIFY pressedChanged)
 
+  Q_PROPERTY(QColor verseBox MEMBER verseBox_ NOTIFY verseBoxChanged)
+  Q_PROPERTY(QColor verseText MEMBER verseText_ NOTIFY verseTextChanged)
+  Q_PROPERTY(QColor chapterBox MEMBER chapterBox_ NOTIFY chapterBoxChanged)
+  Q_PROPERTY(QColor chapterText MEMBER chapterText_ NOTIFY chapterTextChanged)
+  Q_PROPERTY(QColor bookHeader MEMBER bookHeader_ NOTIFY bookHeaderChanged)
+  Q_PROPERTY(QColor bookHeaderText MEMBER bookHeaderText_ NOTIFY bookHeaderTextChanged)
+
 public: // Structors
   explicit Colors(QObject* parent = nullptr);
   ~Colors() noexcept override;
@@ -36,13 +55,27 @@ signals:
   void hoverChanged();
   void pressedChanged();
 
+  void verseBoxChanged();
+  void verseTextChanged();
+  void chapterBoxChanged();
+  void chapterTextChanged();
+  void bookHeaderChanged();
+  void bookHeaderTextChanged();
+
 private: // Variables
-  QColor backgroundTransparent_{"#3ad0d2e2"};
-  QColor backgroundSolid_{"#3ad0d2ff"};
-  QColor border_{"#adb9baff"};
-  QColor text_{"#ffffff"};
-  QColor hover_{"#69b2b4ff"};
-  QColor pressed_{"#1e7c7dff"};
+  QColor backgroundTransparent_{detail::toQColor("#fef5deed")};
+  QColor backgroundSolid_{detail::toQColor("#fef5deff")};
+  QColor border_{detail::toQColor("#937a7aff")};
+  QColor text_{detail::toQColor("#000000ff")};
+  QColor hover_{detail::toQColor("#eabca8ff")};
+  QColor pressed_{detail::toQColor("#937a7aff")};
+
+  QColor verseBox_{detail::toQColor("#5B4A8Aff")};
+  QColor verseText_{detail::toQColor("#FFFFFFff")};
+  QColor chapterBox_{detail::toQColor("#7B5EA7ff")};
+  QColor chapterText_{detail::toQColor("#F0E6FFff")};
+  QColor bookHeader_{detail::toQColor("#9B7DC8ff")};
+  QColor bookHeaderText_{detail::toQColor("#FFFFFFff")};
 };
 
-} // namespace bibqml
+} // namespace aba::qml

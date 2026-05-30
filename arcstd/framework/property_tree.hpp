@@ -1,14 +1,14 @@
 #pragma once
 
+#include "bibstd/framework/property.hpp"
+#include "bibstd/framework/property_parser.hpp"
 #include "bibstd/util/exception.hpp"
-#include "bibstd/util/property.hpp"
-#include "bibstd/util/property_parser.hpp"
 
 #include <filesystem>
 #include <memory>
 #include <mutex>
 
-namespace bibstd::util
+namespace bibstd::framework
 {
 
 ///
@@ -63,7 +63,7 @@ auto property_tree::create_property(const property_path_type& path, T&& default_
   const auto lock = std::lock_guard(mtx_);
   if(path.empty())
   {
-    THROW_EXCEPTION("register property failed: empty path");
+    throw util::exception("register property failed: empty path");
   }
   auto prop = property<T>(property_parser::read<T>(path, tree_).value_or(std::forward<decltype(default_value)>(default_value)));
   prop.property_tree_update_ = [sptr = shared_from_this(), path](const T& value)
@@ -72,4 +72,4 @@ auto property_tree::create_property(const property_path_type& path, T&& default_
   return prop;
 }
 
-} // namespace bibstd::util
+} // namespace bibstd::framework

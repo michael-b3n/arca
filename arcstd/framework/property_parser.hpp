@@ -2,25 +2,25 @@
 
 #include "bibstd/meta/chrono.hpp"
 #include "bibstd/meta/contains.hpp"
-#include "bibstd/meta/pack.hpp"
 #include "bibstd/util/enum.hpp"
+#include "bibstd/util/ranges.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
 #include <algorithm>
 #include <cstdint>
+#include <filesystem>
 #include <format>
-#include <ranges>
 #include <string>
 #include <vector>
 
-namespace bibstd::util
+namespace bibstd::framework
 {
 
 ///
 /// All valid property_core types in a pack.
 ///
-using basic_property_value_types = meta::pack<
+using basic_property_value_types = std::tuple<
   bool,
   std::int8_t,
   std::uint8_t,
@@ -75,9 +75,9 @@ struct property_parser final
   template<basic_property_value_type T>
   static auto write(const property_path_type& path, property_tree_type& tree, const T& value) -> void;
 
-  template<enum_type T>
+  template<util::enum_type T>
   static auto read(const property_path_type& path, const property_tree_type& tree) -> std::optional<T>;
-  template<enum_type T>
+  template<util::enum_type T>
   static auto write(const property_path_type& path, property_tree_type& tree, const T& value) -> void;
 
   template<property_parser_pair_type T>
@@ -133,13 +133,13 @@ auto property_parser::write(const property_path_type& path, property_tree_type& 
 
 ///
 ///
-template<enum_type T>
+template<util::enum_type T>
 auto property_parser::read(const property_path_type& path, const property_tree_type& tree) -> std::optional<T>
 {
   const auto optional_value = tree.get_optional<std::string>(path);
   if(optional_value.has_value())
   {
-    if(const auto v = to_enum<T>(optional_value.value()); v.has_value())
+    if(const auto v = util::to_enum<T>(optional_value.value()); v.has_value())
     {
       return v.value();
     }
@@ -149,10 +149,10 @@ auto property_parser::read(const property_path_type& path, const property_tree_t
 
 ///
 ///
-template<enum_type T>
+template<util::enum_type T>
 auto property_parser::write(const property_path_type& path, property_tree_type& tree, const T& value) -> void
 {
-  tree.put(path, to_string_view(value));
+  tree.put(path, util::enum_name(value));
 }
 
 ///
@@ -260,7 +260,7 @@ auto property_parser::read(const property_path_type& path, const property_tree_t
   }
   auto retval = Vector(size.value());
   const auto valid = std::ranges::all_of(
-    std::views::iota(decltype(size.value()){0}, size.value()),
+    util::ranges::index_view(retval),
     [&](const auto i)
     {
       auto element = read<typename Vector::value_type>(path / std::format("index_{}", i), tree);
@@ -283,9 +283,8 @@ auto property_parser::write(const property_path_type& path, property_tree_type& 
 {
   write(path / path_name_size, tree, static_cast<std::uint64_t>(value.size()));
   std::ranges::for_each(
-    std::views::iota(decltype(value.size()){0}, value.size()),
-    [&](const auto i) { write(path / std::format("index_{}", i), tree, value.at(i)); }
+    util::ranges::index_view(value), [&](const auto i) { write(path / std::format("index_{}", i), tree, value.at(i)); }
   );
 }
 
-} // namespace bibstd::util
+} // namespace bibstd::framework
