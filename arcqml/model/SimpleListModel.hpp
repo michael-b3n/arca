@@ -9,7 +9,7 @@
 
 #include <vector>
 
-namespace aba::qml
+namespace verselens::qml
 {
 
 ///
@@ -90,4 +90,4 @@ public: // Modifiers
   Q_INVOKABLE void clear();
 };
 
-} // namespace aba::qml
+} // namespace verselens::qml

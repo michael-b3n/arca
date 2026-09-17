@@ -6,7 +6,7 @@
 #include <QString>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace aba::qml
+namespace verselens::qml
 {
 namespace detail
 {
@@ -67,4 +67,4 @@ private: // Variables
   QString updateAvailable_{detail::toIconUrl("update_available.svg")};
 };
 
-} // namespace aba::qml
+} // namespace verselens::qml

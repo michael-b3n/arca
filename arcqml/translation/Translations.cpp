@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace aba::qml
+namespace verselens::qml
 {
 namespace
 {
@@ -120,4 +120,4 @@ QString Translations::names(const QStringList& keys, const QString& language) co
   return result.join(nameSeparator);
 }
 
-} // namespace aba::qml
+} // namespace verselens::qml

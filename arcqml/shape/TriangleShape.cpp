@@ -3,7 +3,7 @@
 #include <QPainter>
 #include <QPainterPath>
 
-namespace aba::qml
+namespace verselens::qml
 {
 
 ///
@@ -38,4 +38,4 @@ void TriangleShape::paint(bibstd::util::non_owning_ptr<QPainter> painter)
   painter->fillPath(path, color_);
 }
 
-} // namespace aba::qml
+} // namespace verselens::qml

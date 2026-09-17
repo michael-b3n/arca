@@ -10,7 +10,7 @@
 #include <QtQml/qqmlengine.h>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace aba::qml
+namespace verselens::qml
 {
 
 ///
@@ -98,4 +98,4 @@ signals:
   void languageChanged();
 };
 
-} // namespace aba::qml
+} // namespace verselens::qml
