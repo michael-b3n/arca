@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-namespace aba::qml
+namespace verselens::qml
 {
 
 ///
@@ -225,4 +225,4 @@ void SimpleListModel::clear()
   endResetModel();
 }
 
-} // namespace aba::qml
+} // namespace verselens::qml

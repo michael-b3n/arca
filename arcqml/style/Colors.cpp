@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace aba::qml
+namespace verselens::qml
 {
 namespace detail
 {
@@ -33,4 +33,4 @@ Colors::Colors(QObject* parent)
 ///
 Colors::~Colors() noexcept = default;
 
-} // namespace aba::qml
+} // namespace verselens::qml

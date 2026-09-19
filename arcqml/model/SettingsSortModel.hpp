@@ -10,7 +10,7 @@
 #include <QtQmlIntegration/qqmlintegration.h>
 #include <QVariant>
 
-namespace aba::qml
+namespace verselens::qml
 {
 
 ///
@@ -73,4 +73,4 @@ private: // Implementation
   [[nodiscard]] static QString settingName(const QStringList& categories);
 };
 
-} // namespace aba::qml
+} // namespace verselens::qml

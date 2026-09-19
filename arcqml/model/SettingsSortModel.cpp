@@ -1,7 +1,7 @@
 #include "SettingsSortModel.hpp"
 #include "Translations.hpp"
 
-namespace aba::qml
+namespace verselens::qml
 {
 namespace
 {
@@ -96,4 +96,4 @@ QString SettingsSortModel::settingName(const QStringList& categories)
   return (translations != nullptr) ? translations->names(belowCategory) : belowCategory.join(Translations::nameSeparator);
 }
 
-} // namespace aba::qml
+} // namespace verselens::qml

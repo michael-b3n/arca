@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace aba::qml
+namespace verselens::qml
 {
 namespace detail
 {
@@ -89,4 +89,4 @@ private: // Variables
   QColor bookHeaderText_{detail::toQColor("#fef5deff")};
 };
 
-} // namespace aba::qml
+} // namespace verselens::qml

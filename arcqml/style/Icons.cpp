@@ -1,6 +1,6 @@
 #include "Icons.hpp"
 
-namespace aba::qml
+namespace verselens::qml
 {
 namespace detail
 {
@@ -26,4 +26,4 @@ Icons::Icons(bibstd::util::non_owning_ptr<QObject> parent)
 ///
 Icons::~Icons() noexcept = default;
 
-} // namespace aba::qml
+} // namespace verselens::qml

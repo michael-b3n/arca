@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace aba::qml
+namespace verselens::qml
 {
 
 ///
@@ -86,4 +86,4 @@ private: // Variables
   int durationDebounce_{500};
 };
 
-} // namespace aba::qml
+} // namespace verselens::qml
