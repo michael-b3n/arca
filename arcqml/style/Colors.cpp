@@ -1,8 +1,8 @@
-#include "Colors.hpp"
+#include "bibqml/style/Colors.hpp"
 
 #include <algorithm>
 
-namespace verselens::qml
+namespace bibqml
 {
 namespace detail
 {
@@ -33,4 +33,4 @@ Colors::Colors(QObject* parent)
 ///
 Colors::~Colors() noexcept = default;
 
-} // namespace verselens::qml
+} // namespace bibqml

@@ -1,6 +1,6 @@
-#include "Metrics.hpp"
+#include "bibqml/style/Metrics.hpp"
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
@@ -14,4 +14,4 @@ Metrics::Metrics(bibstd::util::non_owning_ptr<QObject> parent)
 ///
 Metrics::~Metrics() noexcept = default;
 
-} // namespace verselens::qml
+} // namespace bibqml

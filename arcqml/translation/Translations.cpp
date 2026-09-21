@@ -1,4 +1,4 @@
-#include "Translations.hpp"
+#include "bibqml/translation/Translations.hpp"
 
 #include <bibstd/util/contains.hpp>
 #include <bibstd/util/log.hpp>
@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace verselens::qml
+namespace bibqml
 {
 namespace
 {
@@ -30,7 +30,7 @@ Translations* Translations::create([[maybe_unused]] QQmlEngine* qmlEngine, QJSEn
 {
   if(instance_ == nullptr)
   {
-    LOG_ERROR("translations do not exist: pretty names are displayed as identifiers");
+    LOG_ERROR("translations do not exist: every key is displayed as its identifier");
     return nullptr;
   }
   // The instance is owned by the application, the QML engine must not delete it.
@@ -43,9 +43,9 @@ Translations* Translations::create([[maybe_unused]] QQmlEngine* qmlEngine, QJSEn
 
 ///
 ///
-Translations::Translations(app_pretty_names names, const bibstd::util::non_owning_ptr<QObject> parent)
+Translations::Translations(const std::span<const std::byte> csv, const bibstd::util::non_owning_ptr<QObject> parent)
   : QObject{parent}
-  , names_{std::move(names)}
+  , names_{csv}
   , language_{names_.languages().empty() ? QString{} : QString::fromStdString(names_.languages().front())}
 {
   if(instance_ != nullptr)
@@ -120,4 +120,4 @@ QString Translations::names(const QStringList& keys, const QString& language) co
   return result.join(nameSeparator);
 }
 
-} // namespace verselens::qml
+} // namespace bibqml

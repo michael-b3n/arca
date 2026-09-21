@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import BibQml
 
 ///
 /// Base of all icon buttons.
@@ -19,7 +20,7 @@ Button
   background: Rectangle
   {
     // Properties
-    color: root.pressed ? Colors.pressed : (root.hovered ? Colors.selection : "transparent")
+    color: root.pressed ? Colors.pressed : (root.hovered ? Colors.selection : Qt.alpha(Colors.selection, 0))
     radius: Metrics.radiusSmall
 
     // Animations

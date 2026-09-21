@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bibqml/model/SettingsListModel.hpp>
+#include "bibqml/model/SettingsListModel.hpp"
 
 #include <bibstd/util/non_owning_ptr.hpp>
 
@@ -10,12 +10,12 @@
 #include <QtQmlIntegration/qqmlintegration.h>
 #include <QVariant>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
 /// QML proxy model putting the settings of a SettingsListModel into the order they are read in:
-/// by the pretty name of their category first, by their own pretty name second. The order
+/// by the display name of their category first, by their own display name second. The order
 /// therefore follows the language they are displayed in and not the order the backend creates
 /// them in.
 /// The source model only tells which segments a setting is named by. That the first of them is
@@ -61,16 +61,16 @@ private: // Implementation
 
   ///
   /// Name of the category a setting is grouped under, as it is displayed.
-  /// \return pretty name of the first segment, the segment itself if no pretty name is available
+  /// \return display name of the first segment, the segment itself if no display name is available
   ///
   [[nodiscard]] static QString categoryName(const QStringList& categories);
 
   ///
   /// Name a setting is displayed under inside its category. Only the category is told apart, all
   /// further segments name the setting itself, the view offers no deeper level of grouping.
-  /// \return pretty name of the segments below the category
+  /// \return display name of the segments below the category
   ///
   [[nodiscard]] static QString settingName(const QStringList& categories);
 };
 
-} // namespace verselens::qml
+} // namespace bibqml

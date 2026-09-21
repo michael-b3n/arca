@@ -27,16 +27,21 @@ ParamBase
     verticalAlignment: Text.AlignVCenter
 
     padding: Metrics.paddingParamContent
+    topPadding: Metrics.spacingSmall
+    bottomPadding: Metrics.spacingSmall
+    // The edited text is kept clear of the postfix standing at the right edge
+    rightPadding: postfixText.width > 0 ? postfixText.width + 2 * Metrics.paddingParamContent
+                                        : Metrics.paddingParamContent
     width: root.availableWidth
-    implicitHeight: input.contentHeight + 2 * input.padding
+    implicitHeight: root.lineHeight + input.topPadding + input.bottomPadding
 
     inputMethodHints:
     {
       switch(root.valueType)
       {
-      case SettingsListModel.IntValueType: return Qt.ImhDigitsOnly
-      case SettingsListModel.DoubleValueType:
-      case SettingsListModel.TimeValueType: return Qt.ImhFormattedNumbersOnly
+      case SettingsListModel.IntValueType:
+      case SettingsListModel.TimeValueType: return Qt.ImhDigitsOnly
+      case SettingsListModel.DoubleValueType: return Qt.ImhFormattedNumbersOnly
       case SettingsListModel.StringValueType:
       case SettingsListModel.PathValueType:
       case SettingsListModel.BoolValueType:
@@ -64,13 +69,24 @@ ParamBase
     }
 
     // Components
+    ParamPostfix
+    {
+      id: postfixText
+
+      // Properties
+      anchors.right: parent.right
+      anchors.rightMargin: Metrics.paddingParamContent
+      anchors.verticalCenter: parent.verticalCenter
+      text: root.postfix
+    }
+
     Timer
     {
       id: debounceTimer
 
       // Properties
       interval: Metrics.durationDebounce
-      repeat: false // single-shot
+      repeat: false
 
       // Connections
       onTriggered: { input.handleTextChange() }
@@ -90,7 +106,8 @@ ParamBase
       case SettingsListModel.BoolValueType:
         BridgeLogger.error("unsupported SettingsListModel::BoolValueType used in ParamTextField")
         return
-      case SettingsListModel.IntValueType:
+      case SettingsListModel.IntValueType: // [[fallthrough]]
+      case SettingsListModel.TimeValueType:
       {
         const v = parseInt(input.text)
         if(isNaN(v))
@@ -103,8 +120,7 @@ ParamBase
         }
         return
       }
-      case SettingsListModel.DoubleValueType: // fallthrough
-      case SettingsListModel.TimeValueType:
+      case SettingsListModel.DoubleValueType:
       {
         const v = parseFloat(input.text)
         if(isNaN(v))

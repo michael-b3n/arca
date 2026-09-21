@@ -1,4 +1,4 @@
-#include "bibqml/util/NativeScreen.hpp"
+#include "bibqml/util/ScreenConversion.hpp"
 
 #include <bibstd/math/rect.hpp>
 #include <bibstd/system/screen.hpp>

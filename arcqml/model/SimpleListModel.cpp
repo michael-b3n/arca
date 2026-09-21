@@ -1,4 +1,4 @@
-#include "SimpleListModel.hpp"
+#include "bibqml/model/SimpleListModel.hpp"
 
 #include <bibstd/util/log.hpp>
 
@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
@@ -225,4 +225,4 @@ void SimpleListModel::clear()
   endResetModel();
 }
 
-} // namespace verselens::qml
+} // namespace bibqml

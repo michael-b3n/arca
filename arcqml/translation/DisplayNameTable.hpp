@@ -8,37 +8,37 @@
 #include <unordered_map>
 #include <vector>
 
-namespace verselens
+namespace bibqml
 {
 
 ///
-/// Table holding the pretty names of the application in all available languages.
+/// Table holding the display names of an application in all available languages.
 /// The table is read from a CSV document with the following layout:
 /// \code
 ///   key,<language>,<language>,...
-///   <key>,<pretty name>,<pretty name>,...
+///   <key>,<display name>,<display name>,...
 /// \endcode
-/// The first column holds the keys, all following columns hold the pretty names of one
-/// language each. The name of a language column is the language identifier used for lookups.
-/// Lines starting with '#' and empty lines are ignored.
+/// The first column is named `key` and holds the keys, all following columns hold the display
+/// names of one language each. The name of a language column is the language identifier used
+/// for lookups. Lines starting with '#' and empty lines are ignored.
 ///
-/// Keys are the identifiers used by the backend, e.g. the path of a setting. The pretty name
+/// Keys are the identifiers used by the backend, e.g. the path of a setting. The display name
 /// of a setting value is stored under the key "<setting path>/<setting value>".
 ///
-class app_pretty_names final
+class DisplayNameTable final
 {
   // Variables
   std::vector<std::string> languages_;
   std::unordered_map<std::string, std::vector<std::string>> entries_;
 
 public: // Structors
-  app_pretty_names() = default;
-
   ///
-  /// Construct the table from a CSV document.
-  /// \throws util::exception if the document cannot be parsed
+  /// Construct the table from a CSV document, an empty one holds no names.
+  /// A malformed row is dropped, a malformed document rejected: one bad row shall not cost
+  /// every other name.
+  /// \throws util::exception if the document does not describe a table of display names
   ///
-  explicit app_pretty_names(std::span<const std::byte> csv);
+  explicit DisplayNameTable(std::span<const std::byte> csv);
 
 public: // Accessors
   ///
@@ -48,10 +48,10 @@ public: // Accessors
   [[nodiscard]] auto languages() const -> const std::vector<std::string>&;
 
   ///
-  /// Access the pretty name of a key.
-  /// \return pretty name, std::nullopt if the language or the key is unknown
+  /// Access the display name of a key.
+  /// \return display name, std::nullopt if the language or the key is unknown
   ///
   [[nodiscard]] auto name(std::string_view language, std::string_view key) const -> std::optional<std::string>;
 };
 
-} // namespace verselens
+} // namespace bibqml

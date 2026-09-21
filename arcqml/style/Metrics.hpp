@@ -1,16 +1,16 @@
 #pragma once
 
-#include "bibstd/util/non_owning_ptr.hpp"
+#include <bibstd/util/non_owning_ptr.hpp>
 
 #include <QObject>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
 /// QML Metrics singleton.
-/// This class provides application wide style metrics (spacing, font sizes, radii).
+/// This class provides the style metrics (spacing, font sizes, radii) of the module.
 ///
 class Metrics final : public QObject
 {
@@ -42,6 +42,8 @@ class Metrics final : public QObject
   Q_PROPERTY(int border MEMBER border_ CONSTANT)
   Q_PROPERTY(int borderThick MEMBER borderThick_ CONSTANT)
   Q_PROPERTY(int controlHeight MEMBER controlHeight_ CONSTANT)
+  Q_PROPERTY(int iconSize MEMBER iconSize_ CONSTANT)
+  Q_PROPERTY(int popupHeightMax MEMBER popupHeightMax_ CONSTANT)
 
   // Durations
   Q_PROPERTY(int durationShort MEMBER durationShort_ CONSTANT)
@@ -67,7 +69,7 @@ private: // Variables
   int spacingLarge_{8};
 
   // Padding
-  int paddingParamContent_{10};
+  int paddingParamContent_{6};
 
   // Radii
   int radiusSmall_{2};
@@ -78,6 +80,8 @@ private: // Variables
   int border_{1};
   int borderThick_{2};
   int controlHeight_{24};
+  int iconSize_{16};
+  int popupHeightMax_{200};
 
   // Durations in milliseconds
   int durationShort_{200};
@@ -86,4 +90,4 @@ private: // Variables
   int durationDebounce_{500};
 };
 
-} // namespace verselens::qml
+} // namespace bibqml

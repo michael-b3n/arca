@@ -1,18 +1,18 @@
 #pragma once
 
-#include "bibstd/util/non_owning_ptr.hpp"
+#include <bibstd/util/non_owning_ptr.hpp>
 
 #include <QObject>
 #include <QString>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace verselens::qml
+namespace bibqml
 {
 namespace detail
 {
 
 ///
-/// Helper function to build the source url of an icon resource, \p name is its file name inside the qml resource folder.
+/// Helper function to build the source url of an icon resource, \p name is its file name inside the module resource folder.
 /// \return The corresponding resource url
 ///
 auto toIconUrl(std::string_view name) -> QString;
@@ -21,7 +21,7 @@ auto toIconUrl(std::string_view name) -> QString;
 
 ///
 /// QML Icons singleton.
-/// This class provides application wide icon sources.
+/// This class provides the icon sources of the module.
 /// Keeping the resource prefix in one place avoids repeating
 /// the module path in every call site.
 ///
@@ -31,13 +31,14 @@ class Icons final : public QObject
   QML_ELEMENT
   QML_SINGLETON
 
-  Q_PROPERTY(QString addToQueue MEMBER addToQueue_ CONSTANT)
+  Q_PROPERTY(QString add MEMBER add_ CONSTANT)
   Q_PROPERTY(QString bell MEMBER bell_ CONSTANT)
   Q_PROPERTY(QString bellRinging MEMBER bellRinging_ CONSTANT)
   Q_PROPERTY(QString checkMark MEMBER checkMark_ CONSTANT)
   Q_PROPERTY(QString close MEMBER close_ CONSTANT)
   Q_PROPERTY(QString copyright MEMBER copyright_ CONSTANT)
   Q_PROPERTY(QString dragHandle MEMBER dragHandle_ CONSTANT)
+  Q_PROPERTY(QString folderOpen MEMBER folderOpen_ CONSTANT)
   Q_PROPERTY(QString loading MEMBER loading_ CONSTANT)
   Q_PROPERTY(QString openInBrowser MEMBER openInBrowser_ CONSTANT)
   Q_PROPERTY(QString pin MEMBER pin_ CONSTANT)
@@ -52,13 +53,14 @@ public: // Structors
   ~Icons() noexcept override;
 
 private: // Variables
-  QString addToQueue_{detail::toIconUrl("add_to_queue.svg")};
+  QString add_{detail::toIconUrl("add.svg")};
   QString bell_{detail::toIconUrl("bell.svg")};
   QString bellRinging_{detail::toIconUrl("bell_ringing.svg")};
   QString checkMark_{detail::toIconUrl("check_mark.svg")};
   QString close_{detail::toIconUrl("close.svg")};
   QString copyright_{detail::toIconUrl("copyright.svg")};
   QString dragHandle_{detail::toIconUrl("drag_handle.svg")};
+  QString folderOpen_{detail::toIconUrl("folder_open.svg")};
   QString loading_{detail::toIconUrl("loading.svg")};
   QString openInBrowser_{detail::toIconUrl("open_in_browser.svg")};
   QString pin_{detail::toIconUrl("pin.svg")};
@@ -69,4 +71,4 @@ private: // Variables
   QString stop_{detail::toIconUrl("stop.svg")};
 };
 
-} // namespace verselens::qml
+} // namespace bibqml
