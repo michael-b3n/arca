@@ -9,7 +9,7 @@
 
 #include <vector>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
@@ -90,4 +90,4 @@ public: // Modifiers
   Q_INVOKABLE void clear();
 };
 
-} // namespace verselens::qml
+} // namespace bibqml

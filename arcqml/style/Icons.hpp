@@ -1,18 +1,18 @@
 #pragma once
 
-#include "bibstd/util/non_owning_ptr.hpp"
+#include <bibstd/util/non_owning_ptr.hpp>
 
 #include <QObject>
 #include <QString>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace verselens::qml
+namespace bibqml
 {
 namespace detail
 {
 
 ///
-/// Helper function to build the source url of an icon resource, \p name is its file name inside the qml resource folder.
+/// Helper function to build the source url of an icon resource, \p name is its file name inside the module resource folder.
 /// \return The corresponding resource url
 ///
 auto toIconUrl(std::string_view name) -> QString;
@@ -21,7 +21,7 @@ auto toIconUrl(std::string_view name) -> QString;
 
 ///
 /// QML Icons singleton.
-/// This class provides application wide icon sources.
+/// This class provides the icon sources of the module.
 /// Keeping the resource prefix in one place avoids repeating
 /// the module path in every call site.
 ///
@@ -71,4 +71,4 @@ private: // Variables
   QString stop_{detail::toIconUrl("stop.svg")};
 };
 
-} // namespace verselens::qml
+} // namespace bibqml

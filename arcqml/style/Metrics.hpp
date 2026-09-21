@@ -1,16 +1,16 @@
 #pragma once
 
-#include "bibstd/util/non_owning_ptr.hpp"
+#include <bibstd/util/non_owning_ptr.hpp>
 
 #include <QObject>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
 /// QML Metrics singleton.
-/// This class provides application wide style metrics (spacing, font sizes, radii).
+/// This class provides the style metrics (spacing, font sizes, radii) of the module.
 ///
 class Metrics final : public QObject
 {
@@ -90,4 +90,4 @@ private: // Variables
   int durationDebounce_{500};
 };
 
-} // namespace verselens::qml
+} // namespace bibqml

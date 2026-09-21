@@ -1,4 +1,4 @@
-#include "bibqml/util/SettingValue.hpp"
+#include "bibqml/util/SettingConversion.hpp"
 
 #include <bibstd/framework/setting_type_erased.hpp>
 #include <bibstd/framework/setting_validator.hpp>

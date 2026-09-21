@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
+import BibQml
 
 ///
 /// Switch control for boolean value types.

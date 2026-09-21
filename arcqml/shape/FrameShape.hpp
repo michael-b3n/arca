@@ -7,7 +7,7 @@
 #include <QQuickPaintedItem>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
@@ -57,4 +57,4 @@ private: // Variables
   qreal gapEnd_{0.0};
 };
 
-} // namespace verselens::qml
+} // namespace bibqml

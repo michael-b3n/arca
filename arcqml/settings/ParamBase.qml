@@ -1,4 +1,5 @@
 import QtQuick
+import BibQml
 
 ///
 /// Parameter base object.

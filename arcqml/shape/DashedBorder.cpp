@@ -1,9 +1,9 @@
-#include "DashedBorder.hpp"
+#include "bibqml/shape/DashedBorder.hpp"
 
 #include <algorithm>
 #include <numbers>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
@@ -42,4 +42,4 @@ qreal DashedBorder::strokes() const
   return std::max(0.0, length) / std::max(strokeWidth_, 1.0);
 }
 
-} // namespace verselens::qml
+} // namespace bibqml

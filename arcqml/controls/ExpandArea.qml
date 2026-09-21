@@ -1,4 +1,5 @@
 import QtQuick
+import BibQml
 
 ///
 /// Mouse area that lets the call site resize what it covers by dragging one of its four corners.

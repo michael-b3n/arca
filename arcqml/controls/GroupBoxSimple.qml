@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import BibQml
 
 ///
 /// Box drawing a frame around its content, named by a title that is set into the top line
@@ -57,7 +58,7 @@ Control
       anchors.centerIn: titleArea
       width: titleArea.width - 2 * Metrics.spacingTiny
       font.pointSize: Metrics.fontSizeSmall
-      color: Colors.border
+      color: Colors.borderDarker
       elide: Text.ElideRight
     }
   }

@@ -1,10 +1,10 @@
-#include "FrameShape.hpp"
+#include "bibqml/shape/FrameShape.hpp"
 
 #include <QPainter>
 
 #include <algorithm>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
@@ -66,4 +66,4 @@ void FrameShape::paint(bibstd::util::non_owning_ptr<QPainter> painter)
   painter->strokePath(buildPath(), QPen{strokeColor_, static_cast<qreal>(strokeWidth_)});
 }
 
-} // namespace verselens::qml
+} // namespace bibqml

@@ -1,4 +1,5 @@
 import QtQuick
+import BibQml
 
 ///
 /// Error marker for unsupported param types.

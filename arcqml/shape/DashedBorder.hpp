@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
@@ -59,4 +59,4 @@ private: // Variables
   qreal segmentRatio_{0.25};
 };
 
-} // namespace verselens::qml
+} // namespace bibqml

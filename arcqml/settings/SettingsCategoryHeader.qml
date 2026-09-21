@@ -1,4 +1,5 @@
 import QtQuick
+import BibQml
 
 ///
 /// Header of one settings category. It names the category and folds its settings away when it is
@@ -81,7 +82,7 @@ Item
       text: Translations.name(root.category, Translations.language)
       font.pointSize: Metrics.fontSizeHeading
       font.bold: true
-      color: Colors.border
+      color: Colors.borderDarker
       elide: Text.ElideRight
     }
 

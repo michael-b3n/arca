@@ -6,7 +6,7 @@
 #include <QQuickPaintedItem>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
@@ -33,4 +33,4 @@ private: // Variables
   QColor color_{Qt::black};
 };
 
-} // namespace verselens::qml
+} // namespace bibqml

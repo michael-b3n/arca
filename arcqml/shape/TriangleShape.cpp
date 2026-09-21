@@ -1,9 +1,9 @@
-#include "TriangleShape.hpp"
+#include "bibqml/shape/TriangleShape.hpp"
 
 #include <QPainter>
 #include <QPainterPath>
 
-namespace verselens::qml
+namespace bibqml
 {
 
 ///
@@ -38,4 +38,4 @@ void TriangleShape::paint(bibstd::util::non_owning_ptr<QPainter> painter)
   painter->fillPath(path, color_);
 }
 
-} // namespace verselens::qml
+} // namespace bibqml

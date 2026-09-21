@@ -1,7 +1,7 @@
-#include "SettingsSortModel.hpp"
-#include "Translations.hpp"
+#include "bibqml/model/SettingsSortModel.hpp"
+#include "bibqml/translation/Translations.hpp"
 
-namespace verselens::qml
+namespace bibqml
 {
 namespace
 {
@@ -20,7 +20,7 @@ SettingsSortModel::SettingsSortModel(const bibstd::util::non_owning_ptr<QObject>
   sort(0);
   if(const auto* const translations = Translations::instance())
   {
-    // The order follows the pretty names, so a language change reorders the settings.
+    // The order follows the display names, so a language change reorders the settings.
     connect(translations, &Translations::languageChanged, this, [this]() { invalidate(); });
   }
 }
@@ -96,4 +96,4 @@ QString SettingsSortModel::settingName(const QStringList& categories)
   return (translations != nullptr) ? translations->names(belowCategory) : belowCategory.join(Translations::nameSeparator);
 }
 
-} // namespace verselens::qml
+} // namespace bibqml

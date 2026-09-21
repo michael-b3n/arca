@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import BibQml
 
 ///
 /// Popup fading in and out on the default background.

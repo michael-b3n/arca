@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QtQmlIntegration/qqmlintegration.h>
 
-namespace verselens::qml
+namespace bibqml
 {
 namespace detail
 {
@@ -20,7 +20,7 @@ auto toQColor(std::string color) -> QColor;
 
 ///
 /// QML Colors singleton.
-/// This class provides application wide style colors.
+/// This class provides the style colors of the module.
 ///
 class Colors final : public QObject
 {
@@ -89,4 +89,4 @@ private: // Variables
   QColor bookHeaderText_{detail::toQColor("#fef5deff")};
 };
 
-} // namespace verselens::qml
+} // namespace bibqml
