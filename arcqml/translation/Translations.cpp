@@ -1,4 +1,4 @@
-#include "bibqml/translation/Translations.hpp"
+#include "arca_qml/translation/Translations.hpp"
 
 #include <arca/util/contains.hpp>
 #include <arca/util/log.hpp>

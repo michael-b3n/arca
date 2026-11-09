@@ -1,5 +1,5 @@
 import QtQuick
-import BibQml
+import ArcaQml
 
 ///
 /// Mouse area reporting drags at its four corners, resizing the target is up to the call site.

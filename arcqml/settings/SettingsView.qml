@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import BibQml
+import ArcaQml
 
 ///
 /// Editor of the settings of a SettingsListModel, grouped by their first segment, both in alphabetical order.

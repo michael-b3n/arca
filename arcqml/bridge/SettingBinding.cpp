@@ -1,6 +1,6 @@
-#include "bibqml/bridge/SettingBinding.hpp"
-#include "bibqml/bridge/BridgeSettings.hpp"
-#include "bibqml/util/SettingConversion.hpp"
+#include "arca_qml/bridge/SettingBinding.hpp"
+#include "arca_qml/bridge/BridgeSettings.hpp"
+#include "arca_qml/util/SettingConversion.hpp"
 
 #include <arca/framework/setting_validator.hpp>
 #include <arca/util/exception.hpp>

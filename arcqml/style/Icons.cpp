@@ -1,4 +1,4 @@
-#include "bibqml/style/Icons.hpp"
+#include "arca_qml/style/Icons.hpp"
 
 namespace bibqml
 {
@@ -9,7 +9,7 @@ namespace detail
 ///
 auto toIconUrl(std::string_view name) -> QString
 {
-  static constexpr auto prefix = std::string_view{"qrc:/qt/qml/BibQml/res/"};
+  static constexpr auto prefix = std::string_view{"qrc:/qt/qml/ArcaQml/res/"};
   return QString::fromLatin1(prefix.data(), prefix.size()).append(QLatin1StringView(name.data(), name.size()));
 }
 

@@ -1,5 +1,5 @@
-#include "bibqml/bridge/BridgeSettings.hpp"
-#include "bibqml/bridge/SettingBinding.hpp"
+#include "arca_qml/bridge/BridgeSettings.hpp"
+#include "arca_qml/bridge/SettingBinding.hpp"
 
 #include <arca/util/log.hpp>
 #include <arca/workflow/workflow_settings.hpp>

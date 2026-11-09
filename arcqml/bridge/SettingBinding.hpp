@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bibqml/util/SettingConversion.hpp"
+#include "arca_qml/util/SettingConversion.hpp"
 
 #include <arca/framework/queued_connections.hpp>
 #include <arca/util/non_owning_ptr.hpp>

@@ -1,5 +1,5 @@
-#include "bibqml/model/SimpleListModel.hpp"
-#include "bibqml/util/SettingConversion.hpp"
+#include "arca_qml/model/SimpleListModel.hpp"
+#include "arca_qml/util/SettingConversion.hpp"
 
 #include <arca/util/log.hpp>
 

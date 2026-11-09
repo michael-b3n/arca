@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.VectorImage
-import BibQml
+import ArcaQml
 
 ///
 /// Button showing a svg icon followed by a single line of text, both centered.

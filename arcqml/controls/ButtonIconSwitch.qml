@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.VectorImage
-import BibQml
+import ArcaQml
 
 ///
 /// Icon button showing one of two svg icons.

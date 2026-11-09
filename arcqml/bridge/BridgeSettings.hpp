@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bibqml/bridge/SettingBinding.hpp"
+#include "arca_qml/bridge/SettingBinding.hpp"
 
 #include <arca/util/non_owning_ptr.hpp>
 

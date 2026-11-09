@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bibqml/model/SettingsListModel.hpp"
+#include "arca_qml/model/SettingsListModel.hpp"
 
 #include <arca/util/non_owning_ptr.hpp>
 

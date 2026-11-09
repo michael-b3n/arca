@@ -1,5 +1,5 @@
 import QtQuick
-import BibQml
+import ArcaQml
 
 ///
 /// Default background of fields, popups and their entries.

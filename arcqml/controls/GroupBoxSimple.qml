@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import BibQml
+import ArcaQml
 
 ///
 /// Box drawing a frame around its content, named by a title that is set into the top line

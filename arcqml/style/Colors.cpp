@@ -1,4 +1,4 @@
-#include "bibqml/style/Colors.hpp"
+#include "arca_qml/style/Colors.hpp"
 
 #include <algorithm>
 

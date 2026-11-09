@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import BibQml
+import ArcaQml
 
 ///
 /// Scroll bar of all scrollable views. It only shows itself while the view it belongs to is

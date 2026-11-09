@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bibqml/translation/DisplayNameTable.hpp"
+#include "arca_qml/translation/DisplayNameTable.hpp"
 
 #include <arca/util/non_owning_ptr.hpp>
 

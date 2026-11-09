@@ -1,4 +1,4 @@
-#include "bibqml/bridge/BridgeLogger.hpp"
+#include "arca_qml/bridge/BridgeLogger.hpp"
 
 #include <arca/util/log.hpp>
 

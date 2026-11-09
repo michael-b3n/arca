@@ -1,5 +1,5 @@
-#include "bibqml/model/SettingsSortModel.hpp"
-#include "bibqml/translation/Translations.hpp"
+#include "arca_qml/model/SettingsSortModel.hpp"
+#include "arca_qml/translation/Translations.hpp"
 
 namespace bibqml
 {

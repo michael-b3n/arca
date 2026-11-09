@@ -1,5 +1,5 @@
 import QtQuick
-import BibQml
+import ArcaQml
 
 ///
 /// Text in the default font size and color of the application.

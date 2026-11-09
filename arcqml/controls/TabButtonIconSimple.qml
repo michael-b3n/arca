@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.VectorImage
-import BibQml
+import ArcaQml
 
 ///
 /// Tab button showing a single svg icon.

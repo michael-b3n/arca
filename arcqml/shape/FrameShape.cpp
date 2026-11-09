@@ -1,4 +1,4 @@
-#include "bibqml/shape/FrameShape.hpp"
+#include "arca_qml/shape/FrameShape.hpp"
 
 #include <QPainter>
 

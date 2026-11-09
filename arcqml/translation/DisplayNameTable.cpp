@@ -1,4 +1,4 @@
-#include "bibqml/translation/DisplayNameTable.hpp"
+#include "arca_qml/translation/DisplayNameTable.hpp"
 
 #include <arca/io/csv_reader.hpp>
 #include <arca/util/exception.hpp>

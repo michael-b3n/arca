@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.VectorImage
-import BibQml
+import ArcaQml
 
 ///
 /// Icon button showing a single svg icon, or a turning loading icon while it is busy.

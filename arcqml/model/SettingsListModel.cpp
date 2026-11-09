@@ -1,5 +1,5 @@
-#include "bibqml/model/SettingsListModel.hpp"
-#include "bibqml/util/SettingConversion.hpp"
+#include "arca_qml/model/SettingsListModel.hpp"
+#include "arca_qml/util/SettingConversion.hpp"
 
 #include <arca/framework/setting.hpp>
 #include <arca/framework/setting_validator.hpp>

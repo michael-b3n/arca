@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import BibQml
+import ArcaQml
 
 ///
 /// Base of all tab buttons.
