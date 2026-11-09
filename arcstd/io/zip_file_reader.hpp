@@ -1,7 +1,7 @@
 #pragma once
 
-#include "bibstd/util/bitflags.hpp"
-#include "bibstd/util/non_owning_ptr.hpp"
+#include "arca/util/bitflags.hpp"
+#include "arca/util/non_owning_ptr.hpp"
 
 #include <cstddef>
 #include <cstdint>

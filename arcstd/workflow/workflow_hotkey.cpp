@@ -1,9 +1,9 @@
-#include "bibstd/workflow/workflow_hotkey.hpp"
-#include "bibstd/execution/launch.hpp"
-#include "bibstd/framework/setting.hpp"
-#include "bibstd/system/hotkey.hpp"
-#include "bibstd/util/contains.hpp"
-#include "bibstd/util/enum.hpp"
+#include "arca/workflow/workflow_hotkey.hpp"
+#include "arca/execution/launch.hpp"
+#include "arca/framework/setting.hpp"
+#include "arca/system/hotkey.hpp"
+#include "arca/util/contains.hpp"
+#include "arca/util/enum.hpp"
 
 #include <array>
 #include <format>

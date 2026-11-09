@@ -1,9 +1,9 @@
-#include "bibstd/system/locale.hpp"
-#include "bibstd/system/windows/language_tag.hpp"
-#include "bibstd/util/enum.hpp"
-#include "bibstd/util/log.hpp"
+#include "arca/system/locale.hpp"
+#include "arca/system/windows/language_tag.hpp"
+#include "arca/util/enum.hpp"
+#include "arca/util/log.hpp"
 
-#include "bibstd/system/windows/win.hpp"
+#include "arca/system/windows/win.hpp"
 
 #include <ranges>
 #include <string>

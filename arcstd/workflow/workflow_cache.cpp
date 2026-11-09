@@ -1,6 +1,6 @@
-#include "bibstd/workflow/workflow_cache.hpp"
-#include "bibstd/core/core_cache.hpp"
-#include "bibstd/util/identifier.hpp"
+#include "arca/workflow/workflow_cache.hpp"
+#include "arca/core/core_cache.hpp"
+#include "arca/util/identifier.hpp"
 
 #include <format>
 #include <optional>
@@ -47,8 +47,7 @@ workflow_cache::workflow_cache(
     ///
     << workflow_script_->register_function(
          "cache.set_all",
-         [this](const std::string& name, std::map<std::string, std::string> values)
-         { set_all(util::identifier{name}, values); }
+         [this](const std::string& name, std::map<std::string, std::string> values) { set_all(util::identifier{name}, values); }
        )
     ///
     /// \lua Removes all values of a cache, \see `workflow.cache.get`.

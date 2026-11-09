@@ -29,7 +29,8 @@ struct filesystem final
   /// Get path to the local data folder \p folder_name, named after the executable if not set.
   /// \return path to local data
   ///
-  [[nodiscard]] static auto local_data_folder(std::optional<std::string_view> folder_name = std::nullopt) -> std::filesystem::path;
+  [[nodiscard]] static auto local_data_folder(std::optional<std::string_view> folder_name = std::nullopt)
+    -> std::filesystem::path;
 };
 
 ///

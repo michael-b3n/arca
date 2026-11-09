@@ -1,5 +1,5 @@
-#include "bibstd/core/core_fetch_web_content.hpp"
-#include "bibstd/util/log.hpp"
+#include "arca/core/core_fetch_web_content.hpp"
+#include "arca/util/log.hpp"
 
 #include <boost/url.hpp>
 #include <curl/curl.h>

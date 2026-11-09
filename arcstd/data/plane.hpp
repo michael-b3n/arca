@@ -1,9 +1,9 @@
 #pragma once
 
-#include "bibstd/math/arithmetic.hpp"
-#include "bibstd/math/rect.hpp"
-#include "bibstd/meta/lossless_conversion.hpp"
-#include "bibstd/util/ranges.hpp"
+#include "arca/math/arithmetic.hpp"
+#include "arca/math/rect.hpp"
+#include "arca/meta/lossless_conversion.hpp"
+#include "arca/util/ranges.hpp"
 
 #include <array>
 #include <cstddef>
@@ -49,7 +49,10 @@ public: // Accessors
   [[nodiscard]] constexpr auto height() const -> size_type { return height_; };
   [[nodiscard]] constexpr auto at(std::size_t index) const -> const value_type& { return data_.at(index); };
   [[nodiscard]] constexpr auto at(std::size_t index) -> value_type& { return data_.at(index); };
-  [[nodiscard]] constexpr auto size() const -> std::size_t { return static_cast<std::size_t>(width_) * static_cast<std::size_t>(height_); };
+  [[nodiscard]] constexpr auto size() const -> std::size_t
+  {
+    return static_cast<std::size_t>(width_) * static_cast<std::size_t>(height_);
+  };
   [[nodiscard]] constexpr auto empty() const -> bool { return size() == 0; };
 
 public: // Iterators

@@ -22,7 +22,7 @@ namespace bibstd::lua::internal
 {
 
 ///
-/// \return the scripts of bibstd/lua/internal, they set up the state
+/// \return the scripts of arca/lua/internal, they set up the state
 ///
 [[nodiscard]] auto all() -> std::span<const embedded_script>;
 
@@ -32,18 +32,3 @@ namespace bibstd::lua::internal
 [[nodiscard]] auto find(std::string_view name) -> std::optional<embedded_script>;
 
 } // namespace bibstd::lua::internal
-
-namespace bibstd::lua::bundled
-{
-
-///
-/// \return the scripts of bibstd/lua/bundled and bibstd/lua/private
-///
-[[nodiscard]] auto all() -> std::span<const embedded_script>;
-
-///
-/// \return the script with the file name \p name
-///
-[[nodiscard]] auto find(std::string_view name) -> std::optional<embedded_script>;
-
-} // namespace bibstd::lua::bundled

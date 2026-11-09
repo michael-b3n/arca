@@ -1,8 +1,8 @@
 #pragma once
 
-#include "bibstd/data/pixel.hpp"
-#include "bibstd/data/plane.hpp"
-#include "bibstd/math/rect.hpp"
+#include "arca/data/pixel.hpp"
+#include "arca/data/plane.hpp"
+#include "arca/math/rect.hpp"
 
 namespace bibstd::data
 {
