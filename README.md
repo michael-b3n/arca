@@ -8,8 +8,8 @@ General C++26 and Qt libraries for Windows apps, linked statically. Split out of
 
 | Folder | Content |
 |---|---|
-| `arcstd` | The C++ library: the workflow base, settings and script workflows (`workflow`), cache and web fetch (`core`), Lua scripting (`lua`), `std::execution` helpers (`execution`), threading and settings (`framework`), text scripts (`txt`), the system layer (`system`, Windows in `system/windows`) |
-| `arcqml` | The Qt layer, QML module `ArcQml`: controls, settings views, styles and icons, the bridges of the settings, scripts and logs |
+| `arcstd` | The C++ library: the workflow base, settings and script workflows (`workflow`), cache and web fetch (`core`), Lua scripting (`lua`), `std::execution` helpers (`execution`), threading and settings (`framework`), the system layer: hotkeys, message loop, file system (`system`, Windows in `system/windows`) |
+| `arcqml` | The Qt layer, QML module `ArcQml`: controls, styles, icons and shapes, and the bindings of the settings, scripts and logs: their bridges and models |
 | `arcstd_test` | Catch2 tests of `arcstd`, and `arcstd_test_utils`, the test helpers a project built on arca may use too |
 | `libs_external` | Third party sources, used as they are |
 | `tools` | CMake helpers and the clang-tidy runner |

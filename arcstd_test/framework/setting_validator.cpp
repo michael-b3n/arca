@@ -1,6 +1,5 @@
 #include <arcstd/framework/setting_validator.hpp>
 #include <arcstd/util/exception.hpp>
-#include <arcstd/util/language.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -13,6 +12,18 @@
 
 namespace arcstd::framework
 {
+
+namespace
+{
+
+// An enum a list validator offers by the names of its values
+enum class language
+{
+  english,
+  german,
+};
+
+} // namespace
 
 TEST_CASE("setting_validator_range_limits_plain_values", "[framework]")
 {
@@ -241,7 +252,7 @@ TEST_CASE("setting_validator_list_type_erased_wraps_a_validator", "[framework]")
 
   SECTION("of an enum, by the names of its values")
   {
-    const auto validator = std::make_shared<setting_validator_list<util::language>>(std::vector{util::language::german});
+    const auto validator = std::make_shared<setting_validator_list<language>>(std::vector{language::german});
     const auto erased = setting_validator_list_type_erased<std::string>{validator};
     CHECK_FALSE(erased.empty());
     CHECK(erased.available() == names_type{"german"});
@@ -249,7 +260,7 @@ TEST_CASE("setting_validator_list_type_erased_wraps_a_validator", "[framework]")
     CHECK_FALSE(erased.contains("english"));
     CHECK(erased.connector == validator);
     // Follows the validator
-    REQUIRE(validator->available(std::vector{util::language::german, util::language::english}));
+    REQUIRE(validator->available(std::vector{language::german, language::english}));
     CHECK(erased.available() == names_type{"english", "german"});
     CHECK(erased.contains("english"));
   }
