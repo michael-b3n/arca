@@ -32,7 +32,7 @@ class bitflags final
   // Variables
   bitset_type flags_{};
 
-public: // Constructor
+public: // Structors
   constexpr bitflags() = default;
   template<typename... Flags>
     requires(meta::are_same_v<E, Flags...>)
@@ -131,7 +131,7 @@ public: // Operators
   constexpr auto operator^=(E flag) -> bitflags&;
   constexpr auto operator~() const -> bitflags;
 
-private: // Constructors
+private: // Structors
   constexpr explicit bitflags(bitset_type bits);
 };
 

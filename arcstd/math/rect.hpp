@@ -31,7 +31,7 @@ public: // Typedefs
   using value_type = ValueType;
   using coordinates_type = coordinates<value_type, 2>;
 
-public: // Constructors
+public: // Structors
   template<
     meta::lossless_convertible<ValueType> T1,
     meta::lossless_convertible<meta::conditional_unsigned_t<ValueType>> T2,

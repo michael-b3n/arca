@@ -48,7 +48,7 @@ target_sources(arcstd_test
 )
 
 #
-# Link libaries.
+# Link libraries.
 #
 target_link_libraries(
   arcstd_test

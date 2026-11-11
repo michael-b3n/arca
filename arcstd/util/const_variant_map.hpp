@@ -51,7 +51,7 @@ public: // Typedefs
 public: // Constants
   static constexpr auto size = sizeof...(P);
 
-public: // Constructor
+public: // Structors
   ///
   /// Constructor of const multi type map.
   /// \tparam ...P pack of type key value pairs

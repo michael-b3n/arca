@@ -44,7 +44,7 @@ struct value_range final
   template<meta::lossless_convertible<ValueType> T1, meta::lossless_convertible<meta::conditional_unsigned_t<ValueType>> T2>
   [[nodiscard]] static constexpr auto create_from_begin_and_size(T1 begin, T2 size) -> value_range<ValueType>;
 
-  // Constructor
+  // Structors
   ///
   /// Value range constructor taking begin and end of a value range.
   /// Range definition for integer types: `[begin, end)`

@@ -29,7 +29,7 @@ public: // Static functions
   ///
   [[nodiscard]] static constexpr auto distance(const coordinates& first, const coordinates& second) -> double;
 
-public: // Constructors
+public: // Structors
   template<typename... T>
   constexpr coordinates(T... coords)
     requires(sizeof...(T) == D);

@@ -70,7 +70,7 @@ public: // Typedefs
   using const_iterator = typename std::array<value_type, N>::const_iterator;
   using const_reverse_iterator = typename std::array<value_type, N>::const_reverse_iterator;
 
-public: // Constructor
+public: // Structors
   ///
   /// Constructor of const bimap.
   /// \tparam ...P pack of type pair
@@ -79,7 +79,7 @@ public: // Constructor
   constexpr const_map(P&&... p)
     requires(meta::are_same_v<std::pair<first_type, second_type>, std::remove_cvref_t<P>...>);
 
-public: // Accessor
+public: // Accessors
   ///
   /// Checks if first value is contained in const bimap.
   /// \tparam F type must be equality comparable with first_type or first_type if first and second types are similar.

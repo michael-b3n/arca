@@ -92,7 +92,7 @@ public: // Accessors
   ///
   [[nodiscard]] bool bound() const;
 
-public: // Setters
+public: // Modifiers
   ///
   /// Write the value to the bound setting. The value is validated by the setting, therefore
   /// the value of the setting may differ from the value written.

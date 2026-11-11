@@ -20,7 +20,7 @@ class [[nodiscard]] single_instance final
   std::optional<std::string> error_;
   bool owner_{false};
 
-public: // Constructors
+public: // Structors
   ~single_instance() noexcept = default;
   single_instance(single_instance&&) = delete;
   single_instance(const single_instance&) = delete;
@@ -50,7 +50,7 @@ public: // Accessors
   ///
   [[nodiscard]] auto error() const -> const std::optional<std::string>&;
 
-private: // Constructors
+private: // Structors
   explicit single_instance(const std::string& name);
 };
 
