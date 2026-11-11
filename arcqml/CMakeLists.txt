@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.3)
 
-project(ArcaQml)
+project(ArcQml)
 
 #
 # Define target sources, headers and qml files.
@@ -25,8 +25,8 @@ qt_add_library(${PROJECT_NAME} STATIC)
 
 qt_add_qml_module(
   ${PROJECT_NAME}
-  URI "ArcaQml"
-  OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ArcaQml"
+  URI "ArcQml"
+  OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ArcQml"
   QML_FILES
   ${${PROJECT_NAME}_QML_FILES_RELATIVE}
   SOURCES
@@ -40,7 +40,7 @@ qt_add_qml_module(
 # Link dependencies
 #
 target_link_libraries(${PROJECT_NAME}
-  PUBLIC arca
+  PUBLIC arcstd
   PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Gui
 )
 

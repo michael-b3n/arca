@@ -1,4 +1,4 @@
-#include "arca_qml/bridge/BridgeApplication.hpp"
+#include "arcqml/bridge/BridgeApplication.hpp"
 
 #include <QMetaObject>
 

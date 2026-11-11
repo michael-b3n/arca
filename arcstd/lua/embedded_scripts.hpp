@@ -22,7 +22,7 @@ namespace bibstd::lua::internal
 {
 
 ///
-/// \return the scripts of arca/lua/internal, they set up the state
+/// \return the scripts of arcstd/lua/internal, they set up the state
 ///
 [[nodiscard]] auto all() -> std::span<const embedded_script>;
 

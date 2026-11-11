@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import ArcaQml
+import ArcQml
 
 ///
 /// Button showing a single line of text, as wide as that text.

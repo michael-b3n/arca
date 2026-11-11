@@ -1,5 +1,5 @@
 import QtQuick
-import ArcaQml
+import ArcQml
 
 ///
 /// Header of one settings category. It names the category and folds its settings away when it is

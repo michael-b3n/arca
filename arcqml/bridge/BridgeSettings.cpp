@@ -1,8 +1,8 @@
-#include "arca_qml/bridge/BridgeSettings.hpp"
-#include "arca_qml/bridge/SettingBinding.hpp"
+#include "arcqml/bridge/BridgeSettings.hpp"
+#include "arcqml/bridge/SettingBinding.hpp"
 
-#include <arca/util/log.hpp>
-#include <arca/workflow/workflow_settings.hpp>
+#include <arcstd/util/log.hpp>
+#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <memory>
 #include <utility>

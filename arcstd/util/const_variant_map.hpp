@@ -1,9 +1,9 @@
 #pragma once
 
-#include "arca/meta/contains.hpp"
-#include "arca/meta/for_each.hpp"
-#include "arca/meta/remove_duplicates.hpp"
-#include "arca/util/exception.hpp"
+#include "arcstd/meta/contains.hpp"
+#include "arcstd/meta/for_each.hpp"
+#include "arcstd/meta/remove_duplicates.hpp"
+#include "arcstd/util/exception.hpp"
 
 #include <algorithm>
 #include <array>

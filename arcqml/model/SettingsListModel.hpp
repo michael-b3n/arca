@@ -1,8 +1,8 @@
 #pragma once
 
-#include <arca/framework/queued_connections.hpp>
-#include <arca/util/non_owning_ptr.hpp>
-#include <arca/workflow/workflow_settings.hpp>
+#include <arcstd/framework/queued_connections.hpp>
+#include <arcstd/util/non_owning_ptr.hpp>
+#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <QAbstractListModel>
 #include <QList>

@@ -1,9 +1,9 @@
-#include "arca_qml/bridge/BridgeScript.hpp"
-#include "arca_qml/util/LocalPath.hpp"
+#include "arcqml/bridge/BridgeScript.hpp"
+#include "arcqml/util/LocalPath.hpp"
 
-#include <arca/execution/launch.hpp>
-#include <arca/util/log.hpp>
-#include <arca/workflow/workflow_script.hpp>
+#include <arcstd/execution/launch.hpp>
+#include <arcstd/util/log.hpp>
+#include <arcstd/workflow/workflow_script.hpp>
 
 #include <QMetaObject>
 #include <QStringList>

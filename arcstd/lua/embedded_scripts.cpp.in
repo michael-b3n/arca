@@ -1,7 +1,7 @@
-// Generated from arca/lua/embedded_scripts.cpp.in by configure_incbin_source.
+// Generated from arcstd/lua/embedded_scripts.cpp.in by configure_incbin_source.
 #include "@INCBIN_HEADER@"
-#include "arca/util/incbin.hpp"
-#include "arca/util/non_owning_ptr.hpp"
+#include "arcstd/util/incbin.hpp"
+#include "arcstd/util/non_owning_ptr.hpp"
 
 #include <algorithm>
 #include <array>

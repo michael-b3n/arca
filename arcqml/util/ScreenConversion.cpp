@@ -1,9 +1,9 @@
-#include "arca_qml/util/ScreenConversion.hpp"
+#include "arcqml/util/ScreenConversion.hpp"
 
-#include <arca/math/rect.hpp>
-#include <arca/system/screen.hpp>
-#include <arca/util/log.hpp>
-#include <arca/util/numeric_cast.hpp>
+#include <arcstd/math/rect.hpp>
+#include <arcstd/system/screen.hpp>
+#include <arcstd/util/log.hpp>
+#include <arcstd/util/numeric_cast.hpp>
 
 #include <QGuiApplication>
 #include <QScreen>

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "arca_qml/util/SettingConversion.hpp"
+#include "arcqml/util/SettingConversion.hpp"
 
-#include <arca/framework/queued_connections.hpp>
-#include <arca/util/non_owning_ptr.hpp>
+#include <arcstd/framework/queued_connections.hpp>
+#include <arcstd/util/non_owning_ptr.hpp>
 
 #include <QObject>
 #include <QString>

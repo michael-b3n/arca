@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import ArcaQml
+import ArcQml
 
 ///
 /// Switch control for boolean value types.

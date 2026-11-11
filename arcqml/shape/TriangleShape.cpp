@@ -1,4 +1,4 @@
-#include "arca_qml/shape/TriangleShape.hpp"
+#include "arcqml/shape/TriangleShape.hpp"
 
 #include <QPainter>
 #include <QPainterPath>

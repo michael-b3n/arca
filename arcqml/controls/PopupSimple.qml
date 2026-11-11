@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import ArcaQml
+import ArcQml
 
 ///
 /// Popup fading in and out on the default background.

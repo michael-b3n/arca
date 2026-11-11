@@ -1,6 +1,6 @@
 #pragma once
 
-#include <arca/lua/registration.hpp>
+#include <arcstd/lua/registration.hpp>
 
 #include <utility>
 #include <vector>

@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
-import ArcaQml
+import ArcQml
 
 ///
 /// Input for string or double value types.

@@ -1,24 +1,24 @@
 cmake_minimum_required(VERSION 4.3)
 
-project(arca)
+project(arcstd)
 add_library(${PROJECT_NAME} STATIC)
 
 #
 # Define target sources
 #
-file(GLOB ARCA_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.cpp")
-file(GLOB ARCA_INC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.hpp")
+file(GLOB ARCSTD_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.cpp")
+file(GLOB ARCSTD_INC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.hpp")
 
 # Include OS specific sources and headers
 if(WIN32)
-  file(GLOB ARCA_WINDOWS_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/windows/*.cpp")
-  file(GLOB ARCA_WINDOWS_INC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/windows/*.hpp")
-  list(APPEND ARCA_SRC_FILES ${ARCA_WINDOWS_SRC_FILES})
-  list(APPEND ARCA_INC_FILES ${ARCA_WINDOWS_INC_FILES})
+  file(GLOB ARCSTD_WINDOWS_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/windows/*.cpp")
+  file(GLOB ARCSTD_WINDOWS_INC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/windows/*.hpp")
+  list(APPEND ARCSTD_SRC_FILES ${ARCSTD_WINDOWS_SRC_FILES})
+  list(APPEND ARCSTD_INC_FILES ${ARCSTD_WINDOWS_INC_FILES})
 endif()
 
 target_sources(${PROJECT_NAME}
-  PRIVATE ${ARCA_SRC_FILES} ${ARCA_INC_FILES}
+  PRIVATE ${ARCSTD_SRC_FILES} ${ARCSTD_INC_FILES}
 )
 
 #
@@ -26,9 +26,9 @@ target_sources(${PROJECT_NAME}
 # The label is the namespace of the scripts, \see lua/embedded_scripts.hpp.
 #
 include(incbin)
-file(GLOB ARCA_LUA_INTERNAL CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/lua/internal/*.lua")
-set(INCBIN_HEADER arca/lua/embedded_scripts.hpp)
-configure_incbin_source(internal lua/embedded_scripts.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/lua/internal.cpp ${ARCA_LUA_INTERNAL})
+file(GLOB ARCSTD_LUA_INTERNAL CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/lua/internal/*.lua")
+set(INCBIN_HEADER arcstd/lua/embedded_scripts.hpp)
+configure_incbin_source(internal lua/embedded_scripts.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/lua/internal.cpp ${ARCSTD_LUA_INTERNAL})
 target_sources(${PROJECT_NAME}
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/lua/internal.cpp
 )
@@ -77,5 +77,5 @@ endif()
 #
 # Add target include dirs.
 #
-cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH ARCA_INCLUDE_DIR)
-target_include_directories(${PROJECT_NAME} PUBLIC ${ARCA_INCLUDE_DIR})
+cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH ARCSTD_INCLUDE_DIR)
+target_include_directories(${PROJECT_NAME} PUBLIC ${ARCSTD_INCLUDE_DIR})

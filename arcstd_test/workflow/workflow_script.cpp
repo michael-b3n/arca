@@ -2,10 +2,10 @@
 #include "test_utils/scripts.hpp"
 #include "test_utils/temp_folder.hpp"
 
-#include <arca/lua/embedded_scripts.hpp>
-#include <arca/lua/script_table.hpp>
-#include <arca/workflow/workflow_base.hpp>
-#include <arca/workflow/workflow_script.hpp>
+#include <arcstd/lua/embedded_scripts.hpp>
+#include <arcstd/lua/script_table.hpp>
+#include <arcstd/workflow/workflow_base.hpp>
+#include <arcstd/workflow/workflow_script.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 

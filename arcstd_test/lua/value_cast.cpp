@@ -1,6 +1,6 @@
-#include <arca/lua/script_table.hpp>
-#include <arca/lua/sol.hpp>
-#include <arca/lua/value_cast.hpp>
+#include <arcstd/lua/script_table.hpp>
+#include <arcstd/lua/sol.hpp>
+#include <arcstd/lua/value_cast.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 

@@ -1,11 +1,11 @@
-#include "arca_qml/bridge/SettingBinding.hpp"
-#include "arca_qml/bridge/BridgeSettings.hpp"
-#include "arca_qml/util/SettingConversion.hpp"
+#include "arcqml/bridge/SettingBinding.hpp"
+#include "arcqml/bridge/BridgeSettings.hpp"
+#include "arcqml/util/SettingConversion.hpp"
 
-#include <arca/framework/setting_validator.hpp>
-#include <arca/util/exception.hpp>
-#include <arca/util/log.hpp>
-#include <arca/util/visit_helper.hpp>
+#include <arcstd/framework/setting_validator.hpp>
+#include <arcstd/util/exception.hpp>
+#include <arcstd/util/log.hpp>
+#include <arcstd/util/visit_helper.hpp>
 
 #include <QMetaObject>
 

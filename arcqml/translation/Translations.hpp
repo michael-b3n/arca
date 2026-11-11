@@ -1,8 +1,8 @@
 #pragma once
 
-#include "arca_qml/translation/DisplayNameTable.hpp"
+#include "arcqml/translation/DisplayNameTable.hpp"
 
-#include <arca/util/non_owning_ptr.hpp>
+#include <arcstd/util/non_owning_ptr.hpp>
 
 #include <QObject>
 #include <QString>

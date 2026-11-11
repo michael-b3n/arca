@@ -1,8 +1,8 @@
 #pragma once
 
-#include "arca_qml/bridge/SettingBinding.hpp"
+#include "arcqml/bridge/SettingBinding.hpp"
 
-#include <arca/util/non_owning_ptr.hpp>
+#include <arcstd/util/non_owning_ptr.hpp>
 
 #include <QObject>
 #include <QString>

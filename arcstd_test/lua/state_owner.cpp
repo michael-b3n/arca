@@ -1,6 +1,6 @@
 #include "test_utils/registrations.hpp"
 
-#include <arca/lua/state_owner.hpp>
+#include <arcstd/lua/state_owner.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 

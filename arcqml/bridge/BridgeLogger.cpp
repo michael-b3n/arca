@@ -1,6 +1,6 @@
-#include "arca_qml/bridge/BridgeLogger.hpp"
+#include "arcqml/bridge/BridgeLogger.hpp"
 
-#include <arca/util/log.hpp>
+#include <arcstd/util/log.hpp>
 
 namespace bibqml
 {

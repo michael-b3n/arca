@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.VectorImage
-import ArcaQml
+import ArcQml
 
 ///
 /// Editable list param for values convertible to string, requires a list wrapper type and no validator.

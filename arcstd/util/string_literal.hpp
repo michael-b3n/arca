@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arca/util/exception.hpp"
+#include "arcstd/util/exception.hpp"
 
 #include <algorithm>
 #include <cstddef>

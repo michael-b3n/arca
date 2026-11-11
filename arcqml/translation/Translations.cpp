@@ -1,7 +1,7 @@
-#include "arca_qml/translation/Translations.hpp"
+#include "arcqml/translation/Translations.hpp"
 
-#include <arca/util/contains.hpp>
-#include <arca/util/log.hpp>
+#include <arcstd/util/contains.hpp>
+#include <arcstd/util/log.hpp>
 
 #include <algorithm>
 

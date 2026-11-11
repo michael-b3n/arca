@@ -1,14 +1,14 @@
-#include "arca_qml/model/SettingsListModel.hpp"
-#include "arca_qml/util/SettingConversion.hpp"
+#include "arcqml/model/SettingsListModel.hpp"
+#include "arcqml/util/SettingConversion.hpp"
 
-#include <arca/framework/setting.hpp>
-#include <arca/framework/setting_validator.hpp>
-#include <arca/math/arithmetic.hpp>
-#include <arca/util/contains.hpp>
-#include <arca/util/exception.hpp>
-#include <arca/util/log.hpp>
-#include <arca/util/path.hpp>
-#include <arca/util/visit_helper.hpp>
+#include <arcstd/framework/setting.hpp>
+#include <arcstd/framework/setting_validator.hpp>
+#include <arcstd/math/arithmetic.hpp>
+#include <arcstd/util/contains.hpp>
+#include <arcstd/util/exception.hpp>
+#include <arcstd/util/log.hpp>
+#include <arcstd/util/path.hpp>
+#include <arcstd/util/visit_helper.hpp>
 
 #include <algorithm>
 #include <chrono>

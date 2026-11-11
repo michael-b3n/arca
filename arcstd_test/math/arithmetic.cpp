@@ -1,6 +1,6 @@
-#include <arca/math/arithmetic.hpp>
-#include <arca/math/is_equal.hpp>
-#include <arca/meta/pack.hpp>
+#include <arcstd/math/arithmetic.hpp>
+#include <arcstd/math/is_equal.hpp>
+#include <arcstd/meta/pack.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 #include <limits>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <arca/framework/setting_validator.hpp>
-#include <arca/workflow/workflow_settings.hpp>
+#include <arcstd/framework/setting_validator.hpp>
+#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <QString>
 #include <QVariant>

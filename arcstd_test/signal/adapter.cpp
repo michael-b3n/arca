@@ -1,5 +1,5 @@
-#include <arca/signal/adapter.hpp>
-#include <arca/signal/connection_store.hpp>
+#include <arcstd/signal/adapter.hpp>
+#include <arcstd/signal/connection_store.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 

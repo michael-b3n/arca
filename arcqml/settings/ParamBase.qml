@@ -1,5 +1,5 @@
 import QtQuick
-import ArcaQml
+import ArcQml
 
 ///
 /// Titled box of a setting, the base of the params. A param nested in another one clears showTitle and is drawn

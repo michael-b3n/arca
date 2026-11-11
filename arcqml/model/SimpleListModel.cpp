@@ -1,7 +1,7 @@
-#include "arca_qml/model/SimpleListModel.hpp"
-#include "arca_qml/util/SettingConversion.hpp"
+#include "arcqml/model/SimpleListModel.hpp"
+#include "arcqml/util/SettingConversion.hpp"
 
-#include <arca/util/log.hpp>
+#include <arcstd/util/log.hpp>
 
 #include <algorithm>
 

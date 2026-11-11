@@ -1,6 +1,6 @@
 #include "test_utils/clipboard.hpp"
 
-#include <arca/system/clipboard.hpp>
+#include <arcstd/system/clipboard.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -9,7 +9,7 @@
 namespace bibstd::system
 {
 
-// Hidden, it replaces the clipboard of whoever runs it. Run it with: arca_test "[.clipboard]"
+// Hidden, it replaces the clipboard of whoever runs it. Run it with: arcstd_test "[.clipboard]"
 TEST_CASE("clipboard replaces the text", "[.clipboard]")
 {
   const auto restorer = test_utils::clipboard_restorer{};

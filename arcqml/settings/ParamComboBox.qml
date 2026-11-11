@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import ArcaQml
+import ArcQml
 
 ///
 /// Combobox parameter object.

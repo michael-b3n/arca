@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import ArcaQml
+import ArcQml
 
 ///
 /// Base of all icon buttons.

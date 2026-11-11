@@ -1,8 +1,8 @@
 #pragma once
 
-#include "arca_qml/model/SettingsListModel.hpp"
+#include "arcqml/model/SettingsListModel.hpp"
 
-#include <arca/util/non_owning_ptr.hpp>
+#include <arcstd/util/non_owning_ptr.hpp>
 
 #include <QHash>
 #include <QSortFilterProxyModel>
