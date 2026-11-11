@@ -1,5 +1,5 @@
 name: Build
-description: Configure, build, test and install VerseLens with MSYS2, then check that the installed executable starts.
+description: Configure, build and test arca with MSYS2.
 
 runs:
   using: composite
@@ -12,7 +12,7 @@ runs:
       shell: msys2 {0}
       run: |
         git config --global --add safe.directory '*'
-        cmake --preset gcc-release -DBIBSTD_LUA_DOC_UPDATE=OFF
+        cmake --preset gcc-release
 
     - name: Build
       shell: msys2 {0}
@@ -21,16 +21,3 @@ runs:
     - name: Test
       shell: msys2 {0}
       run: ctest --preset gcc-release
-
-    - name: Install
-      shell: msys2 {0}
-      run: cmake --install build
-
-    # Runs outside of MSYS2, so a dll that is only found on its PATH fails here.
-    # The install hook exits before the window opens, a missing dll or a crashing hook does not.
-    - name: Check the installed executable starts
-      shell: pwsh
-      run: |
-        $process = Start-Process -FilePath build/install/bin/verselens.exe -ArgumentList '--veloapp-install', '0.0.0' -PassThru
-        if (-not $process.WaitForExit(60000)) { $process.Kill(); throw 'verselens.exe did not exit within 60 seconds' }
-        if ($process.ExitCode -ne 0) { throw "verselens.exe exited with $($process.ExitCode)" }

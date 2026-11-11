@@ -1,6 +1,6 @@
 ---
 #
-# Clang-Tidy configuration for biblia.
+# Clang-Tidy configuration for arca.
 #
 # Run over the whole project with `tools/run_clang_tidy.ps1`, or over a single file with
 # `clang-tidy -p build <file>`. The build directory has to be configured first, because
@@ -61,7 +61,7 @@ Checks: >
 #
 # Only diagnose the projects own headers, not the ones of Qt, boost or other external libraries.
 #
-HeaderFilterRegex: '(arcstd|arcqml|arcstd_test|bibocr|bibstd|bibqml|bibstd_test|verselens)[/\].*\.hpp$'
+HeaderFilterRegex: '(arcstd|arcqml|arcstd_test)[/\].*\.hpp$'
 ExcludeHeaderFilterRegex: '(build|libs_external)[/\].*'
 
 #

@@ -13,7 +13,7 @@
 3. Install the libraries the project builds against:
 
    ```
-   pacman -S --needed mingw-w64-ucrt-x86_64-{boost,catch,cppwinrt,curl,libzip,lua54,pugixml,qt6-declarative,qt6-svg,sol2,spdlog,sqlite3,tesseract-ocr,tesseract-data-deu}
+   pacman -S --needed mingw-w64-ucrt-x86_64-{boost,catch,curl,libzip,lua54,qt6-declarative,qt6-svg,sol2,spdlog,sqlite3}
    ```
 
 4. Optional, for clang-tidy and clangd: `pacman -S mingw-w64-ucrt-x86_64-clang-tools-extra`.
@@ -21,7 +21,7 @@
 
 ## Build
 
-`CMakePresets.json` holds a preset per compiler and build type: `clang-debug`, `clang-release`, `gcc-debug` and `gcc-release`. All build into `build`. CI and releases use `gcc-release`.
+`CMakePresets.json` holds a preset per compiler and build type: `clang-debug`, `clang-release`, `gcc-debug` and `gcc-release`. All build into `build`. CI uses `gcc-release`.
 
 The presets expect the compilers and Ninja on the PATH, as in the `MSYS2 UCRT64` shell. In the root directory:
 
@@ -34,10 +34,3 @@ ctest --preset clang-debug
 `--fresh` replaces the configuration of the previous preset.
 
 In Visual Studio Code, CMake Tools can build with kits and variants instead, which put the compiler folder on the PATH. Set `"cmake.useCMakePresets": "never"` in `.vscode/settings.json` to keep them while the presets file is present.
-
-## Packing an installer
-
-The release workflow packs the releases, see the Release section of the [README](../README.md). Packing locally is only needed to test an installer:
-
-1. Install the .NET SDK 10.
-2. Run `dotnet tool install --global vpk --version 1.2.0`. The version has to match `libs_external/velopack`.

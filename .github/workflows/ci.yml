@@ -1,5 +1,5 @@
 #
-# Builds, tests and installs on every pushed branch and pull request.
+# Builds and tests on every pushed branch and pull request.
 #
 name: CI
 

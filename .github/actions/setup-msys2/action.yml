@@ -1,5 +1,5 @@
 name: Set up MSYS2
-description: Install the MSYS2 toolchain and the libraries VerseLens builds against.
+description: Install the MSYS2 toolchain and the libraries arca builds against.
 
 runs:
   using: composite
@@ -19,15 +19,12 @@ runs:
           mingw-w64-ucrt-x86_64-pkgconf
           mingw-w64-ucrt-x86_64-boost
           mingw-w64-ucrt-x86_64-catch
-          mingw-w64-ucrt-x86_64-cppwinrt
           mingw-w64-ucrt-x86_64-curl
           mingw-w64-ucrt-x86_64-libzip
           mingw-w64-ucrt-x86_64-lua54
-          mingw-w64-ucrt-x86_64-pugixml
           mingw-w64-ucrt-x86_64-sol2
           mingw-w64-ucrt-x86_64-spdlog
           mingw-w64-ucrt-x86_64-sqlite3
-          mingw-w64-ucrt-x86_64-tesseract-ocr
           mingw-w64-ucrt-x86_64-qt6-base
           mingw-w64-ucrt-x86_64-qt6-declarative
           mingw-w64-ucrt-x86_64-qt6-svg
