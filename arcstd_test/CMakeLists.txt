@@ -10,21 +10,17 @@ include(Catch)
 # Includable by their path below the test root, e.g. "test_utils/temp_folder.hpp".
 #
 file(GLOB ARCSTD_TEST_UTILS_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_utils/*.hpp")
-if(WIN32)
-  file(GLOB ARCSTD_TEST_UTILS_WINDOWS_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_utils/windows/*.cpp")
-  list(APPEND ARCSTD_TEST_UTILS_FILES ${ARCSTD_TEST_UTILS_WINDOWS_FILES})
-endif()
 
-add_library(arcstd_test_utils STATIC)
+add_library(arcstd_test_utils INTERFACE)
 target_sources(arcstd_test_utils
-  PRIVATE ${ARCSTD_TEST_UTILS_FILES}
+  INTERFACE ${ARCSTD_TEST_UTILS_FILES}
 )
 target_include_directories(arcstd_test_utils
-  PUBLIC ${CMAKE_CURRENT_LIST_DIR}
+  INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 target_link_libraries(arcstd_test_utils
-  PUBLIC Catch2::Catch2
-  PUBLIC arcstd
+  INTERFACE Catch2::Catch2
+  INTERFACE arcstd
 )
 
 #

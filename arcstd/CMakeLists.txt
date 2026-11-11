@@ -63,7 +63,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 if(WIN32)
-  target_link_libraries(${PROJECT_NAME} PRIVATE mswsock ole32 oleaut32)
+  target_link_libraries(${PROJECT_NAME} PRIVATE mswsock)
 endif()
 
 #
