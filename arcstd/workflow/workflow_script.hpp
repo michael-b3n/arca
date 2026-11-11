@@ -66,7 +66,7 @@ struct workflow_script_sigs final
 };
 
 ///
-/// Workflow script, owns the Lua state and loads the bundled and user scripts \see load_scripts, doc/lua_scripts.md.
+/// Workflow script, owns the Lua state and loads the bundled and user scripts \see load_scripts.
 /// Workflows register below root.interface.workflow last in their constructor and keep the registration as their
 /// last member, \see lua::registration.
 /// Signal IDs to connect to:
