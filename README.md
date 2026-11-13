@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/michael-b3n/arca/actions/workflows/ci.yml/badge.svg)](https://github.com/michael-b3n/arca/actions/workflows/ci.yml)
 
-General C++26 and Qt libraries for Windows apps, linked statically. Split out of [biblia](https://github.com/michael-b3n/biblia), whose Bible libraries and the app VerseLens are built on them.
+General C++26 objects and Qml bindings for applications, linked statically.
 
 ## Repository
 

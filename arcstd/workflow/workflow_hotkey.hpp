@@ -44,7 +44,6 @@ class workflow_hotkey final : public workflow_base<void>
 
   // Variables
   const std::shared_ptr<workflow_settings> workflow_settings_;
-  // Before the guard: the hotkeys end first, then the signals they started
   execution::scope scope_;
   const util::shared_scope_guard hotkey_guard_;
   mutable std::mutex mtx_;
