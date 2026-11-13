@@ -1,4 +1,5 @@
 #include "arcstd/lua/state.hpp"
+#include "arcstd/lua/object_cast.hpp"
 #include "arcstd/util/log.hpp"
 
 #include <algorithm>
@@ -31,6 +32,36 @@ auto state::operator*() const -> sol::state&
 auto state::operator->() const -> sol::state*
 {
   return &data_->lua;
+}
+
+///
+///
+auto state::register_function(const util::path& p, function function, std::shared_ptr<const void> registered) -> registration
+{
+  auto parent = free_parent(p);
+  if(!parent)
+  {
+    return {};
+  }
+  parent->set_function(p.sections().back(), to_object_function(std::move(function)));
+  return registration{data_, p, std::move(registered)};
+}
+
+///
+///
+auto state::register_functions(const util::path& p, function_table functions, std::shared_ptr<const void> registered)
+  -> registration
+{
+  auto parent = free_parent(p);
+  if(!parent)
+  {
+    return {};
+  }
+  auto node = parent->create_named(p.sections().back());
+  std::ranges::for_each(
+    functions, [&](auto& entry) { node.set_function(entry.first, to_object_function(std::move(entry.second))); }
+  );
+  return registration{data_, p, std::move(registered)};
 }
 
 ///

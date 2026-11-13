@@ -24,9 +24,9 @@ TEST_CASE("workflow_web_fetches_web_pages", "[workflow]")
   CHECK(web.fetch("not a url") == std::unexpected{std::string{"invalid_url"}});
   CHECK(web.fetch("not a url") == std::unexpected{std::string{"invalid_url"}});
   CHECK(
-    script->state()
-      ->script("local content, error = root.interface.workflow.web.fetch('not a url') return content == nil and error")
-      .get<std::string>() == "invalid_url"
+    test_utils::script_value<std::string>(
+      *script, "local content, error = workflow.web.fetch('not a url') return content == nil and error"
+    ) == "invalid_url"
   );
 }
 
@@ -52,11 +52,11 @@ TEST_CASE("workflow_web_takes_its_function_back_on_destruction", "[workflow]")
   const auto script = std::make_shared<workflow_script>(settings, test_utils::no_bundled);
   {
     const auto web = workflow_web{settings, script};
-    CHECK(script->state()->script("return type(root.interface.workflow.web.fetch) == 'function'").get<bool>());
+    CHECK(test_utils::script_value<bool>(*script, "return type(workflow.web.fetch) == 'function'") == true);
   }
   // Only it, the scripts go on
-  CHECK(script->state()->script("return root.interface.workflow == nil").get<bool>());
-  CHECK(script->state().run_script("after.lua", "return 1"));
+  CHECK(test_utils::script_value<bool>(*script, "return workflow == nil") == true);
+  CHECK(script->run_script("after.lua", "return 1"));
 }
 
 } // namespace arcstd::workflow

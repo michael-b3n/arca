@@ -3,8 +3,8 @@
 #include "arcstd/framework/setting.hpp"
 #include "arcstd/framework/setting_common.hpp"
 #include "arcstd/lua/function_cast.hpp"
-#include "arcstd/lua/names.hpp"
 #include "arcstd/lua/registration.hpp"
+#include "arcstd/lua/setting_cast.hpp"
 #include "arcstd/lua/sol.hpp"
 #include "arcstd/util/path.hpp"
 
@@ -77,12 +77,28 @@ public: // Operations
   [[nodiscard]] auto register_function(const util::path& p, F&& function) -> registration;
 
   ///
+  /// Register \p function at \p p, the last section is its name, for as long as the registration is kept:
+  /// the registration keeps \p registered, which the function watches, \see function_cast.
+  /// \return the registration, one of nothing if \p p can not be registered
+  ///
+  [[nodiscard]] auto register_function(const util::path& p, function function, std::shared_ptr<const void> registered)
+    -> registration;
+
+  ///
   /// Register \p setting at \p p, as table with the functions get(), set(value) and postfix(), for as long as the
   /// registration is kept. \p setting must live as long.
   /// \return the registration, one of nothing if the path can not be registered
   ///
   template<framework::underlying_setting_type T>
   [[nodiscard]] auto register_setting(const util::path& p, framework::setting<T>& setting) -> registration;
+
+  ///
+  /// Register \p functions as table at \p p, for as long as the registration is kept: the registration keeps
+  /// \p registered, which the functions watch, \see function_cast.
+  /// \return the registration, one of nothing if \p p can not be registered
+  ///
+  [[nodiscard]] auto register_functions(const util::path& p, function_table functions, std::shared_ptr<const void> registered)
+    -> registration;
 
   ///
   /// Run a user script in an environment of its own, so its globals do not reach other scripts.
@@ -108,14 +124,9 @@ private: // Implementation
 template<function_castable F>
 auto state::register_function(const util::path& p, F&& function) -> registration
 {
-  auto parent = free_parent(p);
-  if(!parent)
-  {
-    return {};
-  }
   auto registered = std::make_shared<const std::monostate>();
-  parent->set_function(p.sections().back(), function_cast(std::forward<F>(function), registered));
-  return registration{data_, p, std::move(registered)};
+  auto cast = function_cast(std::forward<F>(function), registered);
+  return register_function(p, std::move(cast), std::move(registered));
 }
 
 ///
@@ -123,46 +134,9 @@ auto state::register_function(const util::path& p, F&& function) -> registration
 template<framework::underlying_setting_type T>
 auto state::register_setting(const util::path& p, framework::setting<T>& setting) -> registration
 {
-  using erased_type = framework::setting_type_erased_type_from<T>;
-
-  auto parent = free_parent(p);
-  if(!parent)
-  {
-    return {};
-  }
   auto registered = std::make_shared<const std::monostate>();
-  auto node = parent->create_named(p.sections().back());
-  ///
-  /// \lua <setting>.get()
-  /// \return the value of the setting
-  ///
-  node.set_function(
-    names::function_get,
-    function_cast(
-      [&setting]() -> erased_type { return framework::create_setting_value_converter<T, erased_type>()(setting.value()); },
-      registered
-    )
-  );
-  ///
-  /// \lua <setting>.set(value)
-  /// Changes the setting, like the user does in the settings.
-  /// \param value the new value
-  /// \return false if the setting rejected \p value or limited it to its range
-  ///
-  node.set_function(
-    names::function_set,
-    function_cast(
-      [&setting](const erased_type& value) -> bool
-      { return setting.value(framework::create_setting_value_converter<erased_type, T>()(value)); },
-      registered
-    )
-  );
-  ///
-  /// \lua <setting>.postfix()
-  /// \return the text shown after the value, e.g. its unit, or an empty text
-  ///
-  node.set_function(names::function_postfix, function_cast([&setting]() { return setting.postfix; }, registered));
-  return registration{data_, p, std::move(registered)};
+  auto functions = setting_cast(setting, registered);
+  return register_functions(p, std::move(functions), std::move(registered));
 }
 
 ///

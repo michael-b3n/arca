@@ -2,6 +2,7 @@
 #include "arcstd/lua/embedded_scripts.hpp"
 #include "arcstd/lua/function_cast.hpp"
 #include "arcstd/lua/names.hpp"
+#include "arcstd/lua/object_cast.hpp"
 #include "arcstd/util/exception.hpp"
 #include "arcstd/util/log.hpp"
 #include "arcstd/util/non_owning_ptr.hpp"
@@ -63,7 +64,7 @@ state_owner::state_owner()
   s->open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::string, sol::lib::table, sol::lib::utf8);
 
   auto system = s->create_table();
-  system.set_function(names::function_embedded, function_cast(&embedded));
+  system.set_function(names::function_embedded, to_object_function(function_cast(&embedded)));
   system.set_function(names::function_log_debug, [](const std::string& text) { LOG_DEBUG("lua: {}", text); });
   system.set_function(names::function_log_info, [](const std::string& text) { LOG_INFO("lua: {}", text); });
   system.set_function(names::function_log_warning, [](const std::string& text) { LOG_WARN("lua: {}", text); });

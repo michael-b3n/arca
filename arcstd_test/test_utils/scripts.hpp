@@ -9,7 +9,9 @@
 #include <filesystem>
 #include <future>
 #include <memory>
+#include <optional>
 #include <span>
+#include <string>
 #include <tuple>
 
 namespace arcstd::test_utils
@@ -42,6 +44,16 @@ inline auto load_scripts(workflow::workflow_script& workflow) -> void
     workflow.connect(&workflow::workflow_script_sigs::scripts_loaded, [loaded]() { loaded->set_value(); });
   workflow.load_scripts();
   REQUIRE(done.wait_for(std::chrono::seconds{10}) == std::future_status::ready);
+}
+
+///
+/// \return what \p code returns as T, run as a user script of \p workflow, std::nullopt if it failed or returns no T
+///
+template<lua::value_castable T>
+[[nodiscard]] auto script_value(const workflow::workflow_script& workflow, const std::string& code) -> std::optional<T>
+{
+  return workflow.run_script("test.lua", code)
+    .and_then([](const lua::value& value) { return lua::value_cast<T>::from(value); });
 }
 
 ///

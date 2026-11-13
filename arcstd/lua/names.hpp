@@ -22,9 +22,6 @@ inline constexpr std::string_view function_log_debug = "log_debug";
 inline constexpr std::string_view function_log_info = "log_info";
 inline constexpr std::string_view function_log_warning = "log_warning";
 inline constexpr std::string_view function_log_error = "log_error";
-inline constexpr std::string_view function_get = "get";
-inline constexpr std::string_view function_set = "set";
-inline constexpr std::string_view function_postfix = "postfix";
 inline constexpr std::string_view function_remove = "remove";
 
 inline constexpr std::string_view script_name = "name";

@@ -1,3 +1,4 @@
+#include <arcstd/lua/object_cast.hpp>
 #include <arcstd/lua/script_table.hpp>
 #include <arcstd/lua/sol.hpp>
 #include <arcstd/lua/value_cast.hpp>
@@ -25,7 +26,7 @@ namespace
 template<value_castable T>
 [[nodiscard]] auto round_trip(sol::state_view lua, const T& v) -> std::optional<T>
 {
-  return value_cast<T>::from(value_cast<T>::to(lua, v));
+  return value_cast<T>::from(to_value(to_object(lua, value_cast<T>::to(v))));
 }
 
 ///
@@ -34,7 +35,7 @@ template<value_castable T>
 template<value_castable T>
 [[nodiscard]] auto cast(sol::state& lua, const std::string& expression) -> std::optional<T>
 {
-  return value_cast<T>::from(lua.script("return " + expression).get<sol::object>());
+  return value_cast<T>::from(to_value(lua.script("return " + expression).get<sol::object>()));
 }
 
 } // namespace
@@ -70,9 +71,9 @@ TEST_CASE("lua_value_cast_throws_for_an_integer_lua_can_not_hold", "[lua]")
   const auto largest = static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max());
   CHECK(round_trip(lua, largest) == largest);
   // It would be another, negative number for the script
-  CHECK_THROWS(value_cast<std::uint64_t>::to(lua, largest + 1));
-  CHECK_THROWS(value_cast<std::uint64_t>::to(lua, limits::max()));
-  CHECK_THROWS(value_cast<std::vector<std::uint64_t>>::to(lua, {1, limits::max()}));
+  CHECK_THROWS(value_cast<std::uint64_t>::to(largest + 1));
+  CHECK_THROWS(value_cast<std::uint64_t>::to(limits::max()));
+  CHECK_THROWS(value_cast<std::vector<std::uint64_t>>::to({1, limits::max()}));
   CHECK(round_trip(lua, std::numeric_limits<std::int64_t>::min()) == std::numeric_limits<std::int64_t>::min());
 }
 
@@ -93,6 +94,9 @@ TEST_CASE("lua_value_cast_converts_containers", "[lua]")
   CHECK_FALSE(cast<list>(lua, "{a = 1}"));
   CHECK_FALSE(cast<list>(lua, "{1, 2, n = 2}"));
   CHECK_FALSE(cast<list>(lua, "{[2] = 2}"));
+  // A table containing itself ends, as no list
+  CHECK_FALSE(cast<list>(lua, "(function() local t = {} t[1] = t return t end)()"));
+  CHECK_FALSE(cast<std::vector<list>>(lua, "(function() local t = {} t[1] = t return t end)()"));
 
   using map = std::map<std::string, std::vector<std::string>>;
   CHECK(

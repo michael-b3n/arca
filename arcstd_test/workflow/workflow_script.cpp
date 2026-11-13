@@ -202,7 +202,8 @@ TEST_CASE("workflow_script_sets_up_the_state", "[workflow]")
 {
   const auto folder = test_utils::temp_folder{"workflow_script_sets_up_the_state"};
   auto workflow = workflow_script{test_utils::make_script_settings(folder.path()), bundled};
-  CHECK(workflow.state()->script("return type(root.interface.util) == 'table' and util == nil and io == nil").get<bool>());
+  // What a script sees
+  CHECK(test_utils::script_value<bool>(workflow, "return type(util) == 'table' and root == nil and io == nil") == true);
   // Disabled, so loaded without a scripts folder
   test_utils::load_scripts(workflow);
   CHECK_FALSE(std::filesystem::exists(folder.path() / "scripts"));
@@ -215,11 +216,7 @@ TEST_CASE("workflow_script_registers_a_workflow", "[workflow]")
   const auto workflow = std::make_shared<workflow_test>(script);
   REQUIRE(workflow->registered);
   workflow->value = 7;
-  CHECK(
-    script->state()
-      ->script("return root.interface.workflow.test.nested.value() + root.interface.workflow.test.twice()")
-      .get<int>() == 21
-  );
+  CHECK(test_utils::script_value<int>(*script, "return workflow.test.nested.value() + workflow.test.twice()") == 21);
 }
 
 TEST_CASE("workflow_script_drops_the_functions_of_a_destroyed_workflow", "[workflow]")
@@ -229,12 +226,12 @@ TEST_CASE("workflow_script_drops_the_functions_of_a_destroyed_workflow", "[workf
   const auto other = workflow_test{script, "other"};
   {
     const auto workflow = workflow_test{script};
-    REQUIRE(script->state().run_script("before.lua", "held = workflow.test.twice return held()"));
+    REQUIRE(script->run_script("before.lua", "held = workflow.test.twice return held()"));
   }
   // Its functions only: no script reaches the destroyed workflow, the other one and the scripts go on
-  CHECK(script->state().run_script("after.lua", "return workflow.test == nil and workflow.other.twice() == 84"));
-  CHECK_FALSE(script->state().run_script("after.lua", "return workflow.test.twice()"));
-  CHECK(script->state().run_script("after.lua", "return 1"));
+  CHECK(script->run_script("after.lua", "return workflow.test == nil and workflow.other.twice() == 84"));
+  CHECK_FALSE(script->run_script("after.lua", "return workflow.test.twice()"));
+  CHECK(script->run_script("after.lua", "return 1"));
 }
 
 TEST_CASE("workflow_script_rejects_a_taken_name", "[workflow]")
@@ -245,7 +242,7 @@ TEST_CASE("workflow_script_rejects_a_taken_name", "[workflow]")
   const auto second = workflow_test{script, "shared"};
   CHECK(first.registered);
   CHECK_FALSE(second.registered);
-  CHECK(script->state()->script("return root.interface.workflow.shared.nested.value()").get<int>() == 42);
+  CHECK(test_utils::script_value<int>(*script, "return workflow.shared.nested.value()") == 42);
 }
 
 TEST_CASE("workflow_script_loads_the_user_scripts", "[workflow]")
@@ -265,7 +262,8 @@ TEST_CASE("workflow_script_loads_the_user_scripts", "[workflow]")
   auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
   test_utils::load_scripts(workflow);
   CHECK(reports(workflow) == std::vector<std::string>{"a (a)", "nil (b)", "ran (e)"});
-  CHECK(workflow.state()->script("return shared == nil").get<bool>());
+  // Nor of a script run later
+  CHECK(test_utils::script_value<bool>(workflow, "return shared == nil") == true);
 }
 
 TEST_CASE("workflow_script_imports_scripts_into_its_folder", "[workflow]")
@@ -337,7 +335,9 @@ TEST_CASE("workflow_script_loads_no_bytecode", "[workflow]")
   {
     const auto workflow = workflow_script{test_utils::make_script_settings(folder.path()), bundled};
     const auto bytecode = "return string.dump(function() " + report("a", "'ran'") + " end)";
-    test_utils::write_file(scripts / "a.lua", workflow.state()->script(bytecode).get<std::string>());
+    const auto dumped = test_utils::script_value<std::string>(workflow, bytecode);
+    REQUIRE(dumped);
+    test_utils::write_file(scripts / "a.lua", *dumped);
   }
   test_utils::write_file(
     scripts / "b.lua", report("b", "load(string.dump(function() end)) == nil and dofile == nil and loadfile == nil")

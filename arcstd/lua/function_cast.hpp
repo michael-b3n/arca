@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arcstd/lua/sol.hpp"
+#include "arcstd/lua/value.hpp"
 #include "arcstd/lua/value_cast.hpp"
 #include "arcstd/util/exception.hpp"
 
@@ -10,11 +10,20 @@
 #include <format>
 #include <functional>
 #include <memory>
+#include <span>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace arcstd::lua
 {
+
+///
+/// Function a script calls: it takes the arguments of the call and returns its results, in order.
+/// An exception it throws is an error for the script.
+///
+using function = std::function<std::vector<value>(std::span<const value>)>;
+
 namespace detail
 {
 
@@ -41,16 +50,15 @@ concept function_result = std::is_void_v<T> || value_castable<T> || expected_res
 /// \throw util::exception if it is no T, the script gets it as error
 ///
 template<value_castable T>
-[[nodiscard]] auto argument(sol::state_view lua, const sol::variadic_args& arguments, const std::size_t index) -> T
+[[nodiscard]] auto argument(const std::span<const value> arguments, const std::size_t index) -> T
 {
-  const auto object = index < arguments.size() ? arguments[static_cast<std::ptrdiff_t>(index)].get<sol::object>()
-                                               : sol::make_object(lua, sol::lua_nil);
-  auto value = value_cast<T>::from(object);
-  if(!value)
+  const auto nil = value{};
+  auto converted = value_cast<T>::from(index < arguments.size() ? arguments[index] : nil);
+  if(!converted)
   {
     throw util::exception{std::format("argument {} is of another type", index + 1)};
   }
-  return std::move(*value);
+  return std::move(*converted);
 }
 
 ///
@@ -64,34 +72,32 @@ concept function_parameter = value_castable<std::remove_cvref_t<T>> && std::conv
 ///
 template<typename R, typename... A>
   requires(function_result<R> && (function_parameter<A> && ...))
-[[nodiscard]] auto wrapped(std::function<R(A...)> function)
+[[nodiscard]] auto wrapped(std::function<R(A...)> function) -> lua::function
 {
-  return [function = std::move(function)](sol::this_state lua, sol::variadic_args arguments)
+  return [function = std::move(function)](const std::span<const value> arguments) -> std::vector<value>
   {
     const auto call = [&]<std::size_t... I>(std::index_sequence<I...>) -> R
-    { return function(argument<std::remove_cvref_t<A>>(lua, arguments, I)...); };
+    { return function(argument<std::remove_cvref_t<A>>(arguments, I)...); };
     // Each kind of function_result
     if constexpr(std::is_void_v<R>)
     {
       call(std::index_sequence_for<A...>{});
+      return {};
     }
     else if constexpr(value_castable<R>)
     {
-      return value_cast<R>::to(lua, call(std::index_sequence_for<A...>{}));
+      return {value_cast<R>::to(call(std::index_sequence_for<A...>{}))};
     }
     else if constexpr(expected_result<R>)
     {
-      auto results = sol::variadic_results{};
       if(const auto result = call(std::index_sequence_for<A...>{}))
       {
-        results.push_back(value_cast<typename R::value_type>::to(lua, *result));
+        return {value_cast<typename R::value_type>::to(*result)};
       }
       else
       {
-        results.push_back(sol::make_object(lua, sol::lua_nil));
-        results.push_back(value_cast<typename R::error_type>::to(lua, result.error()));
+        return {value{}, value_cast<typename R::error_type>::to(result.error())};
       }
-      return results;
     }
     else
     {
@@ -128,20 +134,20 @@ concept function_castable = requires(F&& function) { detail::wrapped(std::functi
 ///
 /// The function a script calls for \p function, which takes and returns C++ values: value_cast converts them.
 /// An argument of another type is an error for the script, one left out is nil, extra ones are ignored.
-/// \return the function to set in a Lua table
+/// \return the function to hand to the Lua state
 ///
 template<function_castable F>
-[[nodiscard]] auto function_cast(F&& function)
+[[nodiscard]] auto function_cast(F&& function) -> lua::function
 {
   return detail::wrapped(std::function{std::forward<F>(function)});
 }
 
 ///
 /// function_cast of a function taken back later: once \p registered is gone, calling it is an error for the script.
-/// \return the function to set in a Lua table
+/// \return the function to hand to the Lua state
 ///
 template<function_castable F>
-[[nodiscard]] auto function_cast(F&& function, std::weak_ptr<const void> registered)
+[[nodiscard]] auto function_cast(F&& function, std::weak_ptr<const void> registered) -> lua::function
 {
   return detail::wrapped(detail::guarded(std::move(registered), std::function{std::forward<F>(function)}));
 }

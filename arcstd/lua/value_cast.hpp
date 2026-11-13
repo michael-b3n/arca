@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arcstd/lua/sol.hpp"
+#include "arcstd/lua/value.hpp"
 #include "arcstd/meta/chrono.hpp"
 #include "arcstd/util/numeric_cast.hpp"
 #include "arcstd/util/ranges.hpp"
@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <map>
 #include <optional>
@@ -15,16 +16,16 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace arcstd::lua
 {
 
 ///
-/// Conversion between a C++ value and the Lua value a script sees: to(lua, value) -> sol::object and
-/// from(object) -> std::optional<T>, std::nullopt if the object is no T. Both copy.
-/// Only plain value types convert, no references, pointers, views or const types: they would point into a Lua
-/// value that may be gone.
+/// Conversion between a C++ value and the Lua value a script sees: to(v) -> value and
+/// from(value) -> std::optional<T>, std::nullopt if the value is no T. Both copy.
+/// Only plain value types convert, no references, pointers, views or const types.
 ///
 template<typename T>
 struct value_cast final
@@ -55,9 +56,9 @@ template<std::ranges::input_range R>
 [[nodiscard]] auto all_or_none(R&& items) -> std::optional<std::vector<typename std::ranges::range_value_t<R>::value_type>>;
 
 ///
-/// \return the keys and values of \p table
+/// \return the values of the sequence of \p table, from index 1 to its length, nil where it has none
 ///
-[[nodiscard]] auto entries(const sol::table& table) -> std::vector<std::pair<sol::object, sol::object>>;
+[[nodiscard]] auto sequence(const value_table& table) -> std::vector<value>;
 
 } // namespace detail
 
@@ -71,8 +72,8 @@ struct value_cast<bool> final
   static constexpr auto valid = true;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, bool v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<bool>;
+  [[nodiscard]] static auto to(bool v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<bool>;
 };
 
 ///
@@ -87,8 +88,8 @@ struct value_cast<T> final
   static constexpr auto valid = true;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, T v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<T>;
+  [[nodiscard]] static auto to(T v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<T>;
 };
 
 ///
@@ -102,8 +103,8 @@ struct value_cast<T> final
   static constexpr auto valid = true;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, T v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<T>;
+  [[nodiscard]] static auto to(T v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<T>;
 };
 
 ///
@@ -116,8 +117,8 @@ struct value_cast<std::string> final
   static constexpr auto valid = true;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, const std::string& v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<std::string>;
+  [[nodiscard]] static auto to(const std::string& v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<std::string>;
 };
 
 ///
@@ -131,8 +132,8 @@ struct value_cast<T> final
   static constexpr auto valid = true;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, const T& v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<T>;
+  [[nodiscard]] static auto to(const T& v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<T>;
 };
 
 ///
@@ -145,8 +146,8 @@ struct value_cast<std::filesystem::path> final
   static constexpr auto valid = true;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, const std::filesystem::path& v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<std::filesystem::path>;
+  [[nodiscard]] static auto to(const std::filesystem::path& v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<std::filesystem::path>;
 };
 
 ///
@@ -159,8 +160,8 @@ struct value_cast<std::optional<T>> final
   static constexpr auto valid = true;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, const std::optional<T>& v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<std::optional<T>>;
+  [[nodiscard]] static auto to(const std::optional<T>& v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<std::optional<T>>;
 };
 
 ///
@@ -173,8 +174,8 @@ struct value_cast<std::vector<T>> final
   static constexpr auto valid = true;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, const std::vector<T>& v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<std::vector<T>>;
+  [[nodiscard]] static auto to(const std::vector<T>& v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<std::vector<T>>;
 };
 
 ///
@@ -187,16 +188,26 @@ struct value_cast<std::map<K, T>> final
   static constexpr auto valid = true;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, const std::map<K, T>& v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<std::map<K, T>>;
+  [[nodiscard]] static auto to(const std::map<K, T>& v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<std::map<K, T>>;
 };
 
 ///
 ///
-inline auto detail::entries(const sol::table& table) -> std::vector<std::pair<sol::object, sol::object>>
+inline auto detail::sequence(const value_table& table) -> std::vector<value>
 {
-  auto result = std::vector<std::pair<sol::object, sol::object>>{};
-  table.for_each([&](const sol::object& key, const sol::object& value) { result.emplace_back(key, value); });
+  auto result = std::vector<value>(table.length);
+  std::ranges::for_each(
+    table.entries,
+    [&](const auto& entry)
+    {
+      const auto index = std::get_if<value::integer_type>(&entry.first);
+      if(index && *index >= 1 && std::cmp_less_equal(*index, table.length))
+      {
+        result[static_cast<std::size_t>(*index - 1)] = entry.second;
+      }
+    }
+  );
   return result;
 }
 
@@ -215,98 +226,105 @@ auto detail::all_or_none(R&& items) -> std::optional<std::vector<typename std::r
 
 ///
 ///
-inline auto value_cast<bool>::to(sol::state_view lua, const bool v) -> sol::object
+inline auto value_cast<bool>::to(const bool v) -> value
 {
-  return sol::make_object(lua, v);
+  return value{v};
 }
 
 ///
 ///
-inline auto value_cast<bool>::from(const sol::object& v) -> std::optional<bool>
+inline auto value_cast<bool>::from(const value& v) -> std::optional<bool>
 {
-  return v.get_type() == sol::type::boolean ? std::optional{v.as<bool>()} : std::nullopt;
-}
-
-///
-///
-template<std::integral T>
-  requires(detail::plain<T> && !std::same_as<T, bool>)
-auto value_cast<T>::to(sol::state_view lua, const T v) -> sol::object
-{
-  return sol::make_object(lua, numeric_cast<lua_Integer>(v));
+  const auto boolean = std::get_if<bool>(&v);
+  return boolean ? std::optional{*boolean} : std::nullopt;
 }
 
 ///
 ///
 template<std::integral T>
   requires(detail::plain<T> && !std::same_as<T, bool>)
-auto value_cast<T>::from(const sol::object& v) -> std::optional<T>
+auto value_cast<T>::to(const T v) -> value
 {
-  // With the safeties on, sol takes integral numbers only
-  const auto value = v.as<sol::optional<lua_Integer>>();
-  return value && std::in_range<T>(*value) ? std::optional{static_cast<T>(*value)} : std::nullopt;
+  return value{numeric_cast<value::integer_type>(v)};
+}
+
+///
+///
+template<std::integral T>
+  requires(detail::plain<T> && !std::same_as<T, bool>)
+auto value_cast<T>::from(const value& v) -> std::optional<T>
+{
+  const auto integer = std::get_if<value::integer_type>(&v);
+  return integer && std::in_range<T>(*integer) ? std::optional{static_cast<T>(*integer)} : std::nullopt;
 }
 
 ///
 ///
 template<std::floating_point T>
   requires detail::plain<T>
-auto value_cast<T>::to(sol::state_view lua, const T v) -> sol::object
+auto value_cast<T>::to(const T v) -> value
 {
-  return sol::make_object(lua, static_cast<lua_Number>(v));
+  return value{static_cast<value::number_type>(v)};
 }
 
 ///
 ///
 template<std::floating_point T>
   requires detail::plain<T>
-auto value_cast<T>::from(const sol::object& v) -> std::optional<T>
+auto value_cast<T>::from(const value& v) -> std::optional<T>
 {
-  return v.get_type() == sol::type::number ? std::optional{static_cast<T>(v.as<lua_Number>())} : std::nullopt;
+  // An integer is a number too
+  if(const auto integer = std::get_if<value::integer_type>(&v))
+  {
+    return static_cast<T>(*integer);
+  }
+  const auto number = std::get_if<value::number_type>(&v);
+  return number ? std::optional{static_cast<T>(*number)} : std::nullopt;
 }
 
 ///
 ///
-inline auto value_cast<std::string>::to(sol::state_view lua, const std::string& v) -> sol::object
+inline auto value_cast<std::string>::to(const std::string& v) -> value
 {
-  return sol::make_object(lua, v);
+  return value{v};
 }
 
 ///
 ///
-inline auto value_cast<std::string>::from(const sol::object& v) -> std::optional<std::string>
+inline auto value_cast<std::string>::from(const value& v) -> std::optional<std::string>
 {
-  return v.get_type() == sol::type::string ? std::optional{v.as<std::string>()} : std::nullopt;
+  const auto string = std::get_if<std::string>(&v);
+  return string ? std::optional{*string} : std::nullopt;
 }
 
 ///
 ///
 template<typename T>
   requires(detail::plain<T> && meta::is_duration_v<T>)
-auto value_cast<T>::to(sol::state_view lua, const T& v) -> sol::object
+auto value_cast<T>::to(const T& v) -> value
 {
-  return value_cast<typename T::rep>::to(lua, v.count());
+  return value_cast<typename T::rep>::to(v.count());
 }
 
 ///
 ///
 template<typename T>
   requires(detail::plain<T> && meta::is_duration_v<T>)
-auto value_cast<T>::from(const sol::object& v) -> std::optional<T>
+auto value_cast<T>::from(const value& v) -> std::optional<T>
 {
   return value_cast<typename T::rep>::from(v).transform([](const auto count) { return T{count}; });
 }
 
 ///
 ///
-inline auto value_cast<std::filesystem::path>::to(sol::state_view lua, const std::filesystem::path& v) -> sol::object
+inline auto value_cast<std::filesystem::path>::to(const std::filesystem::path& v) -> value
 {
-  return value_cast<std::string>::to(lua, v.generic_string());
+  return value_cast<std::string>::to(v.generic_string());
 }
 
 ///
 ///
-inline auto value_cast<std::filesystem::path>::from(const sol::object& v) -> std::optional<std::filesystem::path>
+inline auto value_cast<std::filesystem::path>::from(const value& v) -> std::optional<std::filesystem::path>
 {
   return value_cast<std::string>::from(v).transform([](const auto& s) { return std::filesystem::path{s}; });
 }
@@ -314,17 +332,17 @@ inline auto value_cast<std::filesystem::path>::from(const sol::object& v) -> std
 ///
 ///
 template<value_castable T>
-auto value_cast<std::optional<T>>::to(sol::state_view lua, const std::optional<T>& v) -> sol::object
+auto value_cast<std::optional<T>>::to(const std::optional<T>& v) -> value
 {
-  return v ? value_cast<T>::to(lua, *v) : sol::make_object(lua, sol::lua_nil);
+  return v ? value_cast<T>::to(*v) : value{};
 }
 
 ///
 ///
 template<value_castable T>
-auto value_cast<std::optional<T>>::from(const sol::object& v) -> std::optional<std::optional<T>>
+auto value_cast<std::optional<T>>::from(const value& v) -> std::optional<std::optional<T>>
 {
-  if(v.get_type() == sol::type::lua_nil)
+  if(std::holds_alternative<value_nil>(v))
   {
     return std::optional<T>{};
   }
@@ -334,57 +352,57 @@ auto value_cast<std::optional<T>>::from(const sol::object& v) -> std::optional<s
 ///
 ///
 template<value_castable T>
-auto value_cast<std::vector<T>>::to(sol::state_view lua, const std::vector<T>& v) -> sol::object
+auto value_cast<std::vector<T>>::to(const std::vector<T>& v) -> value
 {
-  auto table = lua.create_table(numeric_cast<int>(v.size()), 0);
-  std::ranges::for_each(v, [&](const T& item) { table.add(value_cast<T>::to(lua, item)); });
-  return table;
+  auto table = value_table{.entries = {}, .length = v.size()};
+  std::ranges::for_each(
+    v,
+    [&](const T& item)
+    { table.entries.emplace_back(value{numeric_cast<value::integer_type>(table.entries.size() + 1)}, value_cast<T>::to(item)); }
+  );
+  return value{std::move(table)};
 }
 
 ///
 ///
 template<value_castable T>
-auto value_cast<std::vector<T>>::from(const sol::object& v) -> std::optional<std::vector<T>>
+auto value_cast<std::vector<T>>::from(const value& v) -> std::optional<std::vector<T>>
 {
-  if(v.get_type() != sol::type::table)
-  {
-    return std::nullopt;
-  }
-  const auto table = v.as<sol::table>();
+  const auto table = std::get_if<value_table>(&v);
   // Else e.g. a table by key would be read as an empty list
-  if(detail::entries(table).size() != table.size())
+  if(!table || table->entries.size() != table->length)
   {
     return std::nullopt;
   }
   return detail::all_or_none(
-    util::ranges::index_view_between(std::size_t{1}, table.size() + 1) |
-    std::views::transform([&](const std::size_t i) { return value_cast<T>::from(table.get<sol::object>(i)); })
+    detail::sequence(*table) | std::views::transform([](const value& item) { return value_cast<T>::from(item); })
   );
 }
 
 ///
 ///
 template<value_castable K, value_castable T>
-auto value_cast<std::map<K, T>>::to(sol::state_view lua, const std::map<K, T>& v) -> sol::object
+auto value_cast<std::map<K, T>>::to(const std::map<K, T>& v) -> value
 {
-  auto table = lua.create_table(0, numeric_cast<int>(v.size()));
+  auto table = value_table{};
   std::ranges::for_each(
-    v, [&](const auto& entry) { table[value_cast<K>::to(lua, entry.first)] = value_cast<T>::to(lua, entry.second); }
+    v, [&](const auto& entry) { table.entries.emplace_back(value_cast<K>::to(entry.first), value_cast<T>::to(entry.second)); }
   );
-  return table;
+  return value{std::move(table)};
 }
 
 ///
 ///
 template<value_castable K, value_castable T>
-auto value_cast<std::map<K, T>>::from(const sol::object& v) -> std::optional<std::map<K, T>>
+auto value_cast<std::map<K, T>>::from(const value& v) -> std::optional<std::map<K, T>>
 {
-  if(v.get_type() != sol::type::table)
+  const auto table = std::get_if<value_table>(&v);
+  if(!table)
   {
     return std::nullopt;
   }
   const auto entries =
-    detail::entries(v.as<sol::table>()) |
+    table->entries |
     std::views::transform([](const auto& entry)
                           { return std::pair{value_cast<K>::from(entry.first), value_cast<T>::from(entry.second)}; }) |
     std::ranges::to<std::vector>();
