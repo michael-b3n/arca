@@ -1,6 +1,5 @@
 #pragma once
 
-#include <arcstd/lua/embedded_scripts.hpp>
 #include <arcstd/workflow/workflow_script.hpp>
 #include <arcstd/workflow/workflow_settings.hpp>
 
@@ -48,7 +47,7 @@ inline auto load_scripts(workflow::workflow_script& workflow) -> void
 ///
 /// \return no bundled scripts, for a workflow script that loads only the scripts of the test
 ///
-[[nodiscard]] inline auto no_bundled() -> std::span<const lua::embedded_script>
+[[nodiscard]] inline auto no_bundled() -> std::span<const workflow::workflow_script::embedded_script_type>
 {
   return {};
 }

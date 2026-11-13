@@ -1,6 +1,5 @@
 #pragma once
 
-#include <arcstd/framework/setting_validator.hpp>
 #include <arcstd/workflow/workflow_settings.hpp>
 
 #include <QString>
@@ -54,10 +53,10 @@ inline constexpr bool alwaysFalse = false;
 /// Shared pointers to the validators a type erased setting holds, one per validator kind.
 ///
 template<typename T>
-using ValidatorRangeSptrType = arcstd::framework::setting_validator_range_type_erased<T>::sptr_type;
+using ValidatorRangeSptrType = arcstd::workflow::workflow_settings::validator_range_type_erased_type<T>::sptr_type;
 template<typename T>
-using ValidatorListSptrType = arcstd::framework::setting_validator_list_type_erased<T>::sptr_type;
-using ValidatorUnboundSptrType = arcstd::framework::setting_validator_unbound::sptr_type;
+using ValidatorListSptrType = arcstd::workflow::workflow_settings::validator_list_type_erased_type<T>::sptr_type;
+using ValidatorUnboundSptrType = arcstd::workflow::workflow_settings::validator_unbound_type::sptr_type;
 
 ///
 /// \return the value of a QJSValue QML wraps \p variant in, \p variant itself if it is none
@@ -70,7 +69,7 @@ using ValidatorUnboundSptrType = arcstd::framework::setting_validator_unbound::s
 /// \return default setting value, std::nullopt if the value type is not supported
 ///
 [[nodiscard]] auto toDefaultSettingValue(const QVariant& value)
-  -> std::optional<arcstd::framework::setting_type_erased_variant>;
+  -> std::optional<arcstd::workflow::workflow_settings::setting_type_erased_variant_type>;
 
 ///
 /// Convert the value of a type erased setting to a QML value.

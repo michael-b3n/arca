@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 4.3)
 
 project(arcstd)
-add_library(${PROJECT_NAME} STATIC)
+if(ARCA_BUILD_SHARED)
+  add_library(${PROJECT_NAME} SHARED)
+else()
+  add_library(${PROJECT_NAME} STATIC)
+endif()
 
 #
 # Define target sources
@@ -46,15 +50,15 @@ pkg_search_module(LUA REQUIRED IMPORTED_TARGET lua5.4)
 pkg_search_module(SQLITE REQUIRED IMPORTED_TARGET sqlite3)
 
 #
-# Link libraries.
+# Link libraries, public are those the headers need.
 #
 target_link_libraries(${PROJECT_NAME}
   PUBLIC Boost::headers
   PUBLIC Boost::filesystem
-  PUBLIC Boost::url
-  PUBLIC spdlog::spdlog
-  PUBLIC libzip::zip
-  PUBLIC PkgConfig::LIBCURL
+  PRIVATE Boost::url
+  PRIVATE spdlog::spdlog
+  PRIVATE libzip::zip
+  PRIVATE PkgConfig::LIBCURL
   PUBLIC PkgConfig::LUA
   PRIVATE PkgConfig::SQLITE
   PUBLIC sol2::sol2

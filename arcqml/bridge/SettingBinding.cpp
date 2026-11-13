@@ -2,10 +2,10 @@
 #include "arcqml/bridge/BridgeSettings.hpp"
 #include "arcqml/util/SettingConversion.hpp"
 
-#include <arcstd/framework/setting_validator.hpp>
 #include <arcstd/util/exception.hpp>
 #include <arcstd/util/log.hpp>
 #include <arcstd/util/visit_helper.hpp>
+#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <QMetaObject>
 
@@ -185,7 +185,7 @@ void SettingBinding::bind()
     [this](const auto setting)
     {
       setting->signal_adapter.connect_queued(
-        &arcstd::framework::setting_signals::value_changed,
+        &arcstd::workflow::workflow_settings::setting_signals_type::value_changed,
         [this]() { QMetaObject::invokeMethod(this, [this]() { emit valueChanged(); }, Qt::QueuedConnection); },
         connections_
       );
@@ -198,15 +198,16 @@ void SettingBinding::bind()
 ///
 ///
 template<typename T>
-auto SettingBinding::settingValidator() const -> arcstd::framework::setting_validator<T>
+auto SettingBinding::settingValidator() const -> arcstd::workflow::workflow_settings::validator_type<T>
 {
-  using list_type = arcstd::framework::setting_validator_list<T>;
-  using range_type = arcstd::framework::setting_validator_range<T>;
-  using return_type = arcstd::framework::setting_validator<T>;
+  using list_type = arcstd::workflow::workflow_settings::validator_list_type<T>;
+  using range_type = arcstd::workflow::workflow_settings::validator_range_type<T>;
+  using return_type = arcstd::workflow::workflow_settings::validator_type<T>;
   const auto toValue = [this](const QVariant& value) { return toValidatorValue<T>(value, defaultValue_); };
   return arcstd::util::visit_lambdas(
     validator_,
-    [](std::monostate) -> return_type { return std::make_shared<arcstd::framework::setting_validator_unbound>(); },
+    [](std::monostate) -> return_type
+    { return std::make_shared<arcstd::workflow::workflow_settings::validator_unbound_type>(); },
     [&](const QVariantList& available) -> return_type
     {
       if constexpr(list_type::is_plain_type)
@@ -220,7 +221,7 @@ auto SettingBinding::settingValidator() const -> arcstd::framework::setting_vali
     },
     [&](const ValueRange& range) -> return_type
     {
-      if constexpr(range_type::is_plain_type && arcstd::framework::detail::setting_validator_range_value_type<T>)
+      if constexpr(range_type::is_plain_type && arcstd::workflow::setting_validator_range_value_type<T>)
       {
         return std::make_shared<range_type>(toValue(range.minimum), toValue(range.maximum));
       }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "arcstd/framework/process_params.hpp"
-#include "arcstd/lua/registration.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
 #include "arcstd/workflow/workflow_script.hpp"
 #include "arcstd/workflow/workflow_settings_base.hpp"
@@ -49,11 +47,11 @@ class workflow_template final : public workflow_base<workflow_template_settings>
 
   // Variables
   const std::shared_ptr<workflow_script> workflow_script_;
-  lua::registration registrations_;
+  workflow_script::registration_type registrations_;
 
 public: // Typedefs
-  using params = framework::process_params<params_t>;
-  using result = framework::process_result<result_t>;
+  using params = params_type<params_t>;
+  using result = result_type<result_t>;
 
 public: // Structors
   workflow_template(std::shared_ptr<workflow_settings> workflow_settings, std::shared_ptr<workflow_script> workflow_script);

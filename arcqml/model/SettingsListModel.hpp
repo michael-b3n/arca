@@ -1,7 +1,7 @@
 #pragma once
 
-#include <arcstd/framework/queued_connections.hpp>
 #include <arcstd/util/non_owning_ptr.hpp>
+#include <arcstd/workflow/workflow_base.hpp>
 #include <arcstd/workflow/workflow_settings.hpp>
 
 #include <QAbstractListModel>
@@ -84,7 +84,7 @@ private: // Typedefs
   // Variables
   std::shared_ptr<arcstd::workflow::workflow_settings> workflowSettings_;
   std::vector<Entry> entries_;
-  arcstd::framework::queued_connections connections_;
+  arcstd::workflow::workflow_ground::connections_type connections_;
 
 public: // Typedefs
   enum Role

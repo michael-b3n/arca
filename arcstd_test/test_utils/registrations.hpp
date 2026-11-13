@@ -1,6 +1,6 @@
 #pragma once
 
-#include <arcstd/lua/registration.hpp>
+#include <arcstd/workflow/workflow_script.hpp>
 
 #include <utility>
 #include <vector>
@@ -14,19 +14,19 @@ namespace arcstd::test_utils
 class registrations final
 {
   // Variables
-  std::vector<lua::registration> kept_;
+  std::vector<workflow::workflow_script::registration_type> kept_;
 
 public: // Operators
   ///
   /// Keep \p registration.
   /// \return true if it registered something
   ///
-  auto operator()(lua::registration registration) -> bool;
+  auto operator()(workflow::workflow_script::registration_type registration) -> bool;
 };
 
 ///
 ///
-inline auto registrations::operator()(lua::registration registration) -> bool
+inline auto registrations::operator()(workflow::workflow_script::registration_type registration) -> bool
 {
   kept_.push_back(std::move(registration));
   return static_cast<bool>(kept_.back());

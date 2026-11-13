@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/michael-b3n/arca/actions/workflows/ci.yml/badge.svg)](https://github.com/michael-b3n/arca/actions/workflows/ci.yml)
 
-General C++26 objects and Qml bindings for applications, linked statically.
+General C++26 objects and Qml bindings for applications.
 
 ## Repository
 
@@ -24,6 +24,12 @@ target_link_libraries(app PRIVATE arcstd ArcQmlplugin)
 ```
 
 The tests of arca build when it is the top level project, or with `ARCA_BUILD_TESTS=ON`.
+`arcstd` is a static library, with `ARCA_BUILD_SHARED=ON` a shared one; the project then places `arcstd.dll` beside
+its executables. `ArcQml` is always static.
+
+The interface of `arcstd` is the workflow layer: a project includes `arcstd/workflow/` and names the types it works
+with by the typedefs there, e.g. `workflow_ground::scope_type` or `workflow_settings::validator_type<T>`. The
+general helpers in `meta`, `math`, `util`, `txt`, `io` and `system/filesystem.hpp` may be included directly.
 
 ## Development
 

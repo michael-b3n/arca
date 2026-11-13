@@ -1,7 +1,10 @@
 #pragma once
 
 #include "arcstd/framework/property_tree.hpp"
+#include "arcstd/framework/setting.hpp"
+#include "arcstd/framework/setting_common.hpp"
 #include "arcstd/framework/setting_type_erased.hpp"
+#include "arcstd/framework/setting_validator.hpp"
 #include "arcstd/meta/for_each.hpp"
 #include "arcstd/meta/type_traits.hpp"
 #include "arcstd/signal/adapter.hpp"
@@ -46,6 +49,24 @@ template<framework::underlying_setting_type T>
 } // namespace detail
 
 ///
+/// Value types of a setting, \see framework::underlying_setting_type
+///
+template<typename T>
+concept underlying_setting_type = framework::underlying_setting_type<T>;
+
+///
+/// Value types of a setting created at runtime, \see framework::underlying_setting_type_erased_type
+///
+template<typename T>
+concept underlying_setting_type_erased_type = framework::underlying_setting_type_erased_type<T>;
+
+///
+/// Value types a range validator limits, \see framework::detail::setting_validator_range_value_type
+///
+template<typename T>
+concept setting_validator_range_value_type = framework::detail::setting_validator_range_value_type<T>;
+
+///
 /// Signals emitted by workflow settings.
 ///
 struct workflow_settings_signals final
@@ -61,8 +82,6 @@ struct workflow_settings_signals final
 class workflow_settings final : public signal::adapter<workflow_settings_signals>
 {
   // Typedefs
-  template<framework::underlying_setting_type_erased_type T>
-  using setting_type_erased_non_owning_ptr_type = util::non_owning_ptr<framework::setting_type_erased<T>>;
   template<framework::underlying_setting_type_erased_type T>
   using setting_type_erased_uptr_type = std::unique_ptr<framework::setting_type_erased<T>>;
   using setting_type_erased_uptr_variant_type =
@@ -81,6 +100,13 @@ class workflow_settings final : public signal::adapter<workflow_settings_signals
   std::vector<setting_uptr_data> settings_;
 
 public: // Typedefs
+  using setting_signals_type = framework::setting_signals;
+  using setting_type_erased_variant_type = framework::setting_type_erased_variant;
+
+  template<framework::underlying_setting_type T>
+  using setting_non_owning_ptr_type = util::non_owning_ptr<framework::setting<T>>;
+  template<framework::underlying_setting_type_erased_type T>
+  using setting_type_erased_non_owning_ptr_type = util::non_owning_ptr<framework::setting_type_erased<T>>;
   using setting_type_erased_non_owning_ptr_variant_type =
     meta::for_each_t<framework::setting_type_erased_variant, setting_type_erased_non_owning_ptr_type>;
 
@@ -94,7 +120,16 @@ public: // Typedefs
   };
 
   template<framework::underlying_setting_type T>
-  using setting_non_owning_ptr_type = util::non_owning_ptr<framework::setting<T>>;
+  using validator_type = framework::setting_validator<T>;
+  using validator_unbound_type = framework::setting_validator_unbound;
+  template<framework::underlying_setting_type T>
+  using validator_range_type = framework::setting_validator_range<T>;
+  template<framework::underlying_setting_type T>
+  using validator_list_type = framework::setting_validator_list<T>;
+  template<framework::underlying_setting_type_erased_type T>
+  using validator_range_type_erased_type = framework::setting_validator_range_type_erased<T>;
+  template<framework::underlying_setting_type_erased_type T>
+  using validator_list_type_erased_type = framework::setting_validator_list_type_erased<T>;
 
 public: // Constants
   static constexpr std::string_view settings_file_name = "settings.xml";
@@ -146,7 +181,7 @@ public: // Modifiers
     const std::string& path,
     T default_value,
     std::string postfix = {},
-    framework::setting_validator<T> validator = detail::conditional_default_validator<T>()
+    validator_type<T> validator = detail::conditional_default_validator<T>()
   ) -> setting_type_erased_non_owning_ptr_variant_type;
 
   ///
@@ -154,7 +189,7 @@ public: // Modifiers
   /// \return the newly created or the already existing setting
   ///
   template<framework::underlying_setting_type_erased_type T>
-  [[nodiscard]] auto type_erased_setting(const std::string& path, T default_value, framework::setting_validator<T> validator)
+  [[nodiscard]] auto type_erased_setting(const std::string& path, T default_value, validator_type<T> validator)
     -> setting_type_erased_non_owning_ptr_variant_type;
 
   ///
@@ -167,7 +202,7 @@ public: // Modifiers
     const std::string& path,
     T default_value,
     std::string postfix = {},
-    framework::setting_validator<T> validator = detail::conditional_default_validator<T>()
+    validator_type<T> validator = detail::conditional_default_validator<T>()
   ) -> setting_non_owning_ptr_type<T>;
 
   ///
@@ -175,7 +210,7 @@ public: // Modifiers
   /// \return non owning pointer to the newly created setting
   ///
   template<framework::underlying_setting_type T>
-  [[nodiscard]] auto create_setting(const std::string& path, T default_value, framework::setting_validator<T> validator)
+  [[nodiscard]] auto create_setting(const std::string& path, T default_value, validator_type<T> validator)
     -> setting_non_owning_ptr_type<T>;
 
 private: // Implementation
@@ -184,16 +219,15 @@ private: // Implementation
   /// \return the entry owning the setting, and the setting
   ///
   template<framework::underlying_setting_type T>
-  [[nodiscard]] auto make_setting(
-    const std::string& path, T default_value, std::string postfix, framework::setting_validator<T> validator
-  ) -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>;
+  [[nodiscard]] auto make_setting(const std::string& path, T default_value, std::string postfix, validator_type<T> validator)
+    -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>;
 };
 
 ///
 ///
 template<framework::underlying_setting_type_erased_type T>
 auto workflow_settings::type_erased_setting(
-  const std::string& path, T default_value, std::string postfix, framework::setting_validator<T> validator
+  const std::string& path, T default_value, std::string postfix, validator_type<T> validator
 ) -> setting_type_erased_non_owning_ptr_variant_type
 {
   auto lock = std::unique_lock{mtx_};
@@ -234,7 +268,7 @@ auto workflow_settings::type_erased_setting(
 ///
 ///
 template<framework::underlying_setting_type_erased_type T>
-auto workflow_settings::type_erased_setting(const std::string& path, T default_value, framework::setting_validator<T> validator)
+auto workflow_settings::type_erased_setting(const std::string& path, T default_value, validator_type<T> validator)
   -> setting_type_erased_non_owning_ptr_variant_type
 {
   return type_erased_setting<T>(path, std::move(default_value), {}, std::move(validator));
@@ -244,7 +278,7 @@ auto workflow_settings::type_erased_setting(const std::string& path, T default_v
 ///
 template<framework::underlying_setting_type T>
 auto workflow_settings::create_setting(
-  const std::string& path, T default_value, std::string postfix, framework::setting_validator<T> validator
+  const std::string& path, T default_value, std::string postfix, validator_type<T> validator
 ) -> setting_non_owning_ptr_type<T>
 {
   auto [entry, setting] = make_setting(path, std::move(default_value), std::move(postfix), std::move(validator));
@@ -264,7 +298,7 @@ auto workflow_settings::create_setting(
 ///
 ///
 template<framework::underlying_setting_type T>
-auto workflow_settings::create_setting(const std::string& path, T default_value, framework::setting_validator<T> validator)
+auto workflow_settings::create_setting(const std::string& path, T default_value, validator_type<T> validator)
   -> setting_non_owning_ptr_type<T>
 {
   return create_setting<T>(path, std::move(default_value), {}, std::move(validator));
@@ -273,9 +307,8 @@ auto workflow_settings::create_setting(const std::string& path, T default_value,
 ///
 ///
 template<framework::underlying_setting_type T>
-auto workflow_settings::make_setting(
-  const std::string& path, T default_value, std::string postfix, framework::setting_validator<T> validator
-) -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>
+auto workflow_settings::make_setting(const std::string& path, T default_value, std::string postfix, validator_type<T> validator)
+  -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>
 {
   using type_erased_type = framework::setting_type_erased<framework::setting_type_erased_type_from<T>>;
   const auto setting = std::make_shared<framework::setting<T>>(

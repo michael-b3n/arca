@@ -83,7 +83,7 @@ workflow_script::~workflow_script() noexcept
 
 ///
 ///
-auto workflow_script::state() const -> lua::state
+auto workflow_script::state() const -> state_type
 {
   return state_owner_.lock();
 }

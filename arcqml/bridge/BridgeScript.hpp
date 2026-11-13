@@ -1,8 +1,7 @@
 #pragma once
 
-#include <arcstd/execution/scope.hpp>
-#include <arcstd/framework/queued_connections.hpp>
 #include <arcstd/util/non_owning_ptr.hpp>
+#include <arcstd/workflow/workflow_base.hpp>
 
 #include <QList>
 #include <QObject>
@@ -39,8 +38,8 @@ class BridgeScript final : public QObject
   const std::shared_ptr<arcstd::workflow::workflow_script> workflowScript_;
   bool loading_{false};
   QVariantList scripts_;
-  arcstd::framework::queued_connections connections_;
-  arcstd::execution::scope scope_;
+  arcstd::workflow::workflow_ground::connections_type connections_;
+  arcstd::workflow::workflow_ground::scope_type scope_;
 
 public: // Structors
   explicit BridgeScript(

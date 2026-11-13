@@ -1,7 +1,5 @@
 #include "arcqml/util/SettingConversion.hpp"
 
-#include <arcstd/framework/setting_type_erased.hpp>
-#include <arcstd/framework/setting_validator.hpp>
 #include <arcstd/meta/chrono.hpp>
 #include <arcstd/meta/type_traits.hpp>
 #include <arcstd/util/exception.hpp>
@@ -31,7 +29,7 @@ namespace
 
 // Typedefs
 template<typename T>
-using setting_ptr = arcstd::util::non_owning_ptr<arcstd::framework::setting_type_erased<T>>;
+using setting_ptr = arcstd::workflow::workflow_settings::setting_type_erased_non_owning_ptr_type<T>;
 
 ///
 /// Protected numeric cast between integers.
@@ -332,7 +330,8 @@ auto tryNormalizeQVariant(const QVariant& variant) -> QVariant
 
 ///
 ///
-auto toDefaultSettingValue(const QVariant& value) -> std::optional<arcstd::framework::setting_type_erased_variant>
+auto toDefaultSettingValue(const QVariant& value)
+  -> std::optional<arcstd::workflow::workflow_settings::setting_type_erased_variant_type>
 {
   const auto v = tryNormalizeQVariant(value);
   switch(v.metaType().id())

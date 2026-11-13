@@ -1,6 +1,5 @@
 #pragma once
 
-#include "arcstd/lua/registration.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
 #include "arcstd/workflow/workflow_script.hpp"
 #include "arcstd/workflow/workflow_settings.hpp"
@@ -46,7 +45,7 @@ class workflow_web final : public workflow_base<workflow_web_settings>
   const std::shared_ptr<workflow_script> workflow_script_;
   mutable std::mutex mtx_;
   mutable std::map<std::string, failure_t> failures_;
-  lua::registration registrations_;
+  workflow_script::registration_type registrations_;
 
 public: // Typedefs
   using page_type = std::expected<std::string, std::string>;

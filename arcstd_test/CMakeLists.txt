@@ -57,6 +57,13 @@ target_link_libraries(
   arcstd_test_utils
   arcstd)
 
+# Test discovery runs the tests after the build, they need the library beside them.
+if(ARCA_BUILD_SHARED)
+  add_custom_command(TARGET arcstd_test POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:arcstd> $<TARGET_FILE_DIR:arcstd_test>
+  )
+endif()
+
 #
 # Register the Catch2 test cases with CTest, so they can be run via `ctest` in the build directory.
 #

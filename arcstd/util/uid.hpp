@@ -1,10 +1,19 @@
 #pragma once
 
-#include <atomic>
+#include <cstdint>
 #include <format>
 
 namespace arcstd::util
 {
+namespace detail
+{
+
+///
+/// \return the next value of the counter all unique IDs share
+///
+[[nodiscard]] auto next_uid_value() -> std::uint64_t;
+
+} // namespace detail
 
 ///
 /// Unique ID type.
@@ -46,8 +55,7 @@ private: // Structors
 template<typename Tag>
 auto uid<Tag>::new_uid() -> uid<tag_type>
 {
-  static std::atomic_uint64_t counter{0};
-  return {++counter};
+  return {detail::next_uid_value()};
 }
 
 ///

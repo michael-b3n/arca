@@ -1,8 +1,6 @@
 #include "arcqml/model/SettingsListModel.hpp"
 #include "arcqml/util/SettingConversion.hpp"
 
-#include <arcstd/framework/setting.hpp>
-#include <arcstd/framework/setting_validator.hpp>
 #include <arcstd/math/arithmetic.hpp>
 #include <arcstd/util/contains.hpp>
 #include <arcstd/util/exception.hpp>
@@ -264,7 +262,7 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
   addEntry(path, setting);
   const auto rowIndex = arcstd::math::arithmetic::subtract(entries_.size(), decltype(entries_.size()){1}).value();
   setting->signal_adapter.connect_queued(
-    &arcstd::framework::setting_signals::value_changed,
+    &arcstd::workflow::workflow_settings::setting_signals_type::value_changed,
     [this, path, rowIndex]()
     {
       LOG_DEBUG("notify setting value changed: path=\"{}\", row={}", path, rowIndex)
@@ -277,7 +275,7 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
     connections_
   );
   setting->signal_adapter.connect_queued(
-    &arcstd::framework::setting_signals::validator_changed,
+    &arcstd::workflow::workflow_settings::setting_signals_type::validator_changed,
     [this, setting, path, rowIndex]()
     {
       using value_type = std::remove_pointer_t<std::remove_cvref_t<decltype(setting)>>::value_type;

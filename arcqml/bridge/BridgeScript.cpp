@@ -1,7 +1,6 @@
 #include "arcqml/bridge/BridgeScript.hpp"
 #include "arcqml/util/LocalPath.hpp"
 
-#include <arcstd/execution/launch.hpp>
 #include <arcstd/util/log.hpp>
 #include <arcstd/workflow/workflow_script.hpp>
 
@@ -92,7 +91,7 @@ void BridgeScript::load(std::vector<std::filesystem::path> files)
     std::ignore = workflowScript_->import_scripts(files);
     workflowScript_->load_scripts();
   };
-  arcstd::execution::launch(std::move(importAndLoad), scope_);
+  arcstd::workflow::workflow_ground::launch(std::move(importAndLoad), scope_);
 }
 
 ///

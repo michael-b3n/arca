@@ -61,6 +61,11 @@ endif()
 option(ARCA_BUILD_TESTS "Build the tests of arca and arcstd_test_utils" ${PROJECT_IS_TOP_LEVEL})
 
 #
+# arcstd is static unless chosen otherwise, arcqml is always static.
+#
+option(ARCA_BUILD_SHARED "Build arcstd as a shared library" OFF)
+
+#
 # Include all subdirectories.
 #
 add_subdirectory(libs_external)

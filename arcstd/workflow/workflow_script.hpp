@@ -1,12 +1,15 @@
 #pragma once
 
 #include "arcstd/lua/embedded_scripts.hpp"
+#include "arcstd/lua/registration.hpp"
+#include "arcstd/lua/script_table.hpp"
 #include "arcstd/lua/state.hpp"
 #include "arcstd/lua/state_owner.hpp"
 #include "arcstd/lua/value_cast.hpp"
 #include "arcstd/signal/adapter.hpp"
 #include "arcstd/signal/common.hpp"
 #include "arcstd/util/path.hpp"
+#include "arcstd/util/string_literal.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
 #include "arcstd/workflow/workflow_settings.hpp"
 #include "arcstd/workflow/workflow_settings_base.hpp"
@@ -98,6 +101,13 @@ public: // Typedefs
   using bundled_provider_type = std::remove_const_t<decltype(bundled_)>;
   using script_name_type = decltype(scripts_)::key_type;
   using scripts_type = decltype(scripts_);
+  using state_type = lua::state;
+  using registration_type = lua::registration;
+  using embedded_script_type = lua::embedded_script;
+  template<util::string_literal Key, typename T>
+  using field_type = lua::field<Key, T>;
+  template<typename... Fields>
+  using table_type = lua::script_table<Fields...>;
 
 public: // Structors
   ///
@@ -110,7 +120,7 @@ public: // Accessors
   ///
   /// \return the locked Lua state
   ///
-  [[nodiscard]] auto state() const -> lua::state;
+  [[nodiscard]] auto state() const -> state_type;
 
   ///
   /// \return the loaded scripts offering a function for each manifest \p M, all of them without \p M, by name
@@ -138,14 +148,14 @@ public: // Modifiers
   /// \return the registration to keep, one of nothing if \p p can not be registered, the reason is logged
   ///
   template<lua::function_castable F>
-  [[nodiscard]] auto register_function(const util::path& p, F&& function) const -> lua::registration;
+  [[nodiscard]] auto register_function(const util::path& p, F&& function) const -> registration_type;
 
   ///
   /// Register \p setting for scripts at workflow.setting and its own path, \see lua::state::register_setting
   /// \return the registration to keep, one of nothing if the path can not be registered, the reason is logged
   ///
   template<framework::underlying_setting_type T>
-  [[nodiscard]] auto register_setting(framework::setting<T>& setting) const -> lua::registration;
+  [[nodiscard]] auto register_setting(framework::setting<T>& setting) const -> registration_type;
 
   ///
   /// Run the function of the manifest \p M of the script named \p script. Blocks until it returns, it may wait
@@ -188,7 +198,7 @@ auto workflow_script::scripts() const -> scripts_type
 ///
 ///
 template<lua::function_castable F>
-auto workflow_script::register_function(const util::path& p, F&& function) const -> lua::registration
+auto workflow_script::register_function(const util::path& p, F&& function) const -> registration_type
 {
   return state().register_function(lua_path(p), std::forward<F>(function));
 }
@@ -196,7 +206,7 @@ auto workflow_script::register_function(const util::path& p, F&& function) const
 ///
 ///
 template<framework::underlying_setting_type T>
-auto workflow_script::register_setting(framework::setting<T>& setting) const -> lua::registration
+auto workflow_script::register_setting(framework::setting<T>& setting) const -> registration_type
 {
   return state().register_setting(lua_path(util::path{setting_node} / util::path{setting.path}), setting);
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "arcstd/lua/registration.hpp"
 #include "arcstd/util/identifier.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
 #include "arcstd/workflow/workflow_script.hpp"
@@ -36,7 +35,7 @@ class workflow_cache final : public workflow_base<void>
   const std::filesystem::path folder_;
   mutable std::mutex mtx_;
   std::map<std::string, std::unique_ptr<core::core_cache>> caches_;
-  lua::registration registrations_;
+  workflow_script::registration_type registrations_;
 
 public: // Structors
   workflow_cache(std::shared_ptr<workflow_settings> workflow_settings, std::shared_ptr<workflow_script> workflow_script);
