@@ -1,4 +1,5 @@
 #include "arcstd/execution/scope.hpp"
+#include "arcstd/execution/scope_data.hpp"
 #include "arcstd/util/exception.hpp"
 #include "arcstd/util/log.hpp"
 
@@ -9,16 +10,16 @@ namespace arcstd::execution
 
 ///
 ///
-scope::~scope() noexcept
+scope::scope()
+  : data_{std::make_unique<detail::scope_data>()}
 {
-  stop();
 }
 
 ///
 ///
-auto scope::token() noexcept -> token_type
+scope::~scope() noexcept
 {
-  return scope_.get_token();
+  stop();
 }
 
 ///
@@ -32,8 +33,8 @@ auto scope::stop() noexcept -> void
   }
   try
   {
-    scope_.request_stop();
-    ex::sync_wait(scope_.join());
+    data_->scope.request_stop();
+    ex::sync_wait(data_->scope.join());
   }
   catch(...)
   {

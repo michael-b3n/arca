@@ -1,11 +1,25 @@
 #pragma once
 
-#include "arcstd/execution/execution.hpp"
-
+#include <functional>
+#include <memory>
 #include <mutex>
 
 namespace arcstd::execution
 {
+
+class scope;
+
+namespace detail
+{
+
+struct scope_data;
+
+///
+/// Run \p work on the thread pool, detached in \p scope, \see execution::launch
+///
+auto launch(std::move_only_function<void()> work, scope& scope) -> void;
+
+} // namespace detail
 
 ///
 /// Scope holding launched work, \see launch. Destruction requests a stop and
@@ -13,23 +27,17 @@ namespace arcstd::execution
 ///
 class scope final
 {
+  // Friends
+  friend auto detail::launch(std::move_only_function<void()> work, scope& scope) -> void;
+
   // Variables
   mutable std::mutex mtx_;
   bool stopped_{false};
-  ex::counting_scope scope_;
-
-public: // Typedefs
-  using token_type = ex::counting_scope::token;
+  const std::unique_ptr<detail::scope_data> data_;
 
 public: // Structors
-  scope() = default;
+  scope();
   ~scope() noexcept;
-
-public: // Accessors
-  ///
-  /// \return token work is launched with
-  ///
-  [[nodiscard]] auto token() noexcept -> token_type;
 
 public: // Modifiers
   ///
