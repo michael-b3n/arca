@@ -7,12 +7,9 @@ runs:
     - name: Set up MSYS2
       uses: ./.github/actions/setup-msys2
 
-    # The MSYS2 git refuses the checkout of the runner's git as not owned by the user
     - name: Configure
       shell: msys2 {0}
-      run: |
-        git config --global --add safe.directory '*'
-        cmake --preset gcc-release
+      run: cmake --preset gcc-release
 
     - name: Build
       shell: msys2 {0}

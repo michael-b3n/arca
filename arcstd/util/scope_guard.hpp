@@ -17,7 +17,7 @@ class scope_guard final
 public: // Typedefs
   using on_destruction_type = decltype(on_destruction_);
 
-public: // Constructors
+public: // Structors
   scope_guard() = default;
   scope_guard(on_destruction_type&& on_destruction);
   ~scope_guard() noexcept;
@@ -72,7 +72,7 @@ public: // Typedefs
     [[nodiscard]] auto create(scope_guard::on_destruction_type&& on_destruction) -> shared_scope_guard;
   };
 
-public: // Constructors
+public: // Structors
   shared_scope_guard() = default;
   ~shared_scope_guard() noexcept = default;
   shared_scope_guard(shared_scope_guard&&) noexcept = default;
@@ -95,7 +95,7 @@ public: // Modifiers
   ///
   auto reset() -> void;
 
-private: // Constructors
+private: // Structors
   shared_scope_guard(scope_guard instance_guard, bool is_initial_instance);
 };
 

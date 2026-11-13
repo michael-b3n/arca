@@ -14,7 +14,7 @@ namespace arcstd::util
 ///
 class exception : public std::runtime_error
 {
-public: // Constructor and destructor
+public: // Structors
   exception(
     const std::string& error,
     const std::source_location& loc = std::source_location::current(),

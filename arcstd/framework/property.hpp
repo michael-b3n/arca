@@ -35,7 +35,7 @@ public: // Operators
   auto operator=(property<value_type>&& other) & noexcept -> property<value_type>&;
   auto operator==(const property<value_type>& other) const -> bool;
 
-public: // Accessor
+public: // Accessors
   ///
   /// Get property value.
   /// \return value of property

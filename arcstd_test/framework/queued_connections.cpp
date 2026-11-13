@@ -45,7 +45,7 @@ auto queued_adapter::fire_text(const std::string& text) -> void
 
 } // namespace
 
-TEST_CASE("queued_connections_run_the_slot_on_another_thread", "[signal]")
+TEST_CASE("queued_connections_run_the_slot_on_another_thread", "[framework]")
 {
   auto adapter = queued_adapter{};
   auto slot_thread = std::thread::id{};
@@ -73,7 +73,7 @@ TEST_CASE("queued_connections_run_the_slot_on_another_thread", "[signal]")
   CHECK(text == "copied");
 }
 
-TEST_CASE("queued_connections_disconnect_waits_for_the_running_slot", "[signal]")
+TEST_CASE("queued_connections_disconnect_waits_for_the_running_slot", "[framework]")
 {
   auto adapter = queued_adapter{};
   auto started = std::atomic_bool{false};
@@ -96,7 +96,7 @@ TEST_CASE("queued_connections_disconnect_waits_for_the_running_slot", "[signal]"
   CHECK(finished);
 }
 
-TEST_CASE("queued_connections_drop_emissions_after_disconnect", "[signal]")
+TEST_CASE("queued_connections_drop_emissions_after_disconnect", "[framework]")
 {
   auto adapter = queued_adapter{};
   auto calls = std::atomic_int{0};
@@ -107,7 +107,7 @@ TEST_CASE("queued_connections_drop_emissions_after_disconnect", "[signal]")
   CHECK(calls == 0);
 }
 
-TEST_CASE("queued_connections_survive_an_emission_after_destruction", "[signal]")
+TEST_CASE("queued_connections_survive_an_emission_after_destruction", "[framework]")
 {
   auto adapter = queued_adapter{};
   auto calls = std::atomic_int{0};

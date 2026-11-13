@@ -29,7 +29,7 @@ public: // Static helpers
   ///
   [[nodiscard]] static auto new_uid() -> uid<tag_type>;
 
-public: // Constructor
+public: // Structors
   uid();
 
 public: // Operators

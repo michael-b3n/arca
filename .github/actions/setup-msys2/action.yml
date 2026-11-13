@@ -10,9 +10,7 @@ runs:
         msystem: UCRT64
         update: true
         cache: true
-        # git is not on the minimal PATH of the MSYS2 shell, CMake needs it for the commit hash
         install: >-
-          git
           mingw-w64-ucrt-x86_64-gcc
           mingw-w64-ucrt-x86_64-cmake
           mingw-w64-ucrt-x86_64-ninja

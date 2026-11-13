@@ -47,7 +47,7 @@ public: // Typedefs
   using value_type = void;
   using id_type = process_id_type;
 
-public: // Constructor
+public: // Structors
   process_params() = default;
 
 public: // Accessors
@@ -73,7 +73,7 @@ public: // Typedefs
   using value_type = ParamsType;
   using id_type = process_id_type;
 
-public: // Constructor
+public: // Structors
   process_params(const ParamsType& params)
     : params_{params}
   {

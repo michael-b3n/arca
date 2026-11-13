@@ -152,7 +152,7 @@ public: // Accessors
   ///
   [[nodiscard]] auto read_entry_as_string(const zip_entry& entry) const -> std::string;
 
-private: // Helpers
+private: // Implementation
   ///
   /// Checks if archive contains entry with name.
   /// \return true if entry is found, false otherwise

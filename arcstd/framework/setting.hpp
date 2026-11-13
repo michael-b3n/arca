@@ -51,13 +51,13 @@ public: // Accessors
   ///
   [[nodiscard]] auto value() const -> value_type;
 
-public: // Setters
+public: // Modifiers
   ///
   /// Set setting value.
   ///
   [[nodiscard]] auto value(const value_type& v) -> bool;
 
-private: // Helpers
+private: // Implementation
   auto validate() -> void;
 };
 

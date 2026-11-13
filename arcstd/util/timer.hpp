@@ -16,7 +16,7 @@ class timer final
   // Variables
   std::chrono::system_clock::time_point time_point_;
 
-public: // Constructor
+public: // Structors
   timer();
 
 public: // Accessors
@@ -36,7 +36,7 @@ class scoped_timer_logger final
   const std::source_location source_location_;
   const timer timer_;
 
-public: // Destructor
+public: // Structors
   scoped_timer_logger(std::source_location&& source_location = std::source_location::current());
   ~scoped_timer_logger();
 };

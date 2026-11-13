@@ -17,7 +17,7 @@ class connection_store final
   mutable std::mutex mtx_;
   std::vector<scoped_connection_type> connections_;
 
-public: // Constructor
+public: // Structors
   connection_store() = default;
   ~connection_store() noexcept;
 
