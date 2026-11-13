@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <mutex>
+#include <utility>
 
 namespace arcstd::framework
 {
@@ -27,6 +28,10 @@ private: // Structors
   property(const value_type& value);
 
 public: // Structors
+  ///
+  /// Property of \p value, each change of it is handed to \p update.
+  ///
+  property(const value_type& value, std::function<void(const value_type&)> update);
   property(const property<value_type>& other);
   property(property<value_type>&& other) noexcept;
 
@@ -60,6 +65,15 @@ public: // Modifiers
 template<typename T>
 property<T>::property(const value_type& value)
   : value_{value}
+{
+}
+
+///
+///
+template<typename T>
+property<T>::property(const value_type& value, std::function<void(const value_type&)> update)
+  : value_{value}
+  , property_tree_update_{std::move(update)}
 {
 }
 

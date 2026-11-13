@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 namespace arcstd::framework
 {
@@ -47,6 +48,19 @@ public: // Modifiers
   ///
   template<typename T>
   [[nodiscard]] auto create_property(const property_path_type& path, T&& default_value) -> property<T>;
+
+  ///
+  /// Write \p value at \p path of the tree.
+  ///
+  template<typename T>
+  auto write(const property_path_type& path, const T& value) -> void;
+
+public: // Accessors
+  ///
+  /// \return the value of the tree at \p path, std::nullopt if it has none of this type
+  ///
+  template<typename T>
+  [[nodiscard]] auto read(const property_path_type& path) const -> std::optional<T>;
 };
 
 ///
@@ -64,6 +78,24 @@ auto property_tree::create_property(const property_path_type& path, T&& default_
   { property_parser::write(path, sptr->tree_, value); };
   prop.property_tree_update_(prop.value());
   return prop;
+}
+
+///
+///
+template<typename T>
+auto property_tree::write(const property_path_type& path, const T& value) -> void
+{
+  const auto lock = std::scoped_lock{mtx_};
+  property_parser::write(path, tree_, value);
+}
+
+///
+///
+template<typename T>
+auto property_tree::read(const property_path_type& path) const -> std::optional<T>
+{
+  const auto lock = std::scoped_lock{mtx_};
+  return property_parser::read<T>(path, tree_);
 }
 
 } // namespace arcstd::framework

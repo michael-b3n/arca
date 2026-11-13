@@ -5,6 +5,7 @@
 #include "arcstd/util/enum.hpp"
 #include "arcstd/util/exception.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <filesystem>
 #include <optional>
@@ -113,6 +114,49 @@ template<typename T>
 }
 
 ///
+/// From enum setting type converter implementation.
+/// \return std::nullopt if \p v names no value of the enum
+///
+template<typename E>
+  requires(std::is_enum_v<E>)
+[[nodiscard]] auto try_from_type_erased_setting(const std::string& v) -> std::optional<E>
+{
+  return util::to_enum<E>(v);
+}
+
+///
+/// From enum setting type converter implementation.
+/// \return std::nullopt if \p v names no value of the enum
+///
+template<typename T>
+  requires(std::is_same_v<T, std::optional<typename T::value_type>> && std::is_enum_v<typename T::value_type>)
+[[nodiscard]] auto try_from_type_erased_setting(const std::optional<std::string>& v) -> std::optional<T>
+{
+  if(!v)
+  {
+    return T{};
+  }
+  return util::to_enum<typename T::value_type>(*v).transform([](const auto value) { return T{value}; });
+}
+
+///
+/// From enum setting type converter implementation.
+/// \return std::nullopt if one of \p v names no value of the enum
+///
+template<typename T>
+  requires(std::is_same_v<T, std::vector<typename T::value_type>> && std::is_enum_v<typename T::value_type>)
+[[nodiscard]] auto try_from_type_erased_setting(const std::vector<std::string>& v) -> std::optional<T>
+{
+  const auto values = v | std::views::transform([](const auto& item) { return util::to_enum<typename T::value_type>(item); }) |
+                      std::ranges::to<std::vector>();
+  if(!std::ranges::all_of(values, [](const auto& value) { return value.has_value(); }))
+  {
+    return std::nullopt;
+  }
+  return values | std::views::transform([](const auto& value) { return *value; }) | std::ranges::to<T>();
+}
+
+///
 /// Helper concept to detect if a given type has a corresponding erased type.
 ///
 template<typename E>
@@ -165,6 +209,23 @@ template<underlying_setting_type_erased_type E>
 template<underlying_setting_type T>
 using setting_type_erased_type_from =
   std::conditional_t<underlying_setting_type_erased_type<T>, T, decltype(detail::to_type_erased_setting(std::declval<T>()))>;
+
+///
+/// Convert the type erased setting value \p v, as the settings file holds it.
+/// \return \p v as T, std::nullopt if it names no value of the enum of T
+///
+template<underlying_setting_type T>
+[[nodiscard]] auto try_from_type_erased_setting(const setting_type_erased_type_from<T>& v) -> std::optional<T>
+{
+  if constexpr(underlying_setting_type_erased_type<T>)
+  {
+    return v;
+  }
+  else
+  {
+    return detail::try_from_type_erased_setting<T>(v);
+  }
+}
 
 ///
 /// Create setting type converter.

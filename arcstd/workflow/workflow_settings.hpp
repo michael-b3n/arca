@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arcstd/framework/property_tree.hpp"
+#include "arcstd/framework/property.hpp"
 #include "arcstd/framework/setting.hpp"
 #include "arcstd/framework/setting_common.hpp"
 #include "arcstd/framework/setting_type_erased.hpp"
@@ -19,6 +19,11 @@
 #include <string>
 #include <string_view>
 #include <utility>
+
+namespace arcstd::framework
+{
+class property_tree;
+} // namespace arcstd::framework
 
 namespace arcstd::workflow
 {
@@ -95,7 +100,7 @@ class workflow_settings final : public signal::adapter<workflow_settings_signals
 
   // Variables
   const std::filesystem::path data_folder_;
-  const framework::property_tree::sptr_type tree_;
+  const std::shared_ptr<framework::property_tree> tree_;
   mutable std::mutex mtx_;
   std::vector<setting_uptr_data> settings_;
 
@@ -221,6 +226,20 @@ private: // Implementation
   template<framework::underlying_setting_type T>
   [[nodiscard]] auto make_setting(const std::string& path, T default_value, std::string postfix, validator_type<T> validator)
     -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>;
+
+  ///
+  /// \return the value \p tree holds for the setting of \p path, of the type \p type holds, std::nullopt if none
+  ///
+  [[nodiscard]] static auto stored_value(
+    const framework::property_tree& tree, const std::string& path, const setting_type_erased_variant_type& type
+  ) -> std::optional<setting_type_erased_variant_type>;
+
+  ///
+  /// Store \p value in \p tree for the setting of \p path.
+  ///
+  static auto store_value(
+    framework::property_tree& tree, const std::string& path, const setting_type_erased_variant_type& value
+  ) -> void;
 };
 
 ///
@@ -310,13 +329,26 @@ template<framework::underlying_setting_type T>
 auto workflow_settings::make_setting(const std::string& path, T default_value, std::string postfix, validator_type<T> validator)
   -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>
 {
-  using type_erased_type = framework::setting_type_erased<framework::setting_type_erased_type_from<T>>;
+  using erased_type = framework::setting_type_erased_type_from<T>;
+  using type_erased_type = framework::setting_type_erased<erased_type>;
+  // The alternative is named, else e.g. a bool would be taken for a std::optional<bool>
+  const auto to_erased = [](const T& v)
+  {
+    return setting_type_erased_variant_type{
+      std::in_place_type<erased_type>, framework::create_setting_value_converter<T, erased_type>()(v)
+    };
+  };
+  // The file holds type erased values, one of another type or naming no enum value counts as none.
+  const auto value =
+    stored_value(*tree_, path, setting_type_erased_variant_type{std::in_place_type<erased_type>})
+      .and_then([](const auto& stored) { return framework::try_from_type_erased_setting<T>(std::get<erased_type>(stored)); })
+      .value_or(std::move(default_value));
+  store_value(*tree_, path, to_erased(value));
   const auto setting = std::make_shared<framework::setting<T>>(
     path,
-    tree_->create_property(
-      framework::property_tree::path_type{std::string(settings_root_name)} / framework::property_tree::path_type{path},
-      std::move(default_value)
-    ),
+    framework::property<T>{
+      value, [tree = tree_, path, to_erased](const T& changed) { store_value(*tree, path, to_erased(changed)); }
+    },
     std::move(postfix),
     std::move(validator)
   );
