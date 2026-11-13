@@ -1,4 +1,4 @@
-// Generated from arcstd/lua/embedded_scripts.cpp.in by configure_incbin_source.
+// Generated from tools/cmake/embedded_scripts.cpp.in by configure_incbin_source.
 #include "@INCBIN_HEADER@"
 #include "arcstd/util/incbin.hpp"
 #include "arcstd/util/non_owning_ptr.hpp"
@@ -6,7 +6,9 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <optional>
 #include <ranges>
+#include <span>
 #include <string_view>
 #include <vector>
 

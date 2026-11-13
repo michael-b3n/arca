@@ -27,13 +27,13 @@ target_sources(${PROJECT_NAME}
 
 #
 # Compile the Lua scripts of lua/internal into the library, a new script needs no other change.
-# The label is the namespace of the scripts, \see lua/embedded_scripts.hpp.
+# The label is the namespace of the scripts, \see lua/internal_scripts.hpp.
 #
 include(incbin)
 file(GLOB ARCSTD_LUA_INTERNAL CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/lua/internal/*.lua")
-set(INCBIN_HEADER arcstd/lua/embedded_scripts.hpp)
+set(INCBIN_HEADER arcstd/lua/internal_scripts.hpp)
 set(INCBIN_NAMESPACE arcstd::lua::internal)
-configure_incbin_source(internal lua/embedded_scripts.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/lua/internal.cpp ${ARCSTD_LUA_INTERNAL})
+configure_incbin_source(internal ${PROJECT_SOURCE_DIR}/../tools/cmake/embedded_scripts.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/lua/internal.cpp ${ARCSTD_LUA_INTERNAL})
 target_sources(${PROJECT_NAME}
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/lua/internal.cpp
 )
@@ -54,7 +54,7 @@ pkg_search_module(SQLITE REQUIRED IMPORTED_TARGET sqlite3)
 #
 target_link_libraries(${PROJECT_NAME}
   PUBLIC Boost::headers
-  PUBLIC Boost::filesystem
+  PRIVATE Boost::filesystem
   PRIVATE Boost::url
   PRIVATE spdlog::spdlog
   PRIVATE libzip::zip
