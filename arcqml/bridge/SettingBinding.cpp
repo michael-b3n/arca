@@ -158,7 +158,7 @@ void SettingBinding::bind()
     LOG_ERROR("bind setting failed: settings registry does not exist: path=\"{}\"", path_.toStdString());
     return;
   }
-  const auto& workflowSettings = registry->workflowSettings();
+  const auto& settingStore = registry->settingStore();
   const auto defaultSettingValue = toDefaultSettingValue(defaultValue_);
   if(!defaultSettingValue)
   {
@@ -170,7 +170,7 @@ void SettingBinding::bind()
   {
     setting_ = std::visit(
       [&]<typename T>(const T& v) -> SettingVariantType
-      { return workflowSettings->type_erased_setting(path_.toStdString(), v, settingValidator<T>()); },
+      { return settingStore->type_erased_setting(path_.toStdString(), v, settingValidator<T>()); },
       *defaultSettingValue
     );
   }

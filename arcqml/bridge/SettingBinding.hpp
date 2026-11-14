@@ -3,8 +3,8 @@
 #include "arcqml/util/SettingConversion.hpp"
 
 #include <arcstd/setting/setting_store.hpp>
+#include <arcstd/signal/queued_connections.hpp>
 #include <arcstd/util/non_owning_ptr.hpp>
-#include <arcstd/workflow/workflow_base.hpp>
 
 #include <QObject>
 #include <QString>
@@ -51,7 +51,7 @@ class SettingBinding final : public QObject
   const QVariant defaultValue_;
   const Validator validator_;
   std::optional<SettingVariantType> setting_;
-  arcstd::workflow::workflow_ground::connections_type connections_;
+  arcstd::signal::queued_connections connections_;
 
 public: // Structors
   ///

@@ -16,8 +16,6 @@
 #include "arcstd/signal/common.hpp"
 #include "arcstd/util/path.hpp"
 #include "arcstd/util/string_literal.hpp"
-#include "arcstd/workflow/workflow_base.hpp"
-#include "arcstd/workflow/workflow_settings_base.hpp"
 
 #include <concepts>
 #include <cstddef>
@@ -40,56 +38,53 @@
 
 namespace arcstd::lua
 {
-class state_owner;
-} // namespace arcstd::lua
 
-namespace arcstd::workflow
-{
+class state_owner;
 
 ///
-/// Manifest of a function a script offers, defined by the workflow calling it: the static id naming the function,
-/// e.g. "scripture.passage", its input and its output, usually a lua::script_table.
+/// Manifest of a function a script offers, defined by who calls it: the static id naming the function,
+/// e.g. "scripture.passage", its input and its output, usually a script_table.
 ///
 template<typename M>
 concept script_manifest = requires {
   { M::id } -> std::convertible_to<util::path>;
-} && lua::value_castable<typename M::input> && lua::value_castable<typename M::output>;
+} && value_castable<typename M::input> && value_castable<typename M::output>;
 
 ///
-/// Settings corresponding to workflow script.
+/// Settings of the Lua engine.
 ///
-class ARCSTD_EXPORT workflow_script_settings final : public workflow_settings_base
+class ARCSTD_EXPORT lua_engine_settings final
 {
+  // Variables
+  const std::shared_ptr<setting::setting_store> setting_store_;
+
 public: // Structors
-  workflow_script_settings(std::shared_ptr<setting::setting_store> setting_store);
-  ~workflow_script_settings() noexcept override = default;
+  lua_engine_settings(std::shared_ptr<setting::setting_store> setting_store);
 
 public: // Constants
   static constexpr auto folder_name = "scripts";
 
 public: // Variables
-  const setting_type<bool> enabled;
+  const setting::setting_store::setting_non_owning_ptr_type<bool> enabled;
   const std::filesystem::path folder;
 };
 
 ///
-/// Signals emitted by workflow script.
+/// Signals emitted by the Lua engine.
 ///
-struct workflow_script_sigs final
+struct lua_engine_signals final
 {
   signal::signal_type<void()> scripts_loaded;
 };
 
 ///
-/// Workflow script, owns the Lua state and loads the bundled and user scripts \see load_scripts.
-/// Workflows register below root.interface.workflow last in their constructor and keep the registration as their
-/// last member, \see lua::registration.
+/// Lua engine, owns the Lua state and loads the bundled and user scripts \see load_scripts.
+/// An object registers its functions for scripts last in its constructor and keeps the registration as its last
+/// member, \see registration.
 /// Signal IDs to connect to:
 /// - scripts_loaded: Emitted under the Lua lock once the scripts are loaded, also if none are.
 ///
-class ARCSTD_EXPORT workflow_script final
-  : public workflow_base<workflow_script_settings>
-  , public signal::adapter<workflow_script_sigs>
+class ARCSTD_EXPORT lua_engine final : public signal::adapter<lua_engine_signals>
 {
   // Typedefs
   struct script_info final
@@ -99,12 +94,12 @@ class ARCSTD_EXPORT workflow_script final
   };
 
   // Constants
-  static constexpr auto lua_node = "workflow";    // below root, the node of all workflow registrations
-  static constexpr auto setting_node = "setting"; // below lua_node, the node of all settings
+  static constexpr auto setting_node = "setting"; // the node of all settings
 
   // Variables
-  const std::function<std::span<const lua::embedded_script>()> bundled_;
-  const std::unique_ptr<lua::state_owner> state_owner_;
+  const lua_engine_settings settings_;
+  const std::function<std::span<const embedded_script>()> bundled_;
+  const std::unique_ptr<state_owner> state_owner_;
   mutable std::mutex mtx_;
   std::map<std::string, script_info> scripts_; // the loaded scripts by name
   std::jthread loader_;                        // last, it joins before the members it uses are destroyed
@@ -114,21 +109,27 @@ public: // Typedefs
   using script_name_type = decltype(scripts_)::key_type;
   using scripts_type = decltype(scripts_);
   using lock_type = lua::lock;
-  using registration_type = lua::registration;
-  using embedded_script_type = lua::embedded_script;
+  using registration_type = registration;
+  using embedded_script_type = embedded_script;
   template<util::string_literal Key, typename T>
-  using field_type = lua::field<Key, T>;
+  using field_type = field<Key, T>;
   template<typename... Fields>
-  using table_type = lua::script_table<Fields...>;
+  using table_type = script_table<Fields...>;
 
 public: // Structors
   ///
-  /// Construct the workflow, \p bundled shall provide the compiled scripts when called.
+  /// Construct the engine with its settings in \p setting_store, \p bundled shall provide the compiled scripts
+  /// when called.
   ///
-  workflow_script(std::shared_ptr<setting::setting_store> setting_store, bundled_provider_type bundled);
-  ~workflow_script() noexcept override;
+  lua_engine(std::shared_ptr<setting::setting_store> setting_store, bundled_provider_type bundled);
+  ~lua_engine() noexcept;
 
 public: // Accessors
+  ///
+  /// \return the settings of the engine
+  ///
+  [[nodiscard]] auto settings() const -> const lua_engine_settings&;
+
   ///
   /// \return the lock of the scripts, no script runs on another thread for as long as it lives
   ///
@@ -143,7 +144,7 @@ public: // Accessors
 public: // Modifiers
   ///
   /// Load the bundled scripts and, if enabled, the user scripts outside of the calling thread, and emit
-  /// scripts_loaded. Called once the workflows registered, and again to load the scripts anew: a loading still
+  /// scripts_loaded. Called once the functions for scripts are registered, and again to load the scripts anew: a loading still
   /// running ends after its script first.
   ///
   auto load_scripts() -> void;
@@ -156,16 +157,16 @@ public: // Modifiers
   [[nodiscard]] auto import_scripts(const std::vector<std::filesystem::path>& files) -> std::size_t;
 
   ///
-  /// Register a function for scripts at workflow.\p p, e.g. "web.fetch", for as long as the registration is kept.
-  /// \p function takes and returns C++ values, \see lua::function_cast. What it reaches must live as long.
+  /// Register a function for scripts at \p p, e.g. "web.fetch", for as long as the registration is kept.
+  /// \p function takes and returns C++ values, \see function_cast. What it reaches must live as long.
   /// \return the registration to keep, one of nothing if \p p can not be registered, the reason is logged
   ///
-  template<lua::function_castable F>
+  template<function_castable F>
   [[nodiscard]] auto register_function(const util::path& p, F&& function) const -> registration_type;
 
   ///
-  /// Register \p setting for scripts at workflow.setting and its own path, for as long as the registration is
-  /// kept, \see lua::setting_cast. \p setting must live as long.
+  /// Register \p setting for scripts at setting and its own path, for as long as the registration is
+  /// kept, \see setting_cast. \p setting must live as long.
   /// \return the registration to keep, one of nothing if the path can not be registered, the reason is logged
   ///
   template<setting::underlying_setting_type T>
@@ -185,28 +186,26 @@ public: // Modifiers
   /// returns.
   /// \return a copy of what it returns, nil if nothing, or std::nullopt if it failed
   ///
-  [[nodiscard]] auto run_script(std::string_view name, std::string_view code) const -> std::optional<lua::value>;
+  [[nodiscard]] auto run_script(std::string_view name, std::string_view code) const -> std::optional<value>;
 
   ///
-  /// Stop the scripts with force, no script runs from now on. Called before the app ends, so no workflow waits
-  /// for a script that never returns once it is destroyed, \see lua::state_owner::shutdown
+  /// Stop the scripts with force, no script runs from now on. Called before the app ends, so no object waits
+  /// for a script that never returns once it is destroyed, \see state_owner::shutdown
   ///
   auto shutdown() const noexcept -> void;
 
 private: // Implementation
-  [[nodiscard]] static auto lua_path(const util::path& p) -> util::path;
   [[nodiscard]] auto scripts(const std::vector<util::path>& ids) const -> scripts_type;
-  [[nodiscard]] auto register_function(
-    const util::path& p, lua::function function, std::shared_ptr<const void> registered
-  ) const -> registration_type;
+  [[nodiscard]] auto register_function(const util::path& p, function function, std::shared_ptr<const void> registered) const
+    -> registration_type;
   [[nodiscard]] auto register_functions(
-    const util::path& p, lua::function_table functions, std::shared_ptr<const void> registered
+    const util::path& p, function_table functions, std::shared_ptr<const void> registered
   ) const -> registration_type;
   auto run(
     const script_name_type& script,
     const util::path& id,
-    const std::function<lua::value()>& input,
-    const std::function<bool(const lua::value&)>& output
+    const std::function<value()>& input,
+    const std::function<bool(const value&)>& output
   ) const -> void;
   auto load(const std::stop_token& stop_token) -> void;
   auto load_folder(const std::filesystem::path& folder, const std::stop_token& stop_token) -> void;
@@ -216,51 +215,48 @@ private: // Implementation
 ///
 ///
 template<script_manifest... M>
-auto workflow_script::scripts() const -> scripts_type
+auto lua_engine::scripts() const -> scripts_type
 {
   return scripts(std::vector<util::path>{util::path{M::id}...});
 }
 
 ///
 ///
-template<lua::function_castable F>
-auto workflow_script::register_function(const util::path& p, F&& function) const -> registration_type
+template<function_castable F>
+auto lua_engine::register_function(const util::path& p, F&& function) const -> registration_type
 {
   auto registered = std::make_shared<const std::monostate>();
-  auto cast = lua::function_cast(std::forward<F>(function), registered);
-  return register_function(lua_path(p), std::move(cast), std::move(registered));
+  auto cast = function_cast(std::forward<F>(function), registered);
+  return register_function(p, std::move(cast), std::move(registered));
 }
 
 ///
 ///
 template<setting::underlying_setting_type T>
-auto workflow_script::register_setting(setting::setting<T>& setting) const -> registration_type
+auto lua_engine::register_setting(setting::setting<T>& setting) const -> registration_type
 {
   auto registered = std::make_shared<const std::monostate>();
-  auto functions = lua::setting_cast(setting, registered);
-  return register_functions(
-    lua_path(util::path{setting_node} / util::path{setting.path}), std::move(functions), std::move(registered)
-  );
+  auto functions = setting_cast(setting, registered);
+  return register_functions(util::path{setting_node} / util::path{setting.path}, std::move(functions), std::move(registered));
 }
 
 ///
 ///
 template<script_manifest M>
-auto workflow_script::run(const script_name_type& script, const typename M::input& input) const
-  -> std::optional<typename M::output>
+auto lua_engine::run(const script_name_type& script, const typename M::input& input) const -> std::optional<typename M::output>
 {
   auto output = std::optional<typename M::output>{};
   run(
     script,
     util::path{M::id},
-    [&] { return lua::value_cast<typename M::input>::to(input); },
-    [&](const lua::value& value)
+    [&] { return value_cast<typename M::input>::to(input); },
+    [&](const value& value)
     {
-      output = lua::value_cast<typename M::output>::from(value);
+      output = value_cast<typename M::output>::from(value);
       return output.has_value();
     }
   );
   return output;
 }
 
-} // namespace arcstd::workflow
+} // namespace arcstd::lua

@@ -12,9 +12,9 @@ namespace arcstd::workflow
 ///
 ///
 workflow_cache::workflow_cache(
-  std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script
+  std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine
 )
-  : workflow_script_{std::move(workflow_script)}
+  : lua_engine_{std::move(lua_engine)}
   , folder_{setting_store->data_folder() / folder_name}
 {
   registrations_
@@ -26,34 +26,34 @@ workflow_cache::workflow_cache(
     /// \param key the key of the value
     /// \return the value, or `nil` if there is none
     ///
-    << workflow_script_->register_function(
+    << lua_engine_->register_function(
          "cache.get", [this](const std::string& name, const std::string& key) { return get(util::identifier{name}, key); }
        )
     ///
-    /// \lua Writes a text value to a cache, \see `workflow.cache.get`.
+    /// \lua Writes a text value to a cache, \see `cache.get`.
     /// \param name the cache
     /// \param key the key of the value
     /// \param value the value, `nil` removes the key
     ///
-    << workflow_script_->register_function(
+    << lua_engine_->register_function(
          "cache.set",
          [this](const std::string& name, const std::string& key, std::optional<std::string> value)
          { set(util::identifier{name}, key, std::move(value)); }
        )
     ///
-    /// \lua Writes many text values to a cache at once, all of them or none, \see `workflow.cache.get`.
+    /// \lua Writes many text values to a cache at once, all of them or none, \see `cache.get`.
     /// \param name the cache
     /// \param values the values by key
     ///
-    << workflow_script_->register_function(
+    << lua_engine_->register_function(
          "cache.set_all",
          [this](const std::string& name, std::map<std::string, std::string> values) { set_all(util::identifier{name}, values); }
        )
     ///
-    /// \lua Removes all values of a cache, \see `workflow.cache.get`.
+    /// \lua Removes all values of a cache, \see `cache.get`.
     /// \param name the cache
     ///
-    << workflow_script_->register_function("cache.clear", [this](const std::string& name) { clear(util::identifier{name}); });
+    << lua_engine_->register_function("cache.clear", [this](const std::string& name) { clear(util::identifier{name}); });
 }
 
 ///

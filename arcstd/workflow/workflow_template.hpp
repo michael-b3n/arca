@@ -1,8 +1,8 @@
 #pragma once
 
 #include "arcstd/export.hpp"
+#include "arcstd/lua/lua_engine.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
-#include "arcstd/workflow/workflow_script.hpp"
 #include "arcstd/workflow/workflow_settings_base.hpp"
 
 #include <memory>
@@ -35,7 +35,7 @@ public: // Variables
 
 ///
 /// Workflow template. This is a template for creating new workflows.
-/// A workflow without Lua registrations leaves out workflow_script.
+/// A workflow without Lua registrations leaves out lua_engine.
 ///
 class ARCSTD_EXPORT workflow_template final : public workflow_base<workflow_template_settings>
 {
@@ -47,15 +47,15 @@ class ARCSTD_EXPORT workflow_template final : public workflow_base<workflow_temp
   using result_t = float /*some type*/;
 
   // Variables
-  const std::shared_ptr<workflow_script> workflow_script_;
-  workflow_script::registration_type registrations_;
+  const std::shared_ptr<lua::lua_engine> lua_engine_;
+  lua::lua_engine::registration_type registrations_;
 
 public: // Typedefs
   using params = params_type<params_t>;
   using result = result_type<result_t>;
 
 public: // Structors
-  workflow_template(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script);
+  workflow_template(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine);
   ~workflow_template() noexcept override;
 
 public: // Modifiers

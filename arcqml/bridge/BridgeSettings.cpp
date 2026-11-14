@@ -45,10 +45,10 @@ BridgeSettings* BridgeSettings::create([[maybe_unused]] QQmlEngine* qmlEngine, Q
 ///
 ///
 BridgeSettings::BridgeSettings(
-  std::shared_ptr<arcstd::setting::setting_store> workflowSettings, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::setting::setting_store> settingStore, const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QObject{parent}
-  , workflowSettings_{std::move(workflowSettings)}
+  , settingStore_{std::move(settingStore)}
 {
   if(instance_ != nullptr)
   {
@@ -70,16 +70,16 @@ BridgeSettings::~BridgeSettings() noexcept
 
 ///
 ///
-const std::shared_ptr<arcstd::setting::setting_store>& BridgeSettings::workflowSettings() const
+const std::shared_ptr<arcstd::setting::setting_store>& BridgeSettings::settingStore() const
 {
-  return workflowSettings_;
+  return settingStore_;
 }
 
 ///
 ///
 bool BridgeSettings::contains(const QString& path) const
 {
-  return workflowSettings_ && workflowSettings_->type_erased_setting(path.toStdString()).has_value();
+  return settingStore_ && settingStore_->type_erased_setting(path.toStdString()).has_value();
 }
 
 ///

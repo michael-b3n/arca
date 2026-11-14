@@ -1,4 +1,4 @@
-#include "arcstd/workflow/workflow_script.hpp"
+#include "arcstd/lua/lua_engine.hpp"
 #include "arcstd/lua/names.hpp"
 #include "arcstd/lua/object_cast.hpp"
 #include "arcstd/lua/sol.hpp"
@@ -24,7 +24,7 @@
 #include <utility>
 #include <vector>
 
-namespace arcstd::workflow
+namespace arcstd::lua
 {
 namespace
 {
@@ -71,7 +71,7 @@ struct offered_script final
 /// Add what the script of \p file \p returned to the script tables of \p state.
 /// \return the script and the functions the file offers, std::nullopt if it offers nothing or is rejected
 ///
-[[nodiscard]] auto add_script(const lua::state& state, const std::string& file, const sol::object& returned)
+[[nodiscard]] auto add_script(const state& state, const std::string& file, const sol::object& returned)
   -> std::optional<offered_script>
 {
   if(returned.get_type() != sol::type::table)
@@ -81,10 +81,10 @@ struct offered_script final
   }
   auto table = returned.as<sol::table>();
   const auto text = [&](const std::string_view key)
-  { return lua::value_cast<std::string>::from(lua::to_value(table.get<sol::object>(key))); };
-  const auto name = text(lua::names::script_name);
-  const auto description = text(lua::names::script_description);
-  const auto node = text(lua::names::script_node);
+  { return value_cast<std::string>::from(to_value(table.get<sol::object>(key))); };
+  const auto name = text(names::script_name);
+  const auto description = text(names::script_description);
+  const auto node = text(names::script_node);
   // Other scripts write scripts.<node>, so it is a Lua name
   static constexpr auto is_lua_name = [](const std::string& s)
   {
@@ -105,10 +105,9 @@ struct offered_script final
   }
   // Other scripts see the node, the app runs the functions of the script from there. Files
   // of the same name are one script with one node, and a node belongs to one script.
-  sol::table nodes =
-    state->traverse_get<sol::table>(lua::names::node_root, lua::names::node_interface, lua::names::node_scripts);
-  sol::table scripts = state->traverse_get<sol::table>(lua::names::node_root, lua::names::node_system)[lua::names::node_scripts]
-                         .get_or_create<sol::table>();
+  sol::table nodes = state->traverse_get<sol::table>(names::node_root, names::node_interface, names::node_scripts);
+  sol::table scripts =
+    state->traverse_get<sol::table>(names::node_root, names::node_system)[names::node_scripts].get_or_create<sol::table>();
   const sol::object own = scripts[*name];
   const sol::object taken = nodes[*node];
   if((own.valid() || taken.valid()) && own != taken)
@@ -124,11 +123,8 @@ struct offered_script final
   table.for_each(
     [&](const sol::object& key, const sol::object& value)
     {
-      const auto entry = lua::value_cast<std::string>::from(lua::to_value(key));
-      if(
-        !entry || *entry == lua::names::script_name || *entry == lua::names::script_description ||
-        *entry == lua::names::script_node
-      )
+      const auto entry = value_cast<std::string>::from(to_value(key));
+      if(!entry || *entry == names::script_name || *entry == names::script_description || *entry == names::script_node)
       {
         return;
       }
@@ -160,25 +156,25 @@ struct offered_script final
 
 ///
 ///
-workflow_script_settings::workflow_script_settings(std::shared_ptr<setting::setting_store> setting_store)
-  : workflow_settings_base{std::move(setting_store)}
-  , enabled{setting_store_->create_setting("script.enabled", true)}
+lua_engine_settings::lua_engine_settings(std::shared_ptr<setting::setting_store> setting_store)
+  : setting_store_{std::move(setting_store)}
+  , enabled{setting_store_->create_setting("lua.enabled", true)}
   , folder{setting_store_->data_folder() / folder_name}
 {
 }
 
 ///
 ///
-workflow_script::workflow_script(std::shared_ptr<setting::setting_store> setting_store, bundled_provider_type bundled)
-  : workflow_base{std::move(setting_store)}
+lua_engine::lua_engine(std::shared_ptr<setting::setting_store> setting_store, bundled_provider_type bundled)
+  : settings_{std::move(setting_store)}
   , bundled_{std::move(bundled)}
-  , state_owner_{std::make_unique<lua::state_owner>()}
+  , state_owner_{std::make_unique<state_owner>()}
 {
 }
 
 ///
 ///
-workflow_script::~workflow_script() noexcept
+lua_engine::~lua_engine() noexcept
 {
   // The loading ends after its script, which is stopped as it may run endlessly. The loader joins once destroyed.
   loader_.request_stop();
@@ -189,21 +185,28 @@ workflow_script::~workflow_script() noexcept
 
 ///
 ///
-auto workflow_script::lock() const -> lock_type
+auto lua_engine::settings() const -> const lua_engine_settings&
 {
-  return lock_type{std::make_shared<lua::state>(state_owner_->lock())};
+  return settings_;
 }
 
 ///
 ///
-auto workflow_script::load_scripts() -> void
+auto lua_engine::lock() const -> lock_type
+{
+  return lock_type{std::make_shared<state>(state_owner_->lock())};
+}
+
+///
+///
+auto lua_engine::load_scripts() -> void
 {
   loader_ = std::jthread{[this](const std::stop_token& stop_token) { load(stop_token); }};
 }
 
 ///
 ///
-auto workflow_script::import_scripts(const std::vector<std::filesystem::path>& files) -> std::size_t
+auto lua_engine::import_scripts(const std::vector<std::filesystem::path>& files) -> std::size_t
 {
   const auto& folder = settings().folder;
   auto error = std::error_code{};
@@ -233,29 +236,22 @@ auto workflow_script::import_scripts(const std::vector<std::filesystem::path>& f
 
 ///
 ///
-auto workflow_script::run_script(const std::string_view name, const std::string_view code) const -> std::optional<lua::value>
+auto lua_engine::run_script(const std::string_view name, const std::string_view code) const -> std::optional<value>
 {
   auto state = state_owner_->lock();
-  return state.run_script(name, code).transform([](const sol::object& returned) { return lua::to_value(returned); });
+  return state.run_script(name, code).transform([](const sol::object& returned) { return to_value(returned); });
 }
 
 ///
 ///
-auto workflow_script::shutdown() const noexcept -> void
+auto lua_engine::shutdown() const noexcept -> void
 {
   state_owner_->shutdown();
 }
 
 ///
 ///
-auto workflow_script::lua_path(const util::path& p) -> util::path
-{
-  return util::path{lua_node} / p;
-}
-
-///
-///
-auto workflow_script::scripts(const std::vector<util::path>& ids) const -> scripts_type
+auto lua_engine::scripts(const std::vector<util::path>& ids) const -> scripts_type
 {
   const auto offers_all = [&ids](const auto& entry)
   { return std::ranges::all_of(ids, [&](const auto& id) { return entry.second.functions.contains(id); }); };
@@ -265,40 +261,38 @@ auto workflow_script::scripts(const std::vector<util::path>& ids) const -> scrip
 
 ///
 ///
-auto workflow_script::register_function(
-  const util::path& p, lua::function function, std::shared_ptr<const void> registered
-) const -> registration_type
+auto lua_engine::register_function(const util::path& p, function function, std::shared_ptr<const void> registered) const
+  -> registration_type
 {
   return state_owner_->lock().register_function(p, std::move(function), std::move(registered));
 }
 
 ///
 ///
-auto workflow_script::register_functions(
-  const util::path& p, lua::function_table functions, std::shared_ptr<const void> registered
-) const -> registration_type
+auto lua_engine::register_functions(const util::path& p, function_table functions, std::shared_ptr<const void> registered) const
+  -> registration_type
 {
   return state_owner_->lock().register_functions(p, std::move(functions), std::move(registered));
 }
 
 ///
 ///
-auto workflow_script::run(
+auto lua_engine::run(
   const script_name_type& script,
   const util::path& id,
-  const std::function<lua::value()>& input,
-  const std::function<bool(const lua::value&)>& output
+  const std::function<value()>& input,
+  const std::function<bool(const value&)>& output
 ) const -> void
 {
   auto state = state_owner_->lock();
   const auto function = state->traverse_get<sol::optional<sol::protected_function>>(
-    lua::names::node_root, lua::names::node_system, lua::names::node_scripts, script, id.string()
+    names::node_root, names::node_system, names::node_scripts, script, id.string()
   );
   if(!function)
   {
     return;
   }
-  if(const auto result = state.call(*function, lua::to_object(*state, input())); result && !output(lua::to_value(*result)))
+  if(const auto result = state.call(*function, to_object(*state, input())); result && !output(to_value(*result)))
   {
     LOG_ERROR("lua script output rejected: script=\"{}\", function=\"{}\"", script, id.string());
   }
@@ -306,18 +300,17 @@ auto workflow_script::run(
 
 ///
 ///
-auto workflow_script::load(const std::stop_token& stop_token) -> void
+auto lua_engine::load(const std::stop_token& stop_token) -> void
 {
   // Loaded anew, so a script gone from the folder is gone
   {
     auto state = state_owner_->lock();
-    state->traverse_get<sol::table>(lua::names::node_root, lua::names::node_system)[lua::names::node_scripts] = sol::lua_nil;
-    state->traverse_get<sol::table>(lua::names::node_root, lua::names::node_interface)[lua::names::node_scripts] =
-      state->create_table();
+    state->traverse_get<sol::table>(names::node_root, names::node_system)[names::node_scripts] = sol::lua_nil;
+    state->traverse_get<sol::table>(names::node_root, names::node_interface)[names::node_scripts] = state->create_table();
     const auto lock = std::scoped_lock{mtx_};
     scripts_.clear();
   }
-  // Faults of the app only, e.g. a vanishing folder. Either way the waiting workflows learn that loading is over.
+  // Faults of the app only, e.g. a vanishing folder. Either way those waiting learn that loading is over.
   try
   {
     std::ranges::for_each(
@@ -348,7 +341,7 @@ auto workflow_script::load(const std::stop_token& stop_token) -> void
 
 ///
 ///
-auto workflow_script::load_folder(const std::filesystem::path& folder, const std::stop_token& stop_token) -> void
+auto lua_engine::load_folder(const std::filesystem::path& folder, const std::stop_token& stop_token) -> void
 {
   std::ranges::for_each(
     lua_files(folder) | std::views::take_while([&](const auto&) { return !stop_token.stop_requested(); }),
@@ -364,7 +357,7 @@ auto workflow_script::load_folder(const std::filesystem::path& folder, const std
 
 ///
 ///
-auto workflow_script::load_script(const std::string_view file, const std::string_view code) -> void
+auto lua_engine::load_script(const std::string_view file, const std::string_view code) -> void
 {
   auto state = state_owner_->lock();
   const auto returned = state.run_script(file, code);
@@ -378,4 +371,4 @@ auto workflow_script::load_script(const std::string_view file, const std::string
   }
 }
 
-} // namespace arcstd::workflow
+} // namespace arcstd::lua

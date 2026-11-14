@@ -3,9 +3,8 @@
 #include "test_utils/temp_folder.hpp"
 
 #include <arcstd/lua/embedded_scripts.hpp>
+#include <arcstd/lua/lua_engine.hpp>
 #include <arcstd/lua/script_table.hpp>
-#include <arcstd/workflow/workflow_base.hpp>
-#include <arcstd/workflow/workflow_script.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -27,7 +26,7 @@
 #include <thread>
 #include <vector>
 
-namespace arcstd::workflow
+namespace arcstd::lua
 {
 namespace
 {
@@ -36,41 +35,41 @@ namespace
 struct report_manifest final
 {
   static inline const util::path id{"test.report"};
-  using input = lua::script_table<>;
-  using output = lua::script_table<lua::field<"value", std::string>>;
+  using input = script_table<>;
+  using output = script_table<field<"value", std::string>>;
 };
 
 // Manifests a script offers or not
 struct a_manifest final
 {
   static inline const util::path id{"test.a"};
-  using input = lua::script_table<>;
-  using output = lua::script_table<>;
+  using input = script_table<>;
+  using output = script_table<>;
 };
 
 struct b_manifest final
 {
   static inline const util::path id{"test.b"};
-  using input = lua::script_table<>;
-  using output = lua::script_table<>;
+  using input = script_table<>;
+  using output = script_table<>;
 };
 
 struct missing_manifest final
 {
   static inline const util::path id{"test.missing"};
-  using input = lua::script_table<>;
-  using output = lua::script_table<>;
+  using input = script_table<>;
+  using output = script_table<>;
 };
 
 // Echoes its input, each type of value a script can take and return
-using echo_table = lua::script_table<
-  lua::field<"text", std::string>,
-  lua::field<"count", std::int64_t>,
-  lua::field<"ratio", double>,
-  lua::field<"flag", bool>,
-  lua::field<"note", std::optional<std::string>>,
-  lua::field<"list", std::vector<std::string>>,
-  lua::field<"scores", std::map<std::string, std::int64_t>>>;
+using echo_table = script_table<
+  field<"text", std::string>,
+  field<"count", std::int64_t>,
+  field<"ratio", double>,
+  field<"flag", bool>,
+  field<"note", std::optional<std::string>>,
+  field<"list", std::vector<std::string>>,
+  field<"scores", std::map<std::string, std::int64_t>>>;
 
 struct echo_manifest final
 {
@@ -102,14 +101,14 @@ struct echo_manifest final
 ///
 /// \return what the scripts offering report_manifest report, as "value (name)"
 ///
-[[nodiscard]] auto reports(const workflow_script& workflow) -> std::vector<std::string>
+[[nodiscard]] auto reports(const lua_engine& engine) -> std::vector<std::string>
 {
-  const auto scripts = workflow.scripts<report_manifest>();
+  const auto scripts = engine.scripts<report_manifest>();
   return scripts | std::views::keys |
          std::views::transform(
-           [&](const workflow_script::script_name_type& script)
+           [&](const lua_engine::script_name_type& script)
            {
-             const auto output = workflow.run<report_manifest>(script, {});
+             const auto output = engine.run<report_manifest>(script, {});
              return std::format("{} ({})", output ? output->get<"value">() : std::string{"?"}, script);
            }
          ) |
@@ -119,10 +118,10 @@ struct echo_manifest final
 ///
 /// \return the bundled scripts of the tests, the way a library compiles them in
 ///
-[[nodiscard]] auto bundled() -> std::span<const lua::embedded_script>
+[[nodiscard]] auto bundled() -> std::span<const embedded_script>
 {
   static constexpr auto scripts = std::array{
-    lua::embedded_script{.name = "bundled.lua", .code = "return {name = 'Bundled', description = '', node = 'bundled'}"}
+    embedded_script{.name = "bundled.lua", .code = "return {name = 'Bundled', description = '', node = 'bundled'}"}
   };
   return scripts;
 }
@@ -130,7 +129,7 @@ struct echo_manifest final
 ///
 /// \return the names of \p scripts
 ///
-[[nodiscard]] auto names(const workflow_script::scripts_type& scripts) -> std::vector<std::string>
+[[nodiscard]] auto script_names(const lua_engine::scripts_type& scripts) -> std::vector<std::string>
 {
   return scripts | std::views::keys | std::ranges::to<std::vector>();
 }
@@ -141,35 +140,34 @@ struct echo_manifest final
 ///
 [[nodiscard]] auto bundled_names(const test_utils::temp_folder& folder) -> std::vector<std::string>
 {
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path() / "bundled"), bundled};
-  test_utils::load_scripts(workflow);
-  return names(workflow.scripts());
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path() / "bundled"), bundled};
+  test_utils::load_scripts(engine);
+  return script_names(engine.scripts());
 }
 
 ///
-/// \return the names of the scripts of \p workflow without the bundled ones
+/// \return the names of the scripts of \p engine without the bundled ones
 ///
-[[nodiscard]] auto user_names(const workflow_script& workflow, const test_utils::temp_folder& folder)
-  -> std::vector<std::string>
+[[nodiscard]] auto user_names(const lua_engine& engine, const test_utils::temp_folder& folder) -> std::vector<std::string>
 {
   const auto bundled = bundled_names(folder);
-  return names(workflow.scripts()) |
+  return script_names(engine.scripts()) |
          std::views::filter([&](const auto& name) { return !std::ranges::contains(bundled, name); }) |
          std::ranges::to<std::vector>();
 }
 
 ///
-/// Workflow registering to Lua the way workflow_template shows.
+/// Object registering functions for scripts, the registration as its last member.
 ///
-class workflow_test final : public workflow_base<void>
+class registering_object final
 {
   // Variables
-  const std::shared_ptr<workflow_script> workflow_script_;
+  const std::shared_ptr<lua_engine> lua_engine_;
   const std::string name_;
 
 public: // Structors
-  explicit workflow_test(std::shared_ptr<workflow_script> workflow_script, std::string name = "test");
-  ~workflow_test() noexcept override;
+  explicit registering_object(std::shared_ptr<lua_engine> lua_engine, std::string name = "test");
+  ~registering_object() noexcept;
 
 public: // Variables
   bool registered{false};
@@ -177,77 +175,77 @@ public: // Variables
 
 private: // Variables
   // Last, so it is taken back first
-  lua::registration registrations_;
+  registration registrations_;
 };
 
 ///
 ///
-workflow_test::workflow_test(std::shared_ptr<workflow_script> workflow_script, std::string name)
-  : workflow_script_{std::move(workflow_script)}
+registering_object::registering_object(std::shared_ptr<lua_engine> lua_engine, std::string name)
+  : lua_engine_{std::move(lua_engine)}
   , name_{std::move(name)}
 {
-  auto nested = workflow_script_->register_function(name_ + ".nested.value", [this]() { return value; });
-  auto twice = workflow_script_->register_function(name_ + ".twice", [this]() { return 2 * value; });
+  auto nested = lua_engine_->register_function(name_ + ".nested.value", [this]() { return value; });
+  auto twice = lua_engine_->register_function(name_ + ".twice", [this]() { return 2 * value; });
   registered = nested && twice;
   registrations_ << std::move(nested) << std::move(twice);
 }
 
 ///
 ///
-workflow_test::~workflow_test() noexcept = default;
+registering_object::~registering_object() noexcept = default;
 
 } // namespace
 
-TEST_CASE("workflow_script_sets_up_the_state", "[workflow]")
+TEST_CASE("lua_engine_sets_up_the_state", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_sets_up_the_state"};
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path()), bundled};
+  const auto folder = test_utils::temp_folder{"lua_engine_sets_up_the_state"};
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path()), bundled};
   // What a script sees
-  CHECK(test_utils::script_value<bool>(workflow, "return type(util) == 'table' and root == nil and io == nil") == true);
+  CHECK(test_utils::script_value<bool>(engine, "return type(util) == 'table' and root == nil and io == nil") == true);
   // Disabled, so loaded without a scripts folder
-  test_utils::load_scripts(workflow);
+  test_utils::load_scripts(engine);
   CHECK_FALSE(std::filesystem::exists(folder.path() / "scripts"));
 }
 
-TEST_CASE("workflow_script_registers_a_workflow", "[workflow]")
+TEST_CASE("lua_engine_registers_an_object", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_registers_a_workflow"};
-  const auto script = std::make_shared<workflow_script>(test_utils::make_script_settings(folder.path()), bundled);
-  const auto workflow = std::make_shared<workflow_test>(script);
-  REQUIRE(workflow->registered);
-  workflow->value = 7;
-  CHECK(test_utils::script_value<int>(*script, "return workflow.test.nested.value() + workflow.test.twice()") == 21);
+  const auto folder = test_utils::temp_folder{"lua_engine_registers_an_object"};
+  const auto script = std::make_shared<lua_engine>(test_utils::make_script_settings(folder.path()), bundled);
+  const auto object = std::make_shared<registering_object>(script);
+  REQUIRE(object->registered);
+  object->value = 7;
+  CHECK(test_utils::script_value<int>(*script, "return test.nested.value() + test.twice()") == 21);
 }
 
-TEST_CASE("workflow_script_drops_the_functions_of_a_destroyed_workflow", "[workflow]")
+TEST_CASE("lua_engine_drops_the_functions_of_a_destroyed_object", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_drops_the_functions_of_a_destroyed_workflow"};
-  const auto script = std::make_shared<workflow_script>(test_utils::make_script_settings(folder.path()), bundled);
-  const auto other = workflow_test{script, "other"};
+  const auto folder = test_utils::temp_folder{"lua_engine_drops_the_functions_of_a_destroyed_object"};
+  const auto script = std::make_shared<lua_engine>(test_utils::make_script_settings(folder.path()), bundled);
+  const auto other = registering_object{script, "other"};
   {
-    const auto workflow = workflow_test{script};
-    REQUIRE(script->run_script("before.lua", "held = workflow.test.twice return held()"));
+    const auto object = registering_object{script};
+    REQUIRE(script->run_script("before.lua", "held = test.twice return held()"));
   }
-  // Its functions only: no script reaches the destroyed workflow, the other one and the scripts go on
-  CHECK(script->run_script("after.lua", "return workflow.test == nil and workflow.other.twice() == 84"));
-  CHECK_FALSE(script->run_script("after.lua", "return workflow.test.twice()"));
+  // Its functions only: no script reaches the destroyed object, the other one and the scripts go on
+  CHECK(script->run_script("after.lua", "return test == nil and other.twice() == 84"));
+  CHECK_FALSE(script->run_script("after.lua", "return test.twice()"));
   CHECK(script->run_script("after.lua", "return 1"));
 }
 
-TEST_CASE("workflow_script_rejects_a_taken_name", "[workflow]")
+TEST_CASE("lua_engine_rejects_a_taken_name", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_rejects_a_taken_name"};
-  const auto script = std::make_shared<workflow_script>(test_utils::make_script_settings(folder.path()), bundled);
-  const auto first = workflow_test{script, "shared"};
-  const auto second = workflow_test{script, "shared"};
+  const auto folder = test_utils::temp_folder{"lua_engine_rejects_a_taken_name"};
+  const auto script = std::make_shared<lua_engine>(test_utils::make_script_settings(folder.path()), bundled);
+  const auto first = registering_object{script, "shared"};
+  const auto second = registering_object{script, "shared"};
   CHECK(first.registered);
   CHECK_FALSE(second.registered);
-  CHECK(test_utils::script_value<int>(*script, "return workflow.shared.nested.value()") == 42);
+  CHECK(test_utils::script_value<int>(*script, "return shared.nested.value()") == 42);
 }
 
-TEST_CASE("workflow_script_loads_the_user_scripts", "[workflow]")
+TEST_CASE("lua_engine_loads_the_user_scripts", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_loads_the_user_scripts"};
+  const auto folder = test_utils::temp_folder{"lua_engine_loads_the_user_scripts"};
   const auto scripts = folder.path() / "scripts";
   std::filesystem::create_directories(scripts);
   // Each script reports what it sees
@@ -259,83 +257,83 @@ TEST_CASE("workflow_script_loads_the_user_scripts", "[workflow]")
   test_utils::write_file(scripts / "e.lua", report("e", "'ran'"));
   test_utils::write_file(scripts / "f.txt", report("f", "'ran'"));
 
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
-  test_utils::load_scripts(workflow);
-  CHECK(reports(workflow) == std::vector<std::string>{"a (a)", "nil (b)", "ran (e)"});
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
+  test_utils::load_scripts(engine);
+  CHECK(reports(engine) == std::vector<std::string>{"a (a)", "nil (b)", "ran (e)"});
   // Nor of a script run later
-  CHECK(test_utils::script_value<bool>(workflow, "return shared == nil") == true);
+  CHECK(test_utils::script_value<bool>(engine, "return shared == nil") == true);
 }
 
-TEST_CASE("workflow_script_imports_scripts_into_its_folder", "[workflow]")
+TEST_CASE("lua_engine_imports_scripts_into_its_folder", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_imports_scripts_into_its_folder"};
+  const auto folder = test_utils::temp_folder{"lua_engine_imports_scripts_into_its_folder"};
   const auto source = folder.path() / "source";
   std::filesystem::create_directories(source);
   test_utils::write_file(source / "a.lua", report("a", "'first'"));
   test_utils::write_file(source / "b.txt", report("b", "'ran'"));
 
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
-  CHECK(workflow.import_scripts({source / "a.lua", source / "b.txt", source / "gone.lua"}) == 1);
-  test_utils::load_scripts(workflow);
-  CHECK(reports(workflow) == std::vector<std::string>{"first (a)"});
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
+  CHECK(engine.import_scripts({source / "a.lua", source / "b.txt", source / "gone.lua"}) == 1);
+  test_utils::load_scripts(engine);
+  CHECK(reports(engine) == std::vector<std::string>{"first (a)"});
 
   // A file of the same name is replaced, one of the folder itself is not copied onto itself
   test_utils::write_file(source / "a.lua", report("a", "'second'"));
-  CHECK(workflow.import_scripts({source / "a.lua"}) == 1);
-  CHECK(workflow.import_scripts({workflow.settings().folder / "a.lua"}) == 0);
+  CHECK(engine.import_scripts({source / "a.lua"}) == 1);
+  CHECK(engine.import_scripts({engine.settings().folder / "a.lua"}) == 0);
   // A function loaded before stays, the file loaded later offering it too is logged
   test_utils::write_file(source / "c.lua", report("a", "'third'"));
-  CHECK(workflow.import_scripts({source / "c.lua"}) == 1);
-  test_utils::load_scripts(workflow);
-  CHECK(reports(workflow) == std::vector<std::string>{"second (a)"});
+  CHECK(engine.import_scripts({source / "c.lua"}) == 1);
+  test_utils::load_scripts(engine);
+  CHECK(reports(engine) == std::vector<std::string>{"second (a)"});
 }
 
-TEST_CASE("workflow_script_loads_the_scripts_anew", "[workflow]")
+TEST_CASE("lua_engine_loads_the_scripts_anew", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_loads_the_scripts_anew"};
+  const auto folder = test_utils::temp_folder{"lua_engine_loads_the_scripts_anew"};
   const auto scripts = folder.path() / "scripts";
   std::filesystem::create_directories(scripts);
   test_utils::write_file(scripts / "a.lua", report("a", "'first'"));
   test_utils::write_file(scripts / "b.lua", report("b", "'b'"));
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
-  test_utils::load_scripts(workflow);
-  CHECK(reports(workflow) == std::vector<std::string>{"first (a)", "b (b)"});
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
+  test_utils::load_scripts(engine);
+  CHECK(reports(engine) == std::vector<std::string>{"first (a)", "b (b)"});
 
   // Changed and removed scripts, e.g. loaded again from the settings
   test_utils::write_file(scripts / "a.lua", report("a", "'second'"));
   std::filesystem::remove(scripts / "b.lua");
-  test_utils::load_scripts(workflow);
-  CHECK(reports(workflow) == std::vector<std::string>{"second (a)"});
+  test_utils::load_scripts(engine);
+  CHECK(reports(engine) == std::vector<std::string>{"second (a)"});
 }
 
-TEST_CASE("workflow_script_ends_loading_once_destroyed", "[workflow]")
+TEST_CASE("lua_engine_ends_loading_once_destroyed", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_ends_loading_once_destroyed"};
+  const auto folder = test_utils::temp_folder{"lua_engine_ends_loading_once_destroyed"};
   const auto scripts = folder.path() / "scripts";
   std::filesystem::create_directories(scripts);
   test_utils::write_file(scripts / "a.lua", "while true do end");
   test_utils::write_file(scripts / "b.lua", "return {}");
 
-  auto workflow = std::make_unique<workflow_script>(test_utils::make_script_settings(folder.path(), true), bundled);
+  auto engine = std::make_unique<lua_engine>(test_utils::make_script_settings(folder.path(), true), bundled);
   auto loaded = std::atomic<bool>{false};
-  const auto connection = workflow->connect(&workflow_script_sigs::scripts_loaded, [&]() { loaded = true; });
-  workflow->load_scripts();
+  const auto connection = engine->connect(&lua_engine_signals::scripts_loaded, [&]() { loaded = true; });
+  engine->load_scripts();
   std::this_thread::sleep_for(std::chrono::milliseconds{100});
   REQUIRE_FALSE(loaded);
   // The endless script is stopped and the loader joins
-  auto destroyed = std::async(std::launch::async, [&]() { workflow.reset(); });
+  auto destroyed = std::async(std::launch::async, [&]() { engine.reset(); });
   CHECK(destroyed.wait_for(std::chrono::seconds{5}) == std::future_status::ready);
 }
 
-TEST_CASE("workflow_script_loads_no_bytecode", "[workflow]")
+TEST_CASE("lua_engine_loads_no_bytecode", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_loads_no_bytecode"};
+  const auto folder = test_utils::temp_folder{"lua_engine_loads_no_bytecode"};
   const auto scripts = folder.path() / "scripts";
   std::filesystem::create_directories(scripts);
   {
-    const auto workflow = workflow_script{test_utils::make_script_settings(folder.path()), bundled};
+    const auto engine = lua_engine{test_utils::make_script_settings(folder.path()), bundled};
     const auto bytecode = "return string.dump(function() " + report("a", "'ran'") + " end)";
-    const auto dumped = test_utils::script_value<std::string>(workflow, bytecode);
+    const auto dumped = test_utils::script_value<std::string>(engine, bytecode);
     REQUIRE(dumped);
     test_utils::write_file(scripts / "a.lua", *dumped);
   }
@@ -343,25 +341,25 @@ TEST_CASE("workflow_script_loads_no_bytecode", "[workflow]")
     scripts / "b.lua", report("b", "load(string.dump(function() end)) == nil and dofile == nil and loadfile == nil")
   );
 
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
-  test_utils::load_scripts(workflow);
-  CHECK(reports(workflow) == std::vector<std::string>{"true (b)"});
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
+  test_utils::load_scripts(engine);
+  CHECK(reports(engine) == std::vector<std::string>{"true (b)"});
 }
 
-TEST_CASE("workflow_script_creates_a_missing_folder", "[workflow]")
+TEST_CASE("lua_engine_creates_a_missing_folder", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_creates_a_missing_folder"};
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
+  const auto folder = test_utils::temp_folder{"lua_engine_creates_a_missing_folder"};
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
   REQUIRE_FALSE(std::filesystem::exists(folder.path() / "scripts"));
-  test_utils::load_scripts(workflow);
+  test_utils::load_scripts(engine);
   // Empty, for the user to put scripts into
   CHECK(std::filesystem::is_empty(folder.path() / "scripts"));
-  CHECK(user_names(workflow, folder).empty());
+  CHECK(user_names(engine, folder).empty());
 }
 
-TEST_CASE("workflow_script_loads_the_bundled_scripts", "[workflow]")
+TEST_CASE("lua_engine_loads_the_bundled_scripts", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_loads_the_bundled_scripts"};
+  const auto folder = test_utils::temp_folder{"lua_engine_loads_the_bundled_scripts"};
   const auto scripts = folder.path() / "scripts";
   std::filesystem::create_directories(scripts);
   test_utils::write_file(scripts / "a.lua", report("a", "'ran'"));
@@ -370,24 +368,24 @@ TEST_CASE("workflow_script_loads_the_bundled_scripts", "[workflow]")
 
   SECTION("without the scripts of the user")
   {
-    auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), false), bundled};
-    test_utils::load_scripts(workflow);
-    CHECK(std::ranges::contains(names(workflow.scripts()), std::string{"Bundled"}));
-    CHECK(reports(workflow).empty());
+    auto engine = lua_engine{test_utils::make_script_settings(folder.path(), false), bundled};
+    test_utils::load_scripts(engine);
+    CHECK(std::ranges::contains(script_names(engine.scripts()), std::string{"Bundled"}));
+    CHECK(reports(engine).empty());
   }
 
   SECTION("before the scripts of the user")
   {
-    auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
-    test_utils::load_scripts(workflow);
-    CHECK(user_names(workflow, folder) == std::vector<std::string>{"a"});
-    CHECK(reports(workflow) == std::vector<std::string>{"ran (Bundled)", "ran (a)"});
+    auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
+    test_utils::load_scripts(engine);
+    CHECK(user_names(engine, folder) == std::vector<std::string>{"a"});
+    CHECK(reports(engine) == std::vector<std::string>{"ran (Bundled)", "ran (a)"});
   }
 }
 
-TEST_CASE("workflow_script_offers_the_scripts_of_manifests", "[workflow]")
+TEST_CASE("lua_engine_offers_the_scripts_of_manifests", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_offers_the_scripts_of_manifests"};
+  const auto folder = test_utils::temp_folder{"lua_engine_offers_the_scripts_of_manifests"};
   const auto scripts = folder.path() / "scripts";
   std::filesystem::create_directories(scripts);
   test_utils::write_file(
@@ -402,18 +400,18 @@ TEST_CASE("workflow_script_offers_the_scripts_of_manifests", "[workflow]")
   // A script returning no table offers nothing
   test_utils::write_file(scripts / "none.lua", "return 1");
 
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
-  test_utils::load_scripts(workflow);
-  CHECK(names(workflow.scripts<a_manifest>()) == std::vector<std::string>{"Both", "One"});
-  CHECK(names(workflow.scripts<a_manifest, b_manifest>()) == std::vector<std::string>{"Both"});
-  CHECK(workflow.scripts<missing_manifest>().empty());
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
+  test_utils::load_scripts(engine);
+  CHECK(script_names(engine.scripts<a_manifest>()) == std::vector<std::string>{"Both", "One"});
+  CHECK(script_names(engine.scripts<a_manifest, b_manifest>()) == std::vector<std::string>{"Both"});
+  CHECK(engine.scripts<missing_manifest>().empty());
   // All of them without a manifest
-  CHECK(user_names(workflow, folder) == std::vector<std::string>{"Both", "One"});
+  CHECK(user_names(engine, folder) == std::vector<std::string>{"Both", "One"});
 }
 
-TEST_CASE("workflow_script_knows_a_script_by_its_name", "[workflow]")
+TEST_CASE("lua_engine_knows_a_script_by_its_name", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_knows_a_script_by_its_name"};
+  const auto folder = test_utils::temp_folder{"lua_engine_knows_a_script_by_its_name"};
   const auto scripts = folder.path() / "scripts";
   std::filesystem::create_directories(scripts);
   const auto script = [](const std::string& fields, const std::string& value)
@@ -444,21 +442,21 @@ TEST_CASE("workflow_script_knows_a_script_by_its_name", "[workflow]")
   test_utils::write_file(scripts / "b.lua", script("name = 'Other', description = '', node = 'zeta',", "ran"));
   test_utils::write_file(scripts / "c.lua", script("name = 'Zeta', description = '', node = 'other',", "ran"));
 
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
-  test_utils::load_scripts(workflow);
-  REQUIRE(user_names(workflow, folder) == std::vector<std::string>{"Alpha page.com", "Zeta"});
-  CHECK(reports(workflow) == std::vector<std::string>{"ran (Alpha page.com)", "first (Zeta)"});
-  CHECK(names(workflow.scripts<a_manifest>()) == std::vector<std::string>{"Zeta"});
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
+  test_utils::load_scripts(engine);
+  REQUIRE(user_names(engine, folder) == std::vector<std::string>{"Alpha page.com", "Zeta"});
+  CHECK(reports(engine) == std::vector<std::string>{"ran (Alpha page.com)", "first (Zeta)"});
+  CHECK(script_names(engine.scripts<a_manifest>()) == std::vector<std::string>{"Zeta"});
   // The first file of a script describes it
-  CHECK(workflow.scripts().at("Zeta").description == "The first");
-  CHECK(workflow.scripts().at("Alpha page.com").description.empty());
+  CHECK(engine.scripts().at("Zeta").description == "The first");
+  CHECK(engine.scripts().at("Alpha page.com").description.empty());
   // Neither by the name of its file
-  CHECK_FALSE(workflow.run<report_manifest>("1", {}));
+  CHECK_FALSE(engine.run<report_manifest>("1", {}));
 }
 
-TEST_CASE("workflow_script_runs_a_function", "[workflow]")
+TEST_CASE("lua_engine_runs_a_function", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_script_runs_a_function"};
+  const auto folder = test_utils::temp_folder{"lua_engine_runs_a_function"};
   const auto scripts = folder.path() / "scripts";
   std::filesystem::create_directories(scripts);
   test_utils::write_file(
@@ -482,8 +480,8 @@ TEST_CASE("workflow_script_runs_a_function", "[workflow]")
       }
     )"
   );
-  auto workflow = workflow_script{test_utils::make_script_settings(folder.path(), true), bundled};
-  test_utils::load_scripts(workflow);
+  auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
+  test_utils::load_scripts(engine);
   const auto input = [](const std::string& text)
   {
     return echo_table{
@@ -492,7 +490,7 @@ TEST_CASE("workflow_script_runs_a_function", "[workflow]")
           {{"x", 1}}
     };
   };
-  const auto run = [&](const std::string& text) { return workflow.run<echo_manifest>("Echo", input(text)); };
+  const auto run = [&](const std::string& text) { return engine.run<echo_manifest>("Echo", input(text)); };
 
   CHECK(
     run("john3") == echo_table{
@@ -514,8 +512,8 @@ TEST_CASE("workflow_script_runs_a_function", "[workflow]")
   CHECK_FALSE(run("number as key"));
   CHECK_FALSE(run("broken"));
   // A missing script or function
-  CHECK_FALSE(workflow.run<echo_manifest>("Missing", input("john3")));
-  CHECK_FALSE(workflow.run<missing_manifest>("Echo", {}));
+  CHECK_FALSE(engine.run<echo_manifest>("Missing", input("john3")));
+  CHECK_FALSE(engine.run<missing_manifest>("Echo", {}));
 }
 
-} // namespace arcstd::workflow
+} // namespace arcstd::lua

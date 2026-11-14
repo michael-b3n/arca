@@ -1,7 +1,7 @@
 #include "test_utils/scripts.hpp"
 #include "test_utils/temp_folder.hpp"
 
-#include <arcstd/workflow/workflow_script.hpp>
+#include <arcstd/lua/lua_engine.hpp>
 #include <arcstd/workflow/workflow_web.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -18,14 +18,14 @@ TEST_CASE("workflow_web_fetches_web_pages", "[workflow]")
 {
   const auto folder = test_utils::temp_folder{"workflow_web_fetches_web_pages"};
   const auto settings = test_utils::make_script_settings(folder.path());
-  const auto script = std::make_shared<workflow_script>(settings, test_utils::no_bundled);
+  const auto script = std::make_shared<lua::lua_engine>(settings, test_utils::no_bundled);
   const auto web = workflow_web{settings, script};
   // Fails before any request, so no network is needed, and the same when answered from memory
   CHECK(web.fetch("not a url") == std::unexpected{std::string{"invalid_url"}});
   CHECK(web.fetch("not a url") == std::unexpected{std::string{"invalid_url"}});
   CHECK(
     test_utils::script_value<std::string>(
-      *script, "local content, error = workflow.web.fetch('not a url') return content == nil and error"
+      *script, "local content, error = web.fetch('not a url') return content == nil and error"
     ) == "invalid_url"
   );
 }
@@ -49,13 +49,13 @@ TEST_CASE("workflow_web_takes_its_function_back_on_destruction", "[workflow]")
 {
   const auto folder = test_utils::temp_folder{"workflow_web_takes_its_function_back_on_destruction"};
   const auto settings = test_utils::make_script_settings(folder.path());
-  const auto script = std::make_shared<workflow_script>(settings, test_utils::no_bundled);
+  const auto script = std::make_shared<lua::lua_engine>(settings, test_utils::no_bundled);
   {
     const auto web = workflow_web{settings, script};
-    CHECK(test_utils::script_value<bool>(*script, "return type(workflow.web.fetch) == 'function'") == true);
+    CHECK(test_utils::script_value<bool>(*script, "return type(web.fetch) == 'function'") == true);
   }
   // Only it, the scripts go on
-  CHECK(test_utils::script_value<bool>(*script, "return workflow == nil") == true);
+  CHECK(test_utils::script_value<bool>(*script, "return web == nil") == true);
   CHECK(script->run_script("after.lua", "return 1"));
 }
 

@@ -22,18 +22,16 @@ workflow_web_settings::workflow_web_settings(std::shared_ptr<setting::setting_st
 
 ///
 ///
-workflow_web::workflow_web(
-  std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script
-)
+workflow_web::workflow_web(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine)
   : workflow_base{std::move(setting_store)}
-  , workflow_script_{std::move(workflow_script)}
+  , lua_engine_{std::move(lua_engine)}
 {
   registrations_
     ///
     /// \lua How long a failed url is not requested again, `Web > Pause after a failure`. With 0 s a script may
     /// request a failed url again right away.
     ///
-    << workflow_script_->register_setting(*settings().retry_pause)
+    << lua_engine_->register_setting(*settings().retry_pause)
     ///
     /// \lua Fetches a web page. The script waits for the page, and other scripts wait too. During
     /// `Web > Pause after a failure` a failed url is not requested again, it returns the same failure.
@@ -41,7 +39,7 @@ workflow_web::workflow_web(
     /// \return the content of the page, or `nil` and the reason: `invalid_url`, `not_found` (HTTP 404 or 410),
     /// `timeout` (after 30 s), `init_failed` or `request_failed`
     ///
-    << workflow_script_->register_function("web.fetch", [this](const std::string& url) { return fetch(url); });
+    << lua_engine_->register_function("web.fetch", [this](const std::string& url) { return fetch(url); });
 }
 
 ///

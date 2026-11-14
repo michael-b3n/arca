@@ -1,5 +1,5 @@
 -- Sets up the state in the global `root` the app created. root.interface is what scripts see as their globals,
--- read-only: the safe parts of Lua, the helpers and what the workflows register. root.system is kept for the app.
+-- read-only: the safe parts of Lua, the helpers and what the app registers. root.system is kept for the app.
 -- The app passes the file names of the other embedded scripts.
 local files = ...
 

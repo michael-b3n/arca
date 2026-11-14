@@ -1,8 +1,9 @@
 #include "arcqml/bridge/BridgeScript.hpp"
 #include "arcqml/util/LocalPath.hpp"
 
+#include <arcstd/execution/launch.hpp>
+#include <arcstd/lua/lua_engine.hpp>
 #include <arcstd/util/log.hpp>
-#include <arcstd/workflow/workflow_script.hpp>
 
 #include <QMetaObject>
 #include <QStringList>
@@ -20,13 +21,13 @@ namespace arcqml
 ///
 ///
 BridgeScript::BridgeScript(
-  std::shared_ptr<arcstd::workflow::workflow_script> workflowScript, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::lua::lua_engine> luaEngine, const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QObject{parent}
-  , workflowScript_{std::move(workflowScript)}
+  , luaEngine_{std::move(luaEngine)}
 {
-  workflowScript_->connect_queued(
-    &arcstd::workflow::workflow_script_sigs::scripts_loaded,
+  luaEngine_->connect_queued(
+    &arcstd::lua::lua_engine_signals::scripts_loaded,
     [this]()
     {
       QMetaObject::invokeMethod(
@@ -88,10 +89,10 @@ void BridgeScript::load(std::vector<std::filesystem::path> files)
   // Starting the loading waits for the one before to end, scripts_loaded ends the loading here
   auto importAndLoad = [this, files = std::move(files)]()
   {
-    std::ignore = workflowScript_->import_scripts(files);
-    workflowScript_->load_scripts();
+    std::ignore = luaEngine_->import_scripts(files);
+    luaEngine_->load_scripts();
   };
-  arcstd::workflow::workflow_ground::launch(std::move(importAndLoad), scope_);
+  arcstd::execution::launch(std::move(importAndLoad), scope_);
 }
 
 ///
@@ -109,7 +110,7 @@ void BridgeScript::updateScripts()
     entry.insert(QStringLiteral("functions"), functions);
     return QVariant{entry};
   };
-  const auto scripts = workflowScript_->scripts();
+  const auto scripts = luaEngine_->scripts();
   scripts_ = scripts | std::views::transform(toEntry) | std::ranges::to<QVariantList>();
   emit scriptsChanged();
 }

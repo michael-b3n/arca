@@ -1,10 +1,10 @@
 #pragma once
 
 #include "arcstd/export.hpp"
+#include "arcstd/lua/lua_engine.hpp"
 #include "arcstd/setting/setting_store.hpp"
 #include "arcstd/util/identifier.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
-#include "arcstd/workflow/workflow_script.hpp"
 
 #include <filesystem>
 #include <map>
@@ -32,14 +32,14 @@ class ARCSTD_EXPORT workflow_cache final : public workflow_base<void>
   static constexpr auto folder_name = "cache";
 
   // Variables
-  const std::shared_ptr<workflow_script> workflow_script_;
+  const std::shared_ptr<lua::lua_engine> lua_engine_;
   const std::filesystem::path folder_;
   mutable std::mutex mtx_;
   std::map<std::string, std::unique_ptr<core::core_cache>> caches_;
-  workflow_script::registration_type registrations_;
+  lua::lua_engine::registration_type registrations_;
 
 public: // Structors
-  workflow_cache(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script);
+  workflow_cache(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine);
   ~workflow_cache() noexcept override;
 
 public: // Modifiers

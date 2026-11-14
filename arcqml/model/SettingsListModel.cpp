@@ -105,12 +105,12 @@ auto getValidatorType(const auto& setting) -> SettingsListModel::ValidatorType
 ///
 ///
 SettingsListModel::SettingsListModel(
-  std::shared_ptr<arcstd::setting::setting_store> workflowSettings, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::setting::setting_store> settingStore, const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QAbstractListModel{parent}
-  , workflowSettings_{std::move(workflowSettings)}
+  , settingStore_{std::move(settingStore)}
 {
-  const auto settings = workflowSettings_->type_erased_settings();
+  const auto settings = settingStore_->type_erased_settings();
   std::ranges::for_each(
     settings | std::views::filter([](const auto& settingData) { return !isInternalSetting(settingData.path); }),
     [&](const auto& settingData)
@@ -118,7 +118,7 @@ SettingsListModel::SettingsListModel(
   );
 
   // Settings may also be created after this model was constructed, e.g. by the QML layer.
-  workflowSettings_->connect_queued(
+  settingStore_->connect_queued(
     &arcstd::setting::setting_store_signals::setting_created,
     [this](const std::string& path)
     {
@@ -238,7 +238,7 @@ void SettingsListModel::appendSetting(const std::string& path)
   {
     return;
   }
-  const auto settingData = workflowSettings_->type_erased_setting(path);
+  const auto settingData = settingStore_->type_erased_setting(path);
   if(!settingData)
   {
     LOG_ERROR("append setting failed: setting not found: path=\"{}\"", path);

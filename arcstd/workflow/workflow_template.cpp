@@ -23,15 +23,15 @@ workflow_template_settings::workflow_template_settings(std::shared_ptr<setting::
 ///
 ///
 workflow_template::workflow_template(
-  std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script
+  std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine
 )
   : workflow_base{std::move(setting_store)}
-  , workflow_script_{std::move(workflow_script)}
+  , lua_engine_{std::move(lua_engine)}
 {
-  // registrations_ << workflow_script_->register_function(
+  // registrations_ << lua_engine_->register_function(
   //   "template.start", [this](int value) { return start(params{{.value = value}}).has_value(); }
   // );
-  // registrations_ << workflow_script_->register_setting(*settings().plain_bool);
+  // registrations_ << lua_engine_->register_setting(*settings().plain_bool);
 }
 
 ///

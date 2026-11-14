@@ -1,9 +1,9 @@
 #pragma once
 
 #include "arcstd/export.hpp"
+#include "arcstd/lua/lua_engine.hpp"
 #include "arcstd/setting/setting_store.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
-#include "arcstd/workflow/workflow_script.hpp"
 #include "arcstd/workflow/workflow_settings_base.hpp"
 
 #include <chrono>
@@ -43,16 +43,16 @@ class ARCSTD_EXPORT workflow_web final : public workflow_base<workflow_web_setti
   };
 
   // Variables
-  const std::shared_ptr<workflow_script> workflow_script_;
+  const std::shared_ptr<lua::lua_engine> lua_engine_;
   mutable std::mutex mtx_;
   mutable std::map<std::string, failure_t> failures_;
-  workflow_script::registration_type registrations_;
+  lua::lua_engine::registration_type registrations_;
 
 public: // Typedefs
   using page_type = std::expected<std::string, std::string>;
 
 public: // Structors
-  workflow_web(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script);
+  workflow_web(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine);
   ~workflow_web() noexcept override;
 
 public: // Operations

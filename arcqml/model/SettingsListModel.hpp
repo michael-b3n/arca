@@ -1,8 +1,8 @@
 #pragma once
 
 #include <arcstd/setting/setting_store.hpp>
+#include <arcstd/signal/queued_connections.hpp>
 #include <arcstd/util/non_owning_ptr.hpp>
-#include <arcstd/workflow/workflow_base.hpp>
 
 #include <QAbstractListModel>
 #include <QList>
@@ -82,9 +82,9 @@ private: // Typedefs
   };
 
   // Variables
-  std::shared_ptr<arcstd::setting::setting_store> workflowSettings_;
+  std::shared_ptr<arcstd::setting::setting_store> settingStore_;
   std::vector<Entry> entries_;
-  arcstd::workflow::workflow_ground::connections_type connections_;
+  arcstd::signal::queued_connections connections_;
 
 public: // Typedefs
   enum Role
@@ -107,7 +107,7 @@ public: // Typedefs
 
 public: // Structors
   explicit SettingsListModel(
-    std::shared_ptr<arcstd::setting::setting_store> workflowSettings, arcstd::util::non_owning_ptr<QObject> parent = nullptr
+    std::shared_ptr<arcstd::setting::setting_store> settingStore, arcstd::util::non_owning_ptr<QObject> parent = nullptr
   );
   ~SettingsListModel() noexcept override;
 
