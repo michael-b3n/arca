@@ -1,17 +1,56 @@
 #include "arcstd/execution/scope.hpp"
-#include "arcstd/execution/scope_data.hpp"
+#include "arcstd/execution/execution.hpp"
 #include "arcstd/util/exception.hpp"
 #include "arcstd/util/log.hpp"
 
+#include <exception>
 #include <utility>
 
 namespace arcstd::execution
 {
+namespace
+{
+
+///
+/// Log the error launched work ended with, nobody else is left to receive it.
+///
+auto log_launch_error(const std::exception_ptr& error) noexcept -> void
+{
+  try
+  {
+    std::rethrow_exception(error);
+  }
+  catch(...)
+  {
+    LOG_ERROR("launched work failed: {}", util::exception_report());
+  }
+}
+
+} // namespace
+
+///
+/// What the scope keeps of the execution library.
+///
+struct scope::impl final
+{
+  ex::counting_scope scope;
+};
+
+///
+/// Compiled here, so the library and the project built on it share the one thread pool.
+///
+auto detail::launch(std::move_only_function<void()> work, scope& scope) -> void
+{
+  ex::spawn(
+    ex::schedule(ex::get_parallel_scheduler()) | ex::then(std::move(work)) | ex::upon_error(&log_launch_error),
+    scope.impl_->scope.get_token()
+  );
+}
 
 ///
 ///
 scope::scope()
-  : data_{std::make_unique<detail::scope_data>()}
+  : impl_{std::make_unique<impl>()}
 {
 }
 
@@ -33,8 +72,8 @@ auto scope::stop() noexcept -> void
   }
   try
   {
-    data_->scope.request_stop();
-    ex::sync_wait(data_->scope.join());
+    impl_->scope.request_stop();
+    ex::sync_wait(impl_->scope.join());
   }
   catch(...)
   {

@@ -23,7 +23,6 @@ endif()
 set(ARCSTD_PRIVATE_INC_FILES
   cache/cache_database.hpp
   execution/execution.hpp
-  execution/scope_data.hpp
   lua/internal_scripts.hpp
   lua/names.hpp
   lua/object_cast.hpp

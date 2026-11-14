@@ -14,8 +14,6 @@ class scope;
 namespace detail
 {
 
-struct scope_data;
-
 ///
 /// Run \p work on the thread pool, detached in \p scope, \see execution::launch
 ///
@@ -32,10 +30,13 @@ class ARCSTD_EXPORT scope final
   // Friends
   friend ARCSTD_EXPORT auto detail::launch(std::move_only_function<void()> work, scope& scope) -> void;
 
+  // Typedefs
+  struct impl;
+
   // Variables
   mutable std::mutex mtx_;
   bool stopped_{false};
-  const std::unique_ptr<detail::scope_data> data_;
+  const std::unique_ptr<impl> impl_;
 
 public: // Structors
   scope();
