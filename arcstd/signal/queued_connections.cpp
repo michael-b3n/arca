@@ -1,8 +1,8 @@
-#include "arcstd/framework/queued_connections.hpp"
+#include "arcstd/signal/queued_connections.hpp"
 #include "arcstd/util/exception.hpp"
 #include "arcstd/util/log.hpp"
 
-namespace arcstd::framework
+namespace arcstd::signal
 {
 
 ///
@@ -31,4 +31,4 @@ auto queued_connections::disconnect() -> void
   scope_.stop();
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::signal

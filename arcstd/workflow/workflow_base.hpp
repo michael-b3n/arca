@@ -3,9 +3,9 @@
 #include "arcstd/execution/launch.hpp"
 #include "arcstd/execution/scope.hpp"
 #include "arcstd/framework/process_params.hpp"
-#include "arcstd/framework/queued_connections.hpp"
 #include "arcstd/signal/adapter.hpp"
 #include "arcstd/signal/common.hpp"
+#include "arcstd/signal/queued_connections.hpp"
 #include "arcstd/workflow/workflow_settings.hpp"
 #include "arcstd/workflow/workflow_settings_base.hpp"
 
@@ -25,7 +25,7 @@ struct workflow_ground
 {
   // Typedefs
   using scope_type = execution::scope;
-  using connections_type = framework::queued_connections;
+  using connections_type = signal::queued_connections;
   using process_id_type = framework::process_id_type;
   using result_unexpected_type = framework::process_result_unexpected;
   template<typename T>

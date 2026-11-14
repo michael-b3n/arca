@@ -1,5 +1,5 @@
-#include <arcstd/framework/queued_connections.hpp>
 #include <arcstd/signal/adapter.hpp>
+#include <arcstd/signal/queued_connections.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -8,21 +8,21 @@
 #include <string>
 #include <thread>
 
-namespace arcstd::framework
+namespace arcstd::signal
 {
 namespace
 {
 
 struct queued_signals final
 {
-  signal::signal_type<void()> on_notify;
-  signal::signal_type<void(std::string)> on_text;
+  signal_type<void()> on_notify;
+  signal_type<void(std::string)> on_text;
 };
 
 ///
 /// Adapter exposing notify for the tests.
 ///
-class queued_adapter final : public signal::adapter<queued_signals>
+class queued_adapter final : public adapter<queued_signals>
 {
 public: // Modifiers
   auto fire_notify() -> void;
@@ -45,7 +45,7 @@ auto queued_adapter::fire_text(const std::string& text) -> void
 
 } // namespace
 
-TEST_CASE("queued_connections_run_the_slot_on_another_thread", "[framework]")
+TEST_CASE("queued_connections_run_the_slot_on_another_thread", "[signal]")
 {
   auto adapter = queued_adapter{};
   auto slot_thread = std::thread::id{};
@@ -73,7 +73,7 @@ TEST_CASE("queued_connections_run_the_slot_on_another_thread", "[framework]")
   CHECK(text == "copied");
 }
 
-TEST_CASE("queued_connections_disconnect_waits_for_the_running_slot", "[framework]")
+TEST_CASE("queued_connections_disconnect_waits_for_the_running_slot", "[signal]")
 {
   auto adapter = queued_adapter{};
   auto started = std::atomic_bool{false};
@@ -96,7 +96,7 @@ TEST_CASE("queued_connections_disconnect_waits_for_the_running_slot", "[framewor
   CHECK(finished);
 }
 
-TEST_CASE("queued_connections_drop_emissions_after_disconnect", "[framework]")
+TEST_CASE("queued_connections_drop_emissions_after_disconnect", "[signal]")
 {
   auto adapter = queued_adapter{};
   auto calls = std::atomic_int{0};
@@ -107,7 +107,7 @@ TEST_CASE("queued_connections_drop_emissions_after_disconnect", "[framework]")
   CHECK(calls == 0);
 }
 
-TEST_CASE("queued_connections_survive_an_emission_after_destruction", "[framework]")
+TEST_CASE("queued_connections_survive_an_emission_after_destruction", "[signal]")
 {
   auto adapter = queued_adapter{};
   auto calls = std::atomic_int{0};
@@ -119,4 +119,4 @@ TEST_CASE("queued_connections_survive_an_emission_after_destruction", "[framewor
   CHECK(calls == 0);
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::signal

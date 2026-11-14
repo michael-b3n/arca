@@ -1,7 +1,7 @@
 #pragma once
 
-#include "arcstd/txt/find_uint.hpp"
 #include "arcstd/util/exception.hpp"
+#include "arcstd/util/find_uint.hpp"
 #include "arcstd/util/ranges.hpp"
 
 #include <algorithm>
@@ -178,7 +178,7 @@ template<string_view_type... S>
     {
       const auto number_size = suffix_pos - number_start;
       if(
-        const auto result = txt::find_uint(data.substr(number_start, number_size));
+        const auto result = find_uint(data.substr(number_start, number_size));
         result.has_value() && result->post_value_offset == number_size
       )
       {

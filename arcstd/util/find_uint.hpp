@@ -6,7 +6,7 @@
 #include <optional>
 #include <string_view>
 
-namespace arcstd::txt
+namespace arcstd::util
 {
 
 ///
@@ -51,4 +51,4 @@ constexpr auto find_uint_t::operator()(const std::string_view text) const -> std
   return result{.value = value, .post_value_offset = static_cast<std::size_t>(offset)};
 }
 
-} // namespace arcstd::txt
+} // namespace arcstd::util

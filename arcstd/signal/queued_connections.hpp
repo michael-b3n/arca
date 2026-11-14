@@ -15,14 +15,14 @@
 #include <type_traits>
 #include <utility>
 
-namespace arcstd::framework
+namespace arcstd::signal
 {
 
 ///
 /// Connections to signals whose slots run on the thread pool instead of on the emitting thread,
 /// possibly several at the same time. The connections end with this object or on disconnect.
 /// No slot connected through it runs once disconnect returned, a slot queued by then is dropped.
-/// \see signal::adapter::connect_queued and signal::adapter::connect_queued_extended
+/// \see adapter::connect_queued and adapter::connect_queued_extended
 ///
 class ARCSTD_EXPORT queued_connections final
 {
@@ -38,7 +38,7 @@ class ARCSTD_EXPORT queued_connections final
 
   // Variables
   const std::shared_ptr<gate> gate_{std::make_shared<gate>()};
-  signal::connection_store connections_;
+  connection_store connections_;
   execution::scope scope_;
 
 public: // Structors
@@ -50,14 +50,14 @@ public: // Modifiers
   /// Connect a slot to a signal. An emission copies its arguments and queues the slot.
   /// \see adapter::connect_queued
   ///
-  template<signal::signal_like T>
+  template<signal_like T>
   auto connect(T& sig, typename T::slot_type slot) -> void;
 
   ///
   /// Connect an extended slot to a signal. An emission copies its arguments and queues the slot.
   /// \see adapter::connect_queued_extended
   ///
-  template<signal::signal_like T>
+  template<signal_like T>
   auto connect_extended(T& sig, typename T::extended_slot_type slot) -> void;
 
   ///
@@ -76,12 +76,12 @@ private: // Implementation
 
 ///
 ///
-template<signal::signal_like T>
+template<signal_like T>
 auto queued_connections::connect(T& sig, typename T::slot_type slot) -> void
 {
   // Nobody is left to take the value a queued slot returns.
-  static_assert(std::is_void_v<typename signal::signal_signature<T>::return_type>);
-  using function_type = signal::to_functional<T, std::function>::type;
+  static_assert(std::is_void_v<typename signal_signature<T>::return_type>);
+  using function_type = to_functional<T, std::function>::type;
   static_assert(std::is_convertible_v<decltype(slot), function_type>);
   static_assert(std::copyable<decltype(slot)>);
 
@@ -90,12 +90,12 @@ auto queued_connections::connect(T& sig, typename T::slot_type slot) -> void
 
 ///
 ///
-template<signal::signal_like T>
+template<signal_like T>
 auto queued_connections::connect_extended(T& sig, typename T::extended_slot_type slot) -> void
 {
   // Nobody is left to take the value a queued slot returns.
-  static_assert(std::is_void_v<typename signal::signal_signature<T>::return_type>);
-  using function_type = signal::to_functional<T, std::function>::type_extended;
+  static_assert(std::is_void_v<typename signal_signature<T>::return_type>);
+  using function_type = to_functional<T, std::function>::type_extended;
   static_assert(std::is_convertible_v<decltype(slot), function_type>);
   static_assert(std::copyable<decltype(slot)>);
 
@@ -126,4 +126,4 @@ auto queued_connections::queued(S slot) -> F
   };
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::signal
