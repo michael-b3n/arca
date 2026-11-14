@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/signal/common.hpp"
 
 #include <mutex>
@@ -11,7 +12,7 @@ namespace arcstd::signal
 ///
 /// Connection store that stores connections to signals and disconnects them when destroyed.
 ///
-class connection_store final
+class ARCSTD_EXPORT connection_store final
 {
   // Variables
   mutable std::mutex mtx_;

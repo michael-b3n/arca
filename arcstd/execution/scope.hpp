@@ -1,5 +1,7 @@
 #pragma once
 
+#include "arcstd/export.hpp"
+
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -17,7 +19,7 @@ struct scope_data;
 ///
 /// Run \p work on the thread pool, detached in \p scope, \see execution::launch
 ///
-auto launch(std::move_only_function<void()> work, scope& scope) -> void;
+ARCSTD_EXPORT auto launch(std::move_only_function<void()> work, scope& scope) -> void;
 
 } // namespace detail
 
@@ -25,10 +27,10 @@ auto launch(std::move_only_function<void()> work, scope& scope) -> void;
 /// Scope holding launched work, \see launch. Destruction requests a stop and
 /// waits for the work, so the work may refer to whatever outlives the scope.
 ///
-class scope final
+class ARCSTD_EXPORT scope final
 {
   // Friends
-  friend auto detail::launch(std::move_only_function<void()> work, scope& scope) -> void;
+  friend ARCSTD_EXPORT auto detail::launch(std::move_only_function<void()> work, scope& scope) -> void;
 
   // Variables
   mutable std::mutex mtx_;

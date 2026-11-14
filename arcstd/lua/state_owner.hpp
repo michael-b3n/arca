@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined(ARCSTD_INTERNAL)
+  #error "arcstd/lua/state_owner.hpp is a private header of arcstd"
+#endif
+
 #include "arcstd/lua/state.hpp"
 
 #include <memory>

@@ -55,4 +55,6 @@ foreach(entry ${${PROJECT_NAME}_SUBDIR_CANDIDATES})
   endif()
 endforeach()
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${${PROJECT_NAME}_SUBDIRS})
+# Its own headers are included by "arcqml/...", from the folder above.
+cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH ARCQML_INCLUDE_DIR)
+target_include_directories(${PROJECT_NAME} PUBLIC ${ARCQML_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${${PROJECT_NAME}_SUBDIRS})

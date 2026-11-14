@@ -1,5 +1,7 @@
 #pragma once
 
+#include "arcstd/export.hpp"
+
 #include <cstddef>
 #include <filesystem>
 #include <memory>
@@ -21,7 +23,7 @@ namespace arcstd::io
 /// Read-only access to the cells of a CSV document as strings, wraps rapidcsv.
 /// \note The complete document is held in memory.
 ///
-class csv_reader final
+class ARCSTD_EXPORT csv_reader final
 {
   // Variables
   std::unique_ptr<rapidcsv::Document> document_;

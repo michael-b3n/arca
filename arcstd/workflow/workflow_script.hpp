@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/framework/setting.hpp"
 #include "arcstd/framework/setting_common.hpp"
 #include "arcstd/lua/embedded_scripts.hpp"
@@ -57,7 +58,7 @@ concept script_manifest = requires {
 ///
 /// Settings corresponding to workflow script.
 ///
-class workflow_script_settings final : public workflow_settings_base
+class ARCSTD_EXPORT workflow_script_settings final : public workflow_settings_base
 {
 public: // Structors
   workflow_script_settings(std::shared_ptr<workflow_settings> workflow_settings);
@@ -86,7 +87,7 @@ struct workflow_script_sigs final
 /// Signal IDs to connect to:
 /// - scripts_loaded: Emitted under the Lua lock once the scripts are loaded, also if none are.
 ///
-class workflow_script final
+class ARCSTD_EXPORT workflow_script final
   : public workflow_base<workflow_script_settings>
   , public signal::adapter<workflow_script_sigs>
 {

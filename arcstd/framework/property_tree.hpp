@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined(ARCSTD_INTERNAL)
+  #error "arcstd/framework/property_tree.hpp is a private header of arcstd"
+#endif
+
 #include "arcstd/framework/property.hpp"
 #include "arcstd/framework/property_parser.hpp"
 #include "arcstd/util/exception.hpp"

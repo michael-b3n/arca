@@ -1,5 +1,7 @@
 #pragma once
 
+#include "arcstd/export.hpp"
+
 #include <format>
 #include <source_location>
 #include <stacktrace>
@@ -12,7 +14,7 @@ namespace arcstd::util
 ///
 /// Exception base class.
 ///
-class exception : public std::runtime_error
+class ARCSTD_EXPORT exception : public std::runtime_error
 {
 public: // Structors
   exception(
@@ -35,7 +37,7 @@ protected: // Variables
 /// including type, message, location, and stacktrace if available.
 /// \return A formatted string with exception details
 ///
-[[nodiscard]] auto exception_report() -> std::string;
+[[nodiscard]] ARCSTD_EXPORT auto exception_report() -> std::string;
 
 } // namespace arcstd::util
 

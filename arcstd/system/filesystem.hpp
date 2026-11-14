@@ -1,5 +1,7 @@
 #pragma once
 
+#include "arcstd/export.hpp"
+
 #include <filesystem>
 #include <optional>
 #include <string_view>
@@ -10,7 +12,7 @@ namespace arcstd::system
 ///
 /// Filesystem class for windows implementation.
 ///
-struct filesystem final
+struct ARCSTD_EXPORT filesystem final
 {
   ///
   /// Get path to executable.

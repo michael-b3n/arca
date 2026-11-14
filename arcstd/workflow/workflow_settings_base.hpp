@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/workflow/workflow_settings.hpp"
 
 #include <memory>
@@ -11,7 +12,7 @@ namespace arcstd::workflow
 ///
 /// Base class of the settings of a workflow.
 ///
-class workflow_settings_base
+class ARCSTD_EXPORT workflow_settings_base
 {
 public: // Structors
   workflow_settings_base(std::shared_ptr<workflow_settings> workflow_settings);

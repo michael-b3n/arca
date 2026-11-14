@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/util/identifier.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
 #include "arcstd/workflow/workflow_script.hpp"
@@ -25,7 +26,7 @@ namespace arcstd::workflow
 /// Registered for scripts as workflow.cache.get(name, key) and workflow.cache.set(name, key, value), a script names
 /// its own cache, e.g. after itself.
 ///
-class workflow_cache final : public workflow_base<void>
+class ARCSTD_EXPORT workflow_cache final : public workflow_base<void>
 {
   // Constants
   static constexpr auto folder_name = "cache";

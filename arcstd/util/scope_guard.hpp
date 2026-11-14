@@ -1,5 +1,7 @@
 #pragma once
 
+#include "arcstd/export.hpp"
+
 #include <functional>
 #include <memory>
 
@@ -9,7 +11,7 @@ namespace arcstd::util
 ///
 /// Move-only guard calling a callable on destruction or reset.
 ///
-class scope_guard final
+class ARCSTD_EXPORT scope_guard final
 {
   // Variables
   std::move_only_function<void()> on_destruction_;
@@ -43,7 +45,7 @@ private: // Implementation
 /// callable, ensuring that the callable is only executed once when all guards are destroyed or reset.
 /// This is useful for cases where multiple components need to share the same cleanup logic.
 ///
-class shared_scope_guard final
+class ARCSTD_EXPORT shared_scope_guard final
 {
   // Variables
   bool is_initial_instance_{false};
@@ -55,7 +57,7 @@ public: // Typedefs
   /// Multiple calls to the create function will return a guard that is bound to the same underlying instance,
   /// ensuring that the on_destruction callback is only called once when all guards are destroyed or reset.
   ///
-  class creator final
+  class ARCSTD_EXPORT creator final
   {
     // Variables
     std::weak_ptr<scope_guard> instance_;

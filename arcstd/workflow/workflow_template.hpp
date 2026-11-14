@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
 #include "arcstd/workflow/workflow_script.hpp"
 #include "arcstd/workflow/workflow_settings_base.hpp"
@@ -12,7 +13,7 @@ namespace arcstd::workflow
 ///
 /// Settings corresponding to workflow template.
 ///
-class workflow_template_settings final : public workflow_settings_base
+class ARCSTD_EXPORT workflow_template_settings final : public workflow_settings_base
 {
 public: // Structors
   workflow_template_settings(std::shared_ptr<workflow_settings> workflow_settings);
@@ -36,7 +37,7 @@ public: // Variables
 /// Workflow template. This is a template for creating new workflows.
 /// A workflow without Lua registrations leaves out workflow_script.
 ///
-class workflow_template final : public workflow_base<workflow_template_settings>
+class ARCSTD_EXPORT workflow_template final : public workflow_base<workflow_template_settings>
 {
   // Typedefs
   struct params_t final

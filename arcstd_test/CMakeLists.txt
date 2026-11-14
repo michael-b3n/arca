@@ -24,32 +24,16 @@ target_link_libraries(arcstd_test_utils
 )
 
 #
-# Define target sources
+# The tests of the interface, built like a project on arcstd: they include the public headers only and link the
+# library as it is, static or shared.
 #
 file(GLOB ARCSTD_TEST_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.cpp")
-
-# Include OS specific sources
-if(WIN32)
-  file(GLOB ARCSTD_TEST_WINDOWS_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/windows/*.cpp")
-  list(APPEND ARCSTD_TEST_SRC_FILES ${ARCSTD_TEST_WINDOWS_SRC_FILES})
-endif()
 list(FILTER ARCSTD_TEST_SRC_FILES EXCLUDE REGEX "/test_utils/")
 
-#
-# Set executable.
-#
 add_executable(arcstd_test)
-
-#
-# Set target sources.
-#
 target_sources(arcstd_test
   PRIVATE ${ARCSTD_TEST_SRC_FILES}
 )
-
-#
-# Link libraries.
-#
 target_link_libraries(
   arcstd_test
   PRIVATE
@@ -65,6 +49,25 @@ if(ARCA_BUILD_SHARED)
 endif()
 
 #
+# The tests of the internals in the folder private, they include the private headers too, \see arcstd_internals.
+#
+file(GLOB ARCSTD_PRIVATE_TEST_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/private/*/*.cpp")
+
+add_executable(arcstd_private_test)
+target_sources(arcstd_private_test
+  PRIVATE ${ARCSTD_PRIVATE_TEST_SRC_FILES}
+)
+target_include_directories(arcstd_private_test
+  PRIVATE ${CMAKE_CURRENT_LIST_DIR}
+)
+target_link_libraries(
+  arcstd_private_test
+  PRIVATE
+  Catch2::Catch2WithMain
+  arcstd_internals)
+
+#
 # Register the Catch2 test cases with CTest, so they can be run via `ctest` in the build directory.
 #
 catch_discover_tests(arcstd_test)
+catch_discover_tests(arcstd_private_test)

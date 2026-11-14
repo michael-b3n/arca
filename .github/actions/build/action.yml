@@ -1,6 +1,11 @@
 name: Build
 description: Configure, build and test arca with MSYS2.
 
+inputs:
+  preset:
+    description: CMake preset to configure, build and test with.
+    default: gcc-release
+
 runs:
   using: composite
   steps:
@@ -9,12 +14,17 @@ runs:
 
     - name: Configure
       shell: msys2 {0}
-      run: cmake --preset gcc-release
+      run: cmake --preset ${{ inputs.preset }}
 
     - name: Build
       shell: msys2 {0}
-      run: cmake --build --preset gcc-release
+      run: cmake --build --preset ${{ inputs.preset }}
+
+    # Each public header compiles on its own, with the include paths a project gets
+    - name: Check public headers
+      shell: msys2 {0}
+      run: cmake --build --preset ${{ inputs.preset }} --target all_verify_interface_header_sets
 
     - name: Test
       shell: msys2 {0}
-      run: ctest --preset gcc-release
+      run: ctest --preset ${{ inputs.preset }}

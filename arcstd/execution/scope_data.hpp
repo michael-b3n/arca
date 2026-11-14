@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined(ARCSTD_INTERNAL)
+  #error "arcstd/execution/scope_data.hpp is a private header of arcstd"
+#endif
+
 #include "arcstd/execution/execution.hpp"
 
 namespace arcstd::execution::detail

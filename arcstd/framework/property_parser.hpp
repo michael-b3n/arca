@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined(ARCSTD_INTERNAL)
+  #error "arcstd/framework/property_parser.hpp is a private header of arcstd"
+#endif
+
 #include "arcstd/meta/chrono.hpp"
 #include "arcstd/meta/contains.hpp"
 #include "arcstd/util/enum.hpp"

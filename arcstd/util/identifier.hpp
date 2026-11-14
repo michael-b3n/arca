@@ -1,5 +1,7 @@
 #pragma once
 
+#include "arcstd/export.hpp"
+
 #include <optional>
 #include <string>
 #include <string_view>
@@ -11,7 +13,7 @@ namespace arcstd::util
 /// Name of the characters below only and not empty, e.g. the name of a cache. So it reads the same as a key, in a
 /// path and in a file name, whoever chose it. Other characters are replaced.
 ///
-class identifier final
+class ARCSTD_EXPORT identifier final
 {
   // Variables
   std::string value_;

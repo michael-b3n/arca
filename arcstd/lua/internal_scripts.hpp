@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined(ARCSTD_INTERNAL)
+  #error "arcstd/lua/internal_scripts.hpp is a private header of arcstd"
+#endif
+
 #include "arcstd/lua/embedded_scripts.hpp"
 
 #include <optional>

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/framework/setting_common.hpp"
 #include "arcstd/math/value_range.hpp"
 #include "arcstd/meta/chrono.hpp"
@@ -62,7 +63,7 @@ concept type_erased_validator_param_requirement =
 ///
 /// Connector class for setting validators. This class shall be used as base class for all setting validators.
 ///
-class setting_validator_connector
+class ARCSTD_EXPORT setting_validator_connector
 {
   // Variables
   std::function<void()> on_changed_{nullptr};

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/util/string.hpp"
 
 #include <ranges>
@@ -14,7 +15,7 @@ namespace arcstd::util
 /// Path of sections separated by '.', e.g. the path of a setting, a Lua node or a script manifest.
 /// Empty sections are left out, so "a..b." is the path "a.b". Built from sections, each is read the same way.
 ///
-class path final
+class ARCSTD_EXPORT path final
 {
   // Typedefs
   using sections_type = std::vector<std::string>;

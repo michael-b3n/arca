@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/util/path.hpp"
 
 #include <memory>
@@ -20,7 +21,7 @@ struct state_data;
 /// Destroyed, it takes back what it registered and nothing else: the paths are free again and a script still holding
 /// a function gets an error calling it. It waits for the running script, which may be inside a function.
 ///
-class registration final
+class ARCSTD_EXPORT registration final
 {
   // Friends
   friend class state;

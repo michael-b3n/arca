@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
 #include "arcstd/workflow/workflow_script.hpp"
 #include "arcstd/workflow/workflow_settings.hpp"
@@ -19,7 +20,7 @@ namespace arcstd::workflow
 ///
 /// Settings corresponding to workflow web.
 ///
-class workflow_web_settings final : public workflow_settings_base
+class ARCSTD_EXPORT workflow_web_settings final : public workflow_settings_base
 {
 public: // Structors
   workflow_web_settings(std::shared_ptr<workflow_settings> workflow_settings);
@@ -32,7 +33,7 @@ public: // Variables
 ///
 /// Workflow web, fetches web pages.
 ///
-class workflow_web final : public workflow_base<workflow_web_settings>
+class ARCSTD_EXPORT workflow_web final : public workflow_base<workflow_web_settings>
 {
   // Typedefs
   struct failure_t final

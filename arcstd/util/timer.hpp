@@ -1,5 +1,7 @@
 #pragma once
 
+#include "arcstd/export.hpp"
+
 #include <boost/preprocessor/cat.hpp>
 
 #include <chrono>
@@ -11,7 +13,7 @@ namespace arcstd::util
 ///
 /// Timer class used for measuring time durations.
 ///
-class timer final
+class ARCSTD_EXPORT timer final
 {
   // Variables
   std::chrono::system_clock::time_point time_point_;
@@ -30,7 +32,7 @@ public: // Accessors
 ///
 /// Scoped timer logging duration on destruction.
 ///
-class scoped_timer_logger final
+class ARCSTD_EXPORT scoped_timer_logger final
 {
   // Variables
   const std::source_location source_location_;

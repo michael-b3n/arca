@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined(ARCSTD_INTERNAL)
+  #error "arcstd/core/core_cache.hpp is a private header of arcstd"
+#endif
+
 #include "arcstd/util/non_owning_ptr.hpp"
 
 #include <filesystem>

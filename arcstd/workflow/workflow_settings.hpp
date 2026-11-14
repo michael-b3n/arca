@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/framework/property.hpp"
 #include "arcstd/framework/setting.hpp"
 #include "arcstd/framework/setting_common.hpp"
@@ -84,7 +85,7 @@ struct workflow_settings_signals final
 /// Since this workflow owns the settings, it is required
 /// to live as long as the settings are used.
 ///
-class workflow_settings final : public signal::adapter<workflow_settings_signals>
+class ARCSTD_EXPORT workflow_settings final : public signal::adapter<workflow_settings_signals>
 {
   // Typedefs
   template<framework::underlying_setting_type_erased_type T>

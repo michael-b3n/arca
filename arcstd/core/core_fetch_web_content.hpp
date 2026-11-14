@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined(ARCSTD_INTERNAL)
+  #error "arcstd/core/core_fetch_web_content.hpp is a private header of arcstd"
+#endif
+
 #include <expected>
 #include <string>
 #include <string_view>

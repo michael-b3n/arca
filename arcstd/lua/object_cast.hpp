@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined(ARCSTD_INTERNAL)
+  #error "arcstd/lua/object_cast.hpp is a private header of arcstd"
+#endif
+
 #include "arcstd/lua/function_cast.hpp"
 #include "arcstd/lua/sol.hpp"
 #include "arcstd/lua/value.hpp"

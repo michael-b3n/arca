@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/util/source_location_helpers.hpp"
 
 #include <format>
@@ -38,28 +39,28 @@ enum class logger_level
 ///
 /// Log message with debug level.
 ///
-auto log_debug(std::string_view msg) -> void;
+ARCSTD_EXPORT auto log_debug(std::string_view msg) -> void;
 
 ///
 /// Log message with info level.
 ///
-auto log_info(std::string_view msg) -> void;
+ARCSTD_EXPORT auto log_info(std::string_view msg) -> void;
 
 ///
 /// Log message with warning level.
 ///
-auto log_warn(std::string_view msg) -> void;
+ARCSTD_EXPORT auto log_warn(std::string_view msg) -> void;
 
 ///
 /// Log message with error level.
 ///
-auto log_error(std::string_view msg) -> void;
+ARCSTD_EXPORT auto log_error(std::string_view msg) -> void;
 
 ///
 /// Init logger and shutdown logger with RAII.
 /// \note Messages logged while no logger instance is alive are dropped.
 ///
-struct logger final
+struct ARCSTD_EXPORT logger final
 {
   ///
   /// Init the logger, writing to the local data folder \p folder_name, see system::filesystem::local_data_folder.

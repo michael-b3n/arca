@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/export.hpp"
 #include "arcstd/util/bitflags.hpp"
 #include "arcstd/util/non_owning_ptr.hpp"
 
@@ -21,7 +22,7 @@ namespace arcstd::io
 /// Reader for ZIP archives. Provides read-only access to ZIP file contents.
 /// This class wraps libzip for simple ZIP file reading operations.
 ///
-class zip_file_reader final
+class ARCSTD_EXPORT zip_file_reader final
 {
   // Variables
   std::string password_;
