@@ -1,17 +1,17 @@
-#include "arcstd/workflow/workflow_web.hpp"
-#include "arcstd/core/core_fetch_web_content.hpp"
+#include "arcstd/web/web_fetcher.hpp"
 #include "arcstd/util/enum.hpp"
 #include "arcstd/util/exception.hpp"
+#include "arcstd/web/web_request.hpp"
 
 #include <utility>
 
-namespace arcstd::workflow
+namespace arcstd::web
 {
 
 ///
 ///
-workflow_web_settings::workflow_web_settings(std::shared_ptr<setting::setting_store> setting_store)
-  : workflow_settings_base{std::move(setting_store)}
+web_fetcher_settings::web_fetcher_settings(std::shared_ptr<setting::setting_store> setting_store)
+  : setting_store_{std::move(setting_store)}
   , retry_pause{setting_store_->create_setting(
       "web.retry_pause",
       std::chrono::seconds{60},
@@ -22,8 +22,8 @@ workflow_web_settings::workflow_web_settings(std::shared_ptr<setting::setting_st
 
 ///
 ///
-workflow_web::workflow_web(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine)
-  : workflow_base{std::move(setting_store)}
+web_fetcher::web_fetcher(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine)
+  : settings_{std::move(setting_store)}
   , lua_engine_{std::move(lua_engine)}
 {
   registrations_
@@ -44,11 +44,18 @@ workflow_web::workflow_web(std::shared_ptr<setting::setting_store> setting_store
 
 ///
 ///
-workflow_web::~workflow_web() noexcept = default;
+web_fetcher::~web_fetcher() noexcept = default;
 
 ///
 ///
-auto workflow_web::fetch(const std::string_view url) const -> page_type
+auto web_fetcher::settings() const -> const web_fetcher_settings&
+{
+  return settings_;
+}
+
+///
+///
+auto web_fetcher::fetch(const std::string_view url) const -> page_type
 {
   using clock_type = std::chrono::steady_clock;
   try
@@ -62,8 +69,7 @@ auto workflow_web::fetch(const std::string_view url) const -> page_type
       }
     }
     // Without the lock, the request may take until its timeout
-    auto page = core::core_fetch_web_content::fetch(url).transform_error([](const auto error)
-                                                                         { return std::string{util::enum_name(error)}; });
+    auto page = web_request::fetch(url).transform_error([](const auto error) { return std::string{util::enum_name(error)}; });
     if(!page)
     {
       const auto lock = std::scoped_lock{mtx_};
@@ -79,4 +85,4 @@ auto workflow_web::fetch(const std::string_view url) const -> page_type
   }
 }
 
-} // namespace arcstd::workflow
+} // namespace arcstd::web

@@ -2,7 +2,7 @@
 #include "test_utils/temp_folder.hpp"
 
 #include <arcstd/lua/lua_engine.hpp>
-#include <arcstd/workflow/workflow_web.hpp>
+#include <arcstd/web/web_fetcher.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -11,15 +11,15 @@
 #include <string>
 #include <tuple>
 
-namespace arcstd::workflow
+namespace arcstd::web
 {
 
-TEST_CASE("workflow_web_fetches_web_pages", "[workflow]")
+TEST_CASE("web_fetcher_fetches_web_pages", "[web]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_web_fetches_web_pages"};
+  const auto folder = test_utils::temp_folder{"web_fetcher_fetches_web_pages"};
   const auto settings = test_utils::make_script_settings(folder.path());
   const auto script = std::make_shared<lua::lua_engine>(settings, test_utils::no_bundled);
-  const auto web = workflow_web{settings, script};
+  const auto web = web_fetcher{settings, script};
   // Fails before any request, so no network is needed, and the same when answered from memory
   CHECK(web.fetch("not a url") == std::unexpected{std::string{"invalid_url"}});
   CHECK(web.fetch("not a url") == std::unexpected{std::string{"invalid_url"}});
@@ -30,11 +30,11 @@ TEST_CASE("workflow_web_fetches_web_pages", "[workflow]")
   );
 }
 
-TEST_CASE("workflow_web_keeps_the_retry_pause_in_its_range", "[workflow]")
+TEST_CASE("web_fetcher_keeps_the_retry_pause_in_its_range", "[web]")
 {
   using namespace std::chrono_literals;
-  const auto folder = test_utils::temp_folder{"workflow_web_keeps_the_retry_pause_in_its_range"};
-  const auto settings = workflow_web_settings{test_utils::make_script_settings(folder.path())};
+  const auto folder = test_utils::temp_folder{"web_fetcher_keeps_the_retry_pause_in_its_range"};
+  const auto settings = web_fetcher_settings{test_utils::make_script_settings(folder.path())};
   CHECK(settings.retry_pause->value() == 60s);
   // A duration is validated like a number: the range ends before its upper bound. 0 s is no pause.
   std::ignore = settings.retry_pause->value(-1s);
@@ -45,13 +45,13 @@ TEST_CASE("workflow_web_keeps_the_retry_pause_in_its_range", "[workflow]")
   CHECK(settings.retry_pause->value() == 5min);
 }
 
-TEST_CASE("workflow_web_takes_its_function_back_on_destruction", "[workflow]")
+TEST_CASE("web_fetcher_takes_its_function_back_on_destruction", "[web]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_web_takes_its_function_back_on_destruction"};
+  const auto folder = test_utils::temp_folder{"web_fetcher_takes_its_function_back_on_destruction"};
   const auto settings = test_utils::make_script_settings(folder.path());
   const auto script = std::make_shared<lua::lua_engine>(settings, test_utils::no_bundled);
   {
-    const auto web = workflow_web{settings, script};
+    const auto web = web_fetcher{settings, script};
     CHECK(test_utils::script_value<bool>(*script, "return type(web.fetch) == 'function'") == true);
   }
   // Only it, the scripts go on
@@ -59,4 +59,4 @@ TEST_CASE("workflow_web_takes_its_function_back_on_destruction", "[workflow]")
   CHECK(script->run_script("after.lua", "return 1"));
 }
 
-} // namespace arcstd::workflow
+} // namespace arcstd::web

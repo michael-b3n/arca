@@ -3,8 +3,6 @@
 #include "arcstd/export.hpp"
 #include "arcstd/lua/lua_engine.hpp"
 #include "arcstd/setting/setting_store.hpp"
-#include "arcstd/workflow/workflow_base.hpp"
-#include "arcstd/workflow/workflow_settings_base.hpp"
 
 #include <chrono>
 #include <expected>
@@ -14,26 +12,28 @@
 #include <string>
 #include <string_view>
 
-namespace arcstd::workflow
+namespace arcstd::web
 {
 
 ///
-/// Settings corresponding to workflow web.
+/// Settings of the web fetcher.
 ///
-class ARCSTD_EXPORT workflow_web_settings final : public workflow_settings_base
+class ARCSTD_EXPORT web_fetcher_settings final
 {
+  // Variables
+  const std::shared_ptr<setting::setting_store> setting_store_;
+
 public: // Structors
-  workflow_web_settings(std::shared_ptr<setting::setting_store> setting_store);
-  ~workflow_web_settings() noexcept override = default;
+  web_fetcher_settings(std::shared_ptr<setting::setting_store> setting_store);
 
 public: // Variables
-  const setting_type<std::chrono::seconds> retry_pause;
+  const setting::setting_store::setting_non_owning_ptr_type<std::chrono::seconds> retry_pause;
 };
 
 ///
-/// Workflow web, fetches web pages.
+/// Web fetcher, fetches web pages. Registered for scripts as web.fetch(url).
 ///
-class ARCSTD_EXPORT workflow_web final : public workflow_base<workflow_web_settings>
+class ARCSTD_EXPORT web_fetcher final
 {
   // Typedefs
   struct failure_t final
@@ -43,6 +43,7 @@ class ARCSTD_EXPORT workflow_web final : public workflow_base<workflow_web_setti
   };
 
   // Variables
+  const web_fetcher_settings settings_;
   const std::shared_ptr<lua::lua_engine> lua_engine_;
   mutable std::mutex mtx_;
   mutable std::map<std::string, failure_t> failures_;
@@ -52,8 +53,17 @@ public: // Typedefs
   using page_type = std::expected<std::string, std::string>;
 
 public: // Structors
-  workflow_web(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine);
-  ~workflow_web() noexcept override;
+  ///
+  /// Construct the fetcher with its settings in \p setting_store and its function for the scripts of \p lua_engine.
+  ///
+  web_fetcher(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine);
+  ~web_fetcher() noexcept;
+
+public: // Accessors
+  ///
+  /// \return the settings of the fetcher
+  ///
+  [[nodiscard]] auto settings() const -> const web_fetcher_settings&;
 
 public: // Operations
   ///
@@ -63,4 +73,4 @@ public: // Operations
   [[nodiscard]] auto fetch(std::string_view url) const -> page_type;
 };
 
-} // namespace arcstd::workflow
+} // namespace arcstd::web

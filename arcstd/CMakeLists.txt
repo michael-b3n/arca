@@ -21,18 +21,18 @@ endif()
 # ARCSTD_INTERNAL, which only the sources of arcstd and the tests of its internals define.
 #
 set(ARCSTD_PRIVATE_INC_FILES
-  core/core_cache.hpp
-  core/core_fetch_web_content.hpp
+  cache/cache_database.hpp
   execution/execution.hpp
   execution/scope_data.hpp
-  setting/property_parser.hpp
-  setting/property_tree.hpp
   lua/internal_scripts.hpp
   lua/names.hpp
   lua/object_cast.hpp
   lua/sol.hpp
   lua/state.hpp
   lua/state_owner.hpp
+  setting/property_parser.hpp
+  setting/property_tree.hpp
+  web/web_request.hpp
 )
 list(TRANSFORM ARCSTD_PRIVATE_INC_FILES PREPEND "${CMAKE_CURRENT_LIST_DIR}/")
 set(ARCSTD_PUBLIC_INC_FILES ${ARCSTD_INC_FILES})

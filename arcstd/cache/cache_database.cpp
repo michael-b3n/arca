@@ -1,4 +1,4 @@
-#include "arcstd/core/core_cache.hpp"
+#include "arcstd/cache/cache_database.hpp"
 #include "arcstd/util/log.hpp"
 #include "arcstd/util/numeric_cast.hpp"
 
@@ -12,7 +12,7 @@
 #include <tuple>
 #include <utility>
 
-namespace arcstd::core
+namespace arcstd::cache
 {
 namespace
 {
@@ -57,21 +57,21 @@ auto reset(const util::non_owning_ptr<sqlite3_stmt> statement) -> void
 
 ///
 ///
-auto core_cache::database_closer::operator()(const util::non_owning_ptr<sqlite3> database) const noexcept -> void
+auto cache_database::database_closer::operator()(const util::non_owning_ptr<sqlite3> database) const noexcept -> void
 {
   sqlite3_close(database);
 }
 
 ///
 ///
-auto core_cache::statement_closer::operator()(const util::non_owning_ptr<sqlite3_stmt> statement) const noexcept -> void
+auto cache_database::statement_closer::operator()(const util::non_owning_ptr<sqlite3_stmt> statement) const noexcept -> void
 {
   sqlite3_finalize(statement);
 }
 
 ///
 ///
-core_cache::core_cache(std::filesystem::path file)
+cache_database::cache_database(std::filesystem::path file)
   : file_{std::move(file)}
   , database_{open()}
   , get_{prepare(get_sql)}
@@ -82,7 +82,7 @@ core_cache::core_cache(std::filesystem::path file)
 
 ///
 ///
-auto core_cache::get(const std::string& key) const -> std::optional<std::string>
+auto cache_database::get(const std::string& key) const -> std::optional<std::string>
 {
   const auto lock = std::scoped_lock{mtx_};
   if(!get_ || !succeeded(bind_text(get_.get(), 1, key), "bind"))
@@ -107,7 +107,7 @@ auto core_cache::get(const std::string& key) const -> std::optional<std::string>
 
 ///
 ///
-auto core_cache::set(const std::string& key, std::optional<std::string> value) -> void
+auto cache_database::set(const std::string& key, std::optional<std::string> value) -> void
 {
   const auto lock = std::scoped_lock{mtx_};
   if(const auto& statement = value ? set_ : remove_)
@@ -118,7 +118,7 @@ auto core_cache::set(const std::string& key, std::optional<std::string> value) -
 
 ///
 ///
-auto core_cache::set_all(const std::map<std::string, std::string>& values) -> void
+auto cache_database::set_all(const std::map<std::string, std::string>& values) -> void
 {
   const auto lock = std::scoped_lock{mtx_};
   if(!set_ || !execute(begin_sql, "begin"))
@@ -132,7 +132,7 @@ auto core_cache::set_all(const std::map<std::string, std::string>& values) -> vo
 
 ///
 ///
-auto core_cache::clear() -> void
+auto cache_database::clear() -> void
 {
   const auto lock = std::scoped_lock{mtx_};
   if(database_)
@@ -143,7 +143,7 @@ auto core_cache::clear() -> void
 
 ///
 ///
-auto core_cache::open() const -> database_ptr
+auto cache_database::open() const -> database_ptr
 {
   auto error = std::error_code{};
   std::filesystem::create_directories(file_.parent_path(), error);
@@ -175,7 +175,7 @@ auto core_cache::open() const -> database_ptr
 
 ///
 ///
-auto core_cache::prepare(const std::string_view sql) const -> statement_ptr
+auto cache_database::prepare(const std::string_view sql) const -> statement_ptr
 {
   if(!database_)
   {
@@ -189,15 +189,16 @@ auto core_cache::prepare(const std::string_view sql) const -> statement_ptr
 
 ///
 ///
-auto core_cache::execute(const std::string_view sql, const std::string_view action) const -> bool
+auto cache_database::execute(const std::string_view sql, const std::string_view action) const -> bool
 {
   return succeeded(sqlite3_exec(database_.get(), std::string{sql}.c_str(), nullptr, nullptr, nullptr), action);
 }
 
 ///
 ///
-auto core_cache::write(const statement_ptr& statement, const std::string& key, const std::optional<std::string>& value) const
-  -> bool
+auto cache_database::write(
+  const statement_ptr& statement, const std::string& key, const std::optional<std::string>& value
+) const -> bool
 {
   const auto written = succeeded(bind_text(statement.get(), 1, key), "bind") &&
                        (!value || succeeded(bind_text(statement.get(), 2, *value), "bind")) &&
@@ -208,7 +209,7 @@ auto core_cache::write(const statement_ptr& statement, const std::string& key, c
 
 ///
 ///
-auto core_cache::succeeded(const int status, const std::string_view action) const -> bool
+auto cache_database::succeeded(const int status, const std::string_view action) const -> bool
 {
   if(status == SQLITE_OK || status == SQLITE_DONE || status == SQLITE_ROW)
   {
@@ -218,4 +219,4 @@ auto core_cache::succeeded(const int status, const std::string_view action) cons
   return false;
 }
 
-} // namespace arcstd::core
+} // namespace arcstd::cache

@@ -1,4 +1,4 @@
-#include "arcstd/core/core_fetch_web_content.hpp"
+#include "arcstd/web/web_request.hpp"
 #include "arcstd/util/log.hpp"
 
 #include <boost/url.hpp>
@@ -6,7 +6,7 @@
 
 #include <cstring>
 
-namespace arcstd::core
+namespace arcstd::web
 {
 namespace
 {
@@ -26,7 +26,7 @@ auto write_callback(char* ptr, std::size_t size, std::size_t nmemb, void* userda
 
 ///
 ///
-auto core_fetch_web_content::fetch(std::string_view url) -> std::expected<std::string, error_code>
+auto web_request::fetch(std::string_view url) -> std::expected<std::string, error_code>
 {
   const auto parsed_url = boost::urls::parse_uri(url);
   if(!parsed_url.has_value())
@@ -54,7 +54,7 @@ auto core_fetch_web_content::fetch(std::string_view url) -> std::expected<std::s
   curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, "http,https");
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // Follow redirects
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);       // 30 second timeout
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, "arcstd-core-fetch/1.0");
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "arcstd-web-request/1.0");
 
   const CURLcode res = curl_easy_perform(curl);
 
@@ -92,4 +92,4 @@ auto core_fetch_web_content::fetch(std::string_view url) -> std::expected<std::s
   return result;
 }
 
-} // namespace arcstd::core
+} // namespace arcstd::web

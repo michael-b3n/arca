@@ -1,21 +1,19 @@
-#include "arcstd/workflow/workflow_cache.hpp"
-#include "arcstd/core/core_cache.hpp"
+#include "arcstd/cache/cache_store.hpp"
+#include "arcstd/cache/cache_database.hpp"
 #include "arcstd/util/identifier.hpp"
 
 #include <format>
 #include <optional>
 #include <utility>
 
-namespace arcstd::workflow
+namespace arcstd::cache
 {
 
 ///
 ///
-workflow_cache::workflow_cache(
-  std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine
-)
+cache_store::cache_store(const std::filesystem::path& data_folder, std::shared_ptr<lua::lua_engine> lua_engine)
   : lua_engine_{std::move(lua_engine)}
-  , folder_{setting_store->data_folder() / folder_name}
+  , folder_{data_folder / folder_name}
 {
   registrations_
     ///
@@ -58,47 +56,47 @@ workflow_cache::workflow_cache(
 
 ///
 ///
-workflow_cache::~workflow_cache() noexcept = default;
+cache_store::~cache_store() noexcept = default;
 
 ///
 ///
-auto workflow_cache::get(const util::identifier& name, const std::string& key) -> std::optional<std::string>
+auto cache_store::get(const util::identifier& name, const std::string& key) -> std::optional<std::string>
 {
   return cache(name).get(key);
 }
 
 ///
 ///
-auto workflow_cache::set(const util::identifier& name, const std::string& key, std::optional<std::string> value) -> void
+auto cache_store::set(const util::identifier& name, const std::string& key, std::optional<std::string> value) -> void
 {
   cache(name).set(key, std::move(value));
 }
 
 ///
 ///
-auto workflow_cache::set_all(const util::identifier& name, const std::map<std::string, std::string>& values) -> void
+auto cache_store::set_all(const util::identifier& name, const std::map<std::string, std::string>& values) -> void
 {
   cache(name).set_all(values);
 }
 
 ///
 ///
-auto workflow_cache::clear(const util::identifier& name) -> void
+auto cache_store::clear(const util::identifier& name) -> void
 {
   cache(name).clear();
 }
 
 ///
 ///
-auto workflow_cache::cache(const util::identifier& name) -> core::core_cache&
+auto cache_store::cache(const util::identifier& name) -> cache_database&
 {
   const auto lock = std::scoped_lock{mtx_};
   auto& cache = caches_[name.string()];
   if(!cache)
   {
-    cache = std::make_unique<core::core_cache>(folder_ / std::format("{}.sqlite", name.string()));
+    cache = std::make_unique<cache_database>(folder_ / std::format("{}.sqlite", name.string()));
   }
   return *cache;
 }
 
-} // namespace arcstd::workflow
+} // namespace arcstd::cache

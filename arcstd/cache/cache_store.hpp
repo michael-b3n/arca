@@ -2,9 +2,7 @@
 
 #include "arcstd/export.hpp"
 #include "arcstd/lua/lua_engine.hpp"
-#include "arcstd/setting/setting_store.hpp"
 #include "arcstd/util/identifier.hpp"
-#include "arcstd/workflow/workflow_base.hpp"
 
 #include <filesystem>
 #include <map>
@@ -13,20 +11,17 @@
 #include <optional>
 #include <string>
 
-namespace arcstd::core
-{
-class core_cache;
-} // namespace arcstd::core
-
-namespace arcstd::workflow
+namespace arcstd::cache
 {
 
+class cache_database;
+
 ///
-/// Workflow cache, keeps text values of the scripts beyond the run of the app, in a database file per cache name.
-/// Registered for scripts as workflow.cache.get(name, key) and workflow.cache.set(name, key, value), a script names
-/// its own cache, e.g. after itself.
+/// Cache store, keeps text values of the scripts beyond the run of the app, in a database file per cache name.
+/// Registered for scripts as cache.get(name, key) and cache.set(name, key, value), a script names its own cache,
+/// e.g. after itself.
 ///
-class ARCSTD_EXPORT workflow_cache final : public workflow_base<void>
+class ARCSTD_EXPORT cache_store final
 {
   // Constants
   static constexpr auto folder_name = "cache";
@@ -35,12 +30,16 @@ class ARCSTD_EXPORT workflow_cache final : public workflow_base<void>
   const std::shared_ptr<lua::lua_engine> lua_engine_;
   const std::filesystem::path folder_;
   mutable std::mutex mtx_;
-  std::map<std::string, std::unique_ptr<core::core_cache>> caches_;
+  std::map<std::string, std::unique_ptr<cache_database>> caches_;
   lua::lua_engine::registration_type registrations_;
 
 public: // Structors
-  workflow_cache(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine);
-  ~workflow_cache() noexcept override;
+  ///
+  /// Construct the store of the caches in the folder "cache" of \p data_folder, with its functions for the scripts
+  /// of \p lua_engine.
+  ///
+  cache_store(const std::filesystem::path& data_folder, std::shared_ptr<lua::lua_engine> lua_engine);
+  ~cache_store() noexcept;
 
 public: // Modifiers
   ///
@@ -64,7 +63,7 @@ public: // Modifiers
   auto clear(const util::identifier& name) -> void;
 
 private: // Implementation
-  [[nodiscard]] auto cache(const util::identifier& name) -> core::core_cache&;
+  [[nodiscard]] auto cache(const util::identifier& name) -> cache_database&;
 };
 
-} // namespace arcstd::workflow
+} // namespace arcstd::cache

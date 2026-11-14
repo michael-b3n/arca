@@ -1,7 +1,7 @@
 #include "test_utils/files.hpp"
 #include "test_utils/temp_folder.hpp"
 
-#include <arcstd/core/core_cache.hpp>
+#include <arcstd/cache/cache_database.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -9,18 +9,18 @@
 #include <optional>
 #include <string>
 
-namespace arcstd::core
+namespace arcstd::cache
 {
 
-TEST_CASE("core_cache_keeps_values", "[core]")
+TEST_CASE("cache_database_keeps_values", "[cache]")
 {
-  const auto folder = test_utils::temp_folder{"core_cache_keeps_values"};
+  const auto folder = test_utils::temp_folder{"cache_database_keeps_values"};
   // Its folder is created as well
   const auto file = folder.path() / "sub" / "test.sqlite";
   const auto binary = std::string{"zero\0inside", 11};
   const auto large = std::string(1'000'000, 'x');
   {
-    auto cache = core_cache{file};
+    auto cache = cache_database{file};
     CHECK_FALSE(cache.get("a"));
     cache.set("a", "0");
     cache.set("a", "1");
@@ -37,7 +37,7 @@ TEST_CASE("core_cache_keeps_values", "[core]")
     CHECK_FALSE(cache.get("b"));
   }
   // Beyond the cache that set them
-  const auto cache = core_cache{file};
+  const auto cache = cache_database{file};
   CHECK(cache.get("a") == "1");
   CHECK_FALSE(cache.get("b"));
   CHECK_FALSE(cache.get("missing"));
@@ -50,13 +50,13 @@ TEST_CASE("core_cache_keeps_values", "[core]")
   CHECK(cache.get("large") == large);
 }
 
-TEST_CASE("core_cache_shares_its_file", "[core]")
+TEST_CASE("cache_database_shares_its_file", "[cache]")
 {
-  const auto folder = test_utils::temp_folder{"core_cache_shares_its_file"};
+  const auto folder = test_utils::temp_folder{"cache_database_shares_its_file"};
   const auto file = folder.path() / "test.sqlite";
   // Two at once, as two processes have them
-  auto first = core_cache{file};
-  auto second = core_cache{file};
+  auto first = cache_database{file};
+  auto second = cache_database{file};
   first.set("a", "1");
   CHECK(second.get("a") == "1");
   second.set("a", "2");
@@ -67,10 +67,10 @@ TEST_CASE("core_cache_shares_its_file", "[core]")
   CHECK_FALSE(second.get("b"));
 }
 
-TEST_CASE("core_cache_sets_many_values_and_clears_them", "[core]")
+TEST_CASE("cache_database_sets_many_values_and_clears_them", "[cache]")
 {
-  const auto folder = test_utils::temp_folder{"core_cache_sets_many_values_and_clears_them"};
-  auto cache = core_cache{folder.path() / "test.sqlite"};
+  const auto folder = test_utils::temp_folder{"cache_database_sets_many_values_and_clears_them"};
+  auto cache = cache_database{folder.path() / "test.sqlite"};
   cache.set("a", "old");
   cache.set_all({
     {"a",         "1"},
@@ -91,14 +91,14 @@ TEST_CASE("core_cache_sets_many_values_and_clears_them", "[core]")
   CHECK(cache.get("c") == "3");
 }
 
-TEST_CASE("core_cache_of_a_broken_file_holds_nothing", "[core]")
+TEST_CASE("cache_database_of_a_broken_file_holds_nothing", "[cache]")
 {
-  const auto folder = test_utils::temp_folder{"core_cache_of_a_broken_file_holds_nothing"};
+  const auto folder = test_utils::temp_folder{"cache_database_of_a_broken_file_holds_nothing"};
   const auto file = folder.path() / "test.sqlite";
   const auto content = std::string{"+a\t1\nno database, e.g. a cache file of a former version\n"};
   test_utils::write_file(file, content);
   {
-    auto cache = core_cache{file};
+    auto cache = cache_database{file};
     CHECK_FALSE(cache.get("a"));
     cache.set("a", "1");
     cache.set_all({
@@ -112,4 +112,4 @@ TEST_CASE("core_cache_of_a_broken_file_holds_nothing", "[core]")
   CHECK(test_utils::read_file(file) == content);
 }
 
-} // namespace arcstd::core
+} // namespace arcstd::cache

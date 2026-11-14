@@ -1,7 +1,7 @@
 #pragma once
 
 #if !defined(ARCSTD_INTERNAL)
-  #error "arcstd/core/core_cache.hpp is a private header of arcstd"
+  #error "arcstd/cache/cache_database.hpp is a private header of arcstd"
 #endif
 
 #include "arcstd/util/non_owning_ptr.hpp"
@@ -17,16 +17,16 @@
 struct sqlite3;
 struct sqlite3_stmt;
 
-namespace arcstd::core
+namespace arcstd::cache
 {
 
 ///
-/// Core cache. Keeps text values by key in a SQLite database file, so they last
+/// Cache database. Keeps text values by key in a SQLite database file, so they last
 /// beyond the run of the app and several processes may use the file at once. A
 /// cache is not worth a failing script: a database that can not be opened, read
 /// or written is logged, the cache then holds nothing and keeps nothing.
 ///
-class core_cache final
+class cache_database final
 {
   // Typedefs
   struct database_closer final
@@ -51,14 +51,14 @@ class core_cache final
   statement_ptr remove_;
 
 public: // Structors
-  explicit core_cache(std::filesystem::path file);
-  ~core_cache() noexcept = default;
-  core_cache(const core_cache&) = delete;
-  core_cache(core_cache&&) = delete;
+  explicit cache_database(std::filesystem::path file);
+  ~cache_database() noexcept = default;
+  cache_database(const cache_database&) = delete;
+  cache_database(cache_database&&) = delete;
 
 public: // Operators
-  auto operator=(const core_cache&) -> core_cache& = delete;
-  auto operator=(core_cache&&) -> core_cache& = delete;
+  auto operator=(const cache_database&) -> cache_database& = delete;
+  auto operator=(cache_database&&) -> cache_database& = delete;
 
 public: // Accessors
   ///
@@ -92,4 +92,4 @@ private: // Implementation
   [[nodiscard]] auto succeeded(int status, std::string_view action) const -> bool;
 };
 
-} // namespace arcstd::core
+} // namespace arcstd::cache

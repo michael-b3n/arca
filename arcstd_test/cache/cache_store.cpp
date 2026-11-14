@@ -1,8 +1,8 @@
 #include "test_utils/scripts.hpp"
 #include "test_utils/temp_folder.hpp"
 
+#include <arcstd/cache/cache_store.hpp>
 #include <arcstd/lua/lua_engine.hpp>
-#include <arcstd/workflow/workflow_cache.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,12 +10,12 @@
 #include <memory>
 #include <string>
 
-namespace arcstd::workflow
+namespace arcstd::cache
 {
 
-TEST_CASE("workflow_cache_keeps_values_of_scripts", "[workflow]")
+TEST_CASE("cache_store_keeps_values_of_scripts", "[cache]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_cache_keeps_values_of_scripts"};
+  const auto folder = test_utils::temp_folder{"cache_store_keeps_values_of_scripts"};
   const auto run = [](const lua::lua_engine& script, const std::string& code)
   { return script.run_script("test.lua", code).has_value(); };
   const auto text = [](const lua::lua_engine& script, const std::string& code)
@@ -23,7 +23,7 @@ TEST_CASE("workflow_cache_keeps_values_of_scripts", "[workflow]")
   {
     const auto settings = test_utils::make_script_settings(folder.path());
     const auto script = std::make_shared<lua::lua_engine>(settings, test_utils::no_bundled);
-    const auto cache = workflow_cache{settings, script};
+    const auto cache = cache_store{settings->data_folder(), script};
     CHECK(test_utils::script_value<bool>(*script, "return cache.get('a', 'key') == nil") == true);
     CHECK(run(*script, "cache.set('a', 'key', 'value a') cache.set('b', 'key', 'value b')"));
     CHECK(run(*script, "cache.set('a', 'gone', 'x') cache.set('a', 'gone', nil)"));
@@ -39,7 +39,7 @@ TEST_CASE("workflow_cache_keeps_values_of_scripts", "[workflow]")
   // Kept beyond the run, apart for each name
   const auto settings = test_utils::make_script_settings(folder.path());
   const auto script = std::make_shared<lua::lua_engine>(settings, test_utils::no_bundled);
-  auto cache = workflow_cache{settings, script};
+  auto cache = cache_store{settings->data_folder(), script};
   CHECK(text(*script, "return cache.get('a', 'key')") == "value a");
   CHECK(text(*script, "return cache.get('b', 'key')") == "value b");
   CHECK(test_utils::script_value<bool>(*script, "return cache.get('a', 'gone') == nil") == true);
@@ -49,13 +49,13 @@ TEST_CASE("workflow_cache_keeps_values_of_scripts", "[workflow]")
   CHECK_FALSE(std::filesystem::exists(folder.path() / "a.sqlite"));
 }
 
-TEST_CASE("workflow_cache_takes_its_functions_back_on_destruction", "[workflow]")
+TEST_CASE("cache_store_takes_its_functions_back_on_destruction", "[cache]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_cache_takes_its_functions_back_on_destruction"};
+  const auto folder = test_utils::temp_folder{"cache_store_takes_its_functions_back_on_destruction"};
   const auto settings = test_utils::make_script_settings(folder.path());
   const auto script = std::make_shared<lua::lua_engine>(settings, test_utils::no_bundled);
   {
-    const auto cache = workflow_cache{settings, script};
+    const auto cache = cache_store{settings->data_folder(), script};
     CHECK(test_utils::script_value<bool>(*script, "return type(cache.get) == 'function'") == true);
   }
   // Only them, the scripts go on
@@ -63,4 +63,4 @@ TEST_CASE("workflow_cache_takes_its_functions_back_on_destruction", "[workflow]"
   CHECK(script->run_script("after.lua", "return 1"));
 }
 
-} // namespace arcstd::workflow
+} // namespace arcstd::cache

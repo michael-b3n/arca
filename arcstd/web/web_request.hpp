@@ -1,20 +1,20 @@
 #pragma once
 
 #if !defined(ARCSTD_INTERNAL)
-  #error "arcstd/core/core_fetch_web_content.hpp is a private header of arcstd"
+  #error "arcstd/web/web_request.hpp is a private header of arcstd"
 #endif
 
 #include <expected>
 #include <string>
 #include <string_view>
 
-namespace arcstd::core
+namespace arcstd::web
 {
 
 ///
-/// Core web content fetcher. This class uses libcurl to fetch content from a webpage.
+/// Web request, fetches the content of a web page with libcurl.
 ///
-class core_fetch_web_content final
+class web_request final
 {
 public: // Typedefs
   ///
@@ -31,8 +31,8 @@ public: // Typedefs
   };
 
 public: // Structors
-  core_fetch_web_content() = default;
-  ~core_fetch_web_content() noexcept = default;
+  web_request() = default;
+  ~web_request() noexcept = default;
 
 public: // Operations
   ///
@@ -41,4 +41,4 @@ public: // Operations
   [[nodiscard]] static auto fetch(std::string_view url) -> std::expected<std::string, error_code>;
 };
 
-} // namespace arcstd::core
+} // namespace arcstd::web
