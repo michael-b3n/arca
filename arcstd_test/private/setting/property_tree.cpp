@@ -1,3 +1,5 @@
+#include <arcstd/setting/property.hpp>
+#include <arcstd/setting/property_node.hpp>
 #include <arcstd/setting/property_tree.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -27,7 +29,10 @@ auto write_file(const std::filesystem::path& path, const std::string& content) -
 [[nodiscard]] auto load_and_store(const std::filesystem::path& path) -> std::string
 {
   auto tree = property_tree::create(path);
-  const auto value = tree->create_property(property_tree::path_type{"settings.name"}, std::string{"default"});
+  const auto value = property<std::string>{
+    property_node{tree, "settings.name"},
+    std::string{"default"}
+  };
   return value.value();
 }
 

@@ -36,7 +36,7 @@ enum class color
 
 template<setting::underlying_setting_type T>
 [[nodiscard]] auto make_setting(
-  setting::property_tree& tree,
+  const std::shared_ptr<setting::property_tree>& tree,
   const std::string& name,
   T value,
   std::string postfix = {},
@@ -45,7 +45,10 @@ template<setting::underlying_setting_type T>
 {
   return std::make_unique<setting::setting<T>>(
     name,
-    tree.create_property(setting::property_tree::path_type{name}, std::move(value)),
+    setting::property<T>{
+      setting::property_node{tree, name},
+      std::move(value)
+  },
     std::move(postfix),
     std::move(validator)
   );
@@ -202,7 +205,7 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
   {
     const auto tree = std::make_shared<setting::property_tree>();
     auto setting = make_setting<std::int32_t>(
-      *tree, "numbers.number", 5, "ms", std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
+      tree, "numbers.number", 5, "ms", std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
     );
     {
       const auto registered = s.register_setting("numbers.number", *setting);
@@ -296,7 +299,7 @@ TEST_CASE("lua_state_register_setting", "[lua]")
   SECTION("range validated")
   {
     auto setting = make_setting<std::int32_t>(
-      *tree, "numbers.number", 1, "ms", std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
+      tree, "numbers.number", 1, "ms", std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
     );
     REQUIRE(keep(s.register_setting("numbers.number", *setting)));
     CHECK(run("return root.interface.numbers.number.get()").get<std::int32_t>() == 1);
@@ -310,7 +313,7 @@ TEST_CASE("lua_state_register_setting", "[lua]")
 
   SECTION("enum")
   {
-    auto setting = make_setting(*tree, "color", color::red);
+    auto setting = make_setting(tree, "color", color::red);
     REQUIRE(keep(s.register_setting("color", *setting)));
     CHECK(run("return root.interface.color.get()").get<std::string>() == "red");
     CHECK(run("return root.interface.color.set('green')").get<bool>());
@@ -320,7 +323,7 @@ TEST_CASE("lua_state_register_setting", "[lua]")
 
   SECTION("optional")
   {
-    auto setting = make_setting(*tree, "name", std::optional<std::string>{});
+    auto setting = make_setting(tree, "name", std::optional<std::string>{});
     REQUIRE(keep(s.register_setting("name", *setting)));
     CHECK(run("return root.interface.name.get() == nil").get<bool>());
     CHECK(run("return root.interface.name.set('kjv')").get<bool>());
@@ -331,7 +334,7 @@ TEST_CASE("lua_state_register_setting", "[lua]")
 
   SECTION("list")
   {
-    auto setting = make_setting(*tree, "list", std::vector<std::int32_t>{1, 2});
+    auto setting = make_setting(tree, "list", std::vector<std::int32_t>{1, 2});
     REQUIRE(keep(s.register_setting("list", *setting)));
     CHECK(run("local l = root.interface.list.get() return #l == 2 and l[1] == 1 and l[2] == 2").get<bool>());
     CHECK(run("return root.interface.list.set({3, 4, 5})").get<bool>());
@@ -340,8 +343,8 @@ TEST_CASE("lua_state_register_setting", "[lua]")
 
   SECTION("duration and path")
   {
-    auto duration = make_setting(*tree, "duration", std::chrono::seconds{3});
-    auto folder = make_setting(*tree, "folder", std::filesystem::path{"a/b"});
+    auto duration = make_setting(tree, "duration", std::chrono::seconds{3});
+    auto folder = make_setting(tree, "folder", std::filesystem::path{"a/b"});
     REQUIRE(keep(s.register_setting("duration", *duration)));
     REQUIRE(keep(s.register_setting("folder", *folder)));
     CHECK(run("return root.interface.duration.get()").get<std::int64_t>() == 3);

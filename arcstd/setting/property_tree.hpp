@@ -4,9 +4,7 @@
   #error "arcstd/setting/property_tree.hpp is a private header of arcstd"
 #endif
 
-#include "arcstd/setting/property.hpp"
 #include "arcstd/setting/property_parser.hpp"
-#include "arcstd/util/exception.hpp"
 
 #include <filesystem>
 #include <memory>
@@ -17,11 +15,14 @@ namespace arcstd::setting
 {
 
 ///
-/// Property tree. This class manages saving and loading of properties.
+/// Property tree. This class loads the settings file and saves it again, its nodes hold the properties, \see property_node.
 /// \note This class must be created as a shared pointer.
 ///
 class property_tree final : public std::enable_shared_from_this<property_tree>
 {
+  // Friends
+  friend class property_node;
+
   // Variables
   inline static std::mutex trees_mtx_{};
   inline static std::vector<std::weak_ptr<property_tree>> trees_{};
@@ -44,62 +45,6 @@ public: // Structors
   property_tree() = default;
   property_tree(const std::filesystem::path& tree_file_path);
   ~property_tree() noexcept;
-
-public: // Modifiers
-  ///
-  /// Create a property at \p path with the value of the tree, or with \p default_value if the tree has none.
-  /// \return the newly created property
-  ///
-  template<typename T>
-  [[nodiscard]] auto create_property(const property_path_type& path, T&& default_value) -> property<T>;
-
-  ///
-  /// Write \p value at \p path of the tree.
-  ///
-  template<typename T>
-  auto write(const property_path_type& path, const T& value) -> void;
-
-public: // Accessors
-  ///
-  /// \return the value of the tree at \p path, std::nullopt if it has none of this type
-  ///
-  template<typename T>
-  [[nodiscard]] auto read(const property_path_type& path) const -> std::optional<T>;
 };
-
-///
-///
-template<typename T>
-auto property_tree::create_property(const property_path_type& path, T&& default_value) -> property<T>
-{
-  const auto lock = std::scoped_lock{mtx_};
-  if(path.empty())
-  {
-    throw util::exception("register property failed: empty path");
-  }
-  auto prop = property<T>(property_parser::read<T>(path, tree_).value_or(std::forward<decltype(default_value)>(default_value)));
-  prop.property_tree_update_ = [sptr = shared_from_this(), path](const T& value)
-  { property_parser::write(path, sptr->tree_, value); };
-  prop.property_tree_update_(prop.value());
-  return prop;
-}
-
-///
-///
-template<typename T>
-auto property_tree::write(const property_path_type& path, const T& value) -> void
-{
-  const auto lock = std::scoped_lock{mtx_};
-  property_parser::write(path, tree_, value);
-}
-
-///
-///
-template<typename T>
-auto property_tree::read(const property_path_type& path) const -> std::optional<T>
-{
-  const auto lock = std::scoped_lock{mtx_};
-  return property_parser::read<T>(path, tree_);
-}
 
 } // namespace arcstd::setting

@@ -1,37 +1,39 @@
 #pragma once
 
-#include <functional>
+#include "arcstd/setting/property_node.hpp"
+#include "arcstd/setting/setting_common.hpp"
+
 #include <mutex>
 #include <utility>
+#include <variant>
 
 namespace arcstd::setting
 {
 
 ///
-/// Thread safe property created from property tree. The value will synchronize with the tree on modification.
-/// The `property_tree` object can access private members of this class \see `property_tree`.
+/// Thread safe property, the value of a node of a settings file. It reads the value from the node once and writes
+/// each change back, \see property_node.
 ///
-template<typename T>
+template<underlying_setting_type T>
 class property final
 {
-  friend class property_tree;
+  // Typedefs
+  using erased_type = setting_type_erased_type_from<T>;
 
   // Variables
   mutable std::mutex mtx_;
+  property_node node_;
   T value_;
-  std::function<void(const T&)> property_tree_update_;
 
 public: // Typedefs
   using value_type = T;
 
-private: // Structors
-  property(const value_type& value);
-
 public: // Structors
   ///
-  /// Property of \p value, each change of it is handed to \p update.
+  /// Property of \p node with its value, \p default_value if the node holds none, or one of another type or naming
+  /// no value of the enum. The node holds the value from now on.
   ///
-  property(const value_type& value, std::function<void(const value_type&)> update);
+  property(property_node node, value_type default_value);
   property(const property<value_type>& other);
   property(property<value_type>&& other) noexcept;
 
@@ -49,85 +51,83 @@ public: // Accessors
 
 public: // Modifiers
   ///
-  /// Set property value. Updates property in tree if registered.
+  /// Set property value, a change is written to the node.
   ///
   auto value(const value_type& value) -> void;
 
   ///
-  /// Exchange property value. Updates property in tree if registered.
+  /// Exchange property value, a change is written to the node.
   /// \return old property value
   ///
   [[nodiscard]] auto exchange(const value_type& new_value) -> value_type;
+
+private: // Structors
+  property(const property<value_type>& other, const std::scoped_lock<std::mutex>& lock);
+  property(property<value_type>&& other, const std::scoped_lock<std::mutex>& lock) noexcept;
+
+private: // Implementation
+  auto write() -> void;
 };
 
 ///
 ///
-template<typename T>
-property<T>::property(const value_type& value)
-  : value_{value}
+template<underlying_setting_type T>
+property<T>::property(property_node node, value_type default_value)
+  : node_{std::move(node)}
+  , value_{node_.read(setting_type_erased_variant{std::in_place_type<erased_type>})
+             .and_then([](const auto& stored) { return try_from_type_erased_setting<T>(std::get<erased_type>(stored)); })
+             .value_or(std::move(default_value))}
 {
+  write();
 }
 
 ///
 ///
-template<typename T>
-property<T>::property(const value_type& value, std::function<void(const value_type&)> update)
-  : value_{value}
-  , property_tree_update_{std::move(update)}
-{
-}
-
-///
-///
-template<typename T>
+template<underlying_setting_type T>
 property<T>::property(const property<value_type>& other)
+  : property{other, std::scoped_lock{other.mtx_}}
 {
-  const auto lock = std::scoped_lock{other.mtx_};
-  value_ = other.value_;
-  property_tree_update_ = other.property_tree_update_;
 }
 
 ///
 ///
-template<typename T>
+template<underlying_setting_type T>
 property<T>::property(property<value_type>&& other) noexcept
+  : property{std::move(other), std::scoped_lock{other.mtx_}}
 {
-  const auto lock = std::scoped_lock{other.mtx_};
-  value_ = std::move(other.value_);
-  property_tree_update_ = std::move(other.property_tree_update_);
 }
 
 ///
 ///
-template<typename T>
+template<underlying_setting_type T>
 auto property<T>::operator=(const property<value_type>& other) & -> property<value_type>&
 {
   if(this != &other)
   {
     const auto lock = std::scoped_lock{mtx_, other.mtx_};
+    node_ = other.node_;
     value_ = other.value_;
-    property_tree_update_ = other.property_tree_update_;
   }
   return *this;
 }
 
 ///
 ///
-template<typename T>
+template<underlying_setting_type T>
 auto property<T>::operator=(property<value_type>&& other) & noexcept -> property<value_type>&
 {
   if(this != &other)
   {
     const auto lock = std::scoped_lock{mtx_, other.mtx_};
+    node_ = std::move(other.node_);
     value_ = std::move(other.value_);
-    property_tree_update_ = std::move(other.property_tree_update_);
   }
   return *this;
 }
 
 ///
 ///
-template<typename T>
+template<underlying_setting_type T>
 auto property<T>::operator==(const property<value_type>& other) const -> bool
 {
   const auto lock = std::scoped_lock{mtx_, other.mtx_};
@@ -136,7 +136,7 @@ auto property<T>::operator==(const property<value_type>& other) const -> bool
 
 ///
 ///
-template<typename T>
+template<underlying_setting_type T>
 auto property<T>::value() const -> value_type
 {
   const auto lock = std::scoped_lock{mtx_};
@@ -145,23 +145,20 @@ auto property<T>::value() const -> value_type
 
 ///
 ///
-template<typename T>
+template<underlying_setting_type T>
 auto property<T>::value(const value_type& value) -> void
 {
   const auto lock = std::scoped_lock{mtx_};
   if(value_ != value)
   {
     value_ = value;
-    if(property_tree_update_)
-    {
-      property_tree_update_(value_);
-    }
+    write();
   }
 }
 
 ///
 ///
-template<typename T>
+template<underlying_setting_type T>
 auto property<T>::exchange(const value_type& new_value) -> value_type
 {
   const auto lock = std::scoped_lock{mtx_};
@@ -169,12 +166,38 @@ auto property<T>::exchange(const value_type& new_value) -> value_type
   if(value_ != new_value)
   {
     value_ = new_value;
-    if(property_tree_update_)
-    {
-      property_tree_update_(value_);
-    }
+    write();
   }
   return old_value;
+}
+
+///
+///
+template<underlying_setting_type T>
+property<T>::property(const property<value_type>& other, [[maybe_unused]] const std::scoped_lock<std::mutex>& lock)
+  : node_{other.node_}
+  , value_{other.value_}
+{
+}
+
+///
+///
+template<underlying_setting_type T>
+property<T>::property(property<value_type>&& other, [[maybe_unused]] const std::scoped_lock<std::mutex>& lock) noexcept
+  : node_{std::move(other.node_)}
+  , value_{std::move(other.value_)}
+{
+}
+
+///
+///
+template<underlying_setting_type T>
+auto property<T>::write() -> void
+{
+  // The alternative is named, else e.g. a bool would be taken for a std::optional<bool>
+  node_.write(
+    setting_type_erased_variant{std::in_place_type<erased_type>, create_setting_value_converter<T, erased_type>()(value_)}
+  );
 }
 
 } // namespace arcstd::setting

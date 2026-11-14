@@ -7,18 +7,6 @@
 
 namespace arcstd::setting
 {
-namespace
-{
-
-///
-/// \return the path of the setting of \p path in the property tree
-///
-[[nodiscard]] auto tree_path(const std::string& path) -> property_tree::path_type
-{
-  return property_tree::path_type{std::string(setting_store::settings_root_name)} / property_tree::path_type{path};
-}
-
-} // namespace
 
 ///
 ///
@@ -69,31 +57,6 @@ auto setting_store::type_erased_setting(const std::string& path) const
     return std::visit([](const auto& e) -> setting_type_erased_non_owning_ptr_variant_type { return e.get(); }, it->setting);
   }
   return std::nullopt;
-}
-
-///
-///
-auto setting_store::stored_value(
-  const property_tree& tree, const std::string& path, const setting_type_erased_variant_type& type
-) -> std::optional<setting_type_erased_variant_type>
-{
-  return std::visit(
-    [&]<typename T>(const T&)
-    {
-      // Named, else an optional value read would be taken as the value itself
-      return tree.read<T>(tree_path(path))
-        .transform([](T stored) { return setting_type_erased_variant_type{std::in_place_type<T>, std::move(stored)}; });
-    },
-    type
-  );
-}
-
-///
-///
-auto setting_store::store_value(property_tree& tree, const std::string& path, const setting_type_erased_variant_type& value)
-  -> void
-{
-  std::visit([&](const auto& v) { tree.write(tree_path(path), v); }, value);
 }
 
 } // namespace arcstd::setting

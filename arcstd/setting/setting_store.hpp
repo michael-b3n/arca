@@ -15,6 +15,7 @@
 #include "arcstd/util/non_owning_ptr.hpp"
 
 #include <filesystem>
+#include <format>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -205,18 +206,6 @@ private: // Implementation
   template<underlying_setting_type T>
   [[nodiscard]] auto make_setting(const std::string& path, T default_value, std::string postfix, validator_type<T> validator)
     -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>;
-
-  ///
-  /// \return the value \p tree holds for the setting of \p path, of the type \p type holds, std::nullopt if none
-  ///
-  [[nodiscard]] static auto stored_value(
-    const property_tree& tree, const std::string& path, const setting_type_erased_variant_type& type
-  ) -> std::optional<setting_type_erased_variant_type>;
-
-  ///
-  /// Store \p value in \p tree for the setting of \p path.
-  ///
-  static auto store_value(property_tree& tree, const std::string& path, const setting_type_erased_variant_type& value) -> void;
 };
 
 ///
@@ -305,24 +294,13 @@ template<underlying_setting_type T>
 auto setting_store::make_setting(const std::string& path, T default_value, std::string postfix, validator_type<T> validator)
   -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>
 {
-  using erased_type = setting_type_erased_type_from<T>;
-  using type_erased_type = setting_type_erased<erased_type>;
-  // The alternative is named, else e.g. a bool would be taken for a std::optional<bool>
-  const auto to_erased = [](const T& v)
-  {
-    return setting_type_erased_variant_type{
-      std::in_place_type<erased_type>, create_setting_value_converter<T, erased_type>()(v)
-    };
-  };
-  // The file holds type erased values, one of another type or naming no enum value counts as none.
-  const auto value =
-    stored_value(*tree_, path, setting_type_erased_variant_type{std::in_place_type<erased_type>})
-      .and_then([](const auto& stored) { return try_from_type_erased_setting<T>(std::get<erased_type>(stored)); })
-      .value_or(std::move(default_value));
-  store_value(*tree_, path, to_erased(value));
+  using type_erased_type = setting_type_erased<setting_type_erased_type_from<T>>;
   const auto created = std::make_shared<setting<T>>(
     path,
-    property<T>{value, [tree = tree_, path, to_erased](const T& changed) { store_value(*tree, path, to_erased(changed)); }},
+    property<T>{
+      property_node{tree_, std::format("{}.{}", settings_root_name, path)},
+      std::move(default_value)
+  },
     std::move(postfix),
     std::move(validator)
   );
