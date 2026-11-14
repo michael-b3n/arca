@@ -1,5 +1,6 @@
 #include <arcstd/execution/launch.hpp>
 #include <arcstd/execution/scope.hpp>
+#include <arcstd/execution/thread_pool.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -68,6 +69,30 @@ TEST_CASE("launch_survives_failing_work", "[execution]")
   launch(succeed, work);
   ran.wait(false);
   CHECK(ran);
+}
+
+TEST_CASE("launch_starts_a_new_thread_pool_after_its_shutdown", "[execution]")
+{
+  const auto run_once = []
+  {
+    auto ran = std::atomic_bool{false};
+    auto work = scope{};
+    launch(
+      [&]
+      {
+        ran = true;
+        ran.notify_all();
+      },
+      work
+    );
+    ran.wait(false);
+  };
+  run_once();
+  shutdown_thread_pool();
+  run_once();
+  // Twice is fine, and once without a pool too
+  shutdown_thread_pool();
+  shutdown_thread_pool();
 }
 
 } // namespace arcstd::execution
