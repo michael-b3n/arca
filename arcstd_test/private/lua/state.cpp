@@ -153,7 +153,7 @@ TEST_CASE("lua_state_functions_go_with_the_state", "[lua]")
     auto s = state_owner.lock();
     auto keep = test_utils::registrations{};
     REQUIRE(keep(s.register_function("a.f", [captured]() { return *captured; })));
-    // As on shutdown, before the workflows behind the functions are destroyed
+    // As on shutdown, before the objects behind the functions are destroyed
     state_owner.shutdown();
     CHECK_FALSE(s.run_script("call.lua", "return a.f()"));
     CHECK(captured.use_count() > 1);
@@ -445,7 +445,7 @@ TEST_CASE("lua_state_protects_shared_tables", "[lua]")
   {
     // A registered function is a plain function, the views and strings hand out a text instead of their metatable
     CHECK(runs("assert(type(a.f) == 'function' and getmetatable(a.f) == nil)"));
-    // Also one with captures, as the workflows register them
+    // Also one with captures, as objects register them
     REQUIRE(keep(s.register_function("c.f", [value = 2]() { return value; })));
     CHECK(runs("assert(type(c.f) == 'function' and getmetatable(c.f) == nil and c.f() == 2)"));
     CHECK(runs("assert(getmetatable(a) == 'read only' and getmetatable(util) == 'read only')"));

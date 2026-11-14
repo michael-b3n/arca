@@ -8,7 +8,7 @@ namespace arcstd::test_utils
 {
 
 ///
-/// Wait until \p condition holds, the workflows update on threads of their own.
+/// Wait until \p condition holds, the objects under test update on threads of their own.
 /// \return false if it does not within a few seconds
 ///
 [[nodiscard]] inline auto wait_until(const std::function<bool()>& condition) -> bool

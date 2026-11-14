@@ -60,7 +60,7 @@ public: // Structors
 public: // Accessors
   ///
   /// Access the setting store all setting bindings operate on.
-  /// \return settings workflow
+  /// \return setting store
   ///
   [[nodiscard]] const std::shared_ptr<arcstd::setting::setting_store>& settingStore() const;
 

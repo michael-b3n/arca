@@ -8,7 +8,7 @@ General C++26 objects and Qml bindings for applications.
 
 | Folder | Content |
 |---|---|
-| `arcstd` | The C++ library: the workflow base and the settings, script, cache and web workflows (`workflow`), cache and web fetch (`core`), Lua scripting (`lua`), threading and settings (`framework`, `execution`), signals (`signal`), csv and zip readers (`io`), math, type traits and general utilities (`math`, `meta`, `util`, `txt`), the file system (`system`, Windows in `system/windows`) |
+| `arcstd` | The C++ library, a collection of helpers by area, see [Use in a project](#use-in-a-project) |
 | `arcqml` | The Qt layer, QML module `ArcQml`: controls, styles, icons and shapes, and the bindings of the settings, scripts and logs: their bridges and models |
 | `arcstd_test` | Catch2 tests of `arcstd`: `arcstd_test` uses it like a project does, `arcstd_private_test` (folder `private`) tests the internals. And `arcstd_test_utils`, the test helpers a project built on arca may use too |
 | `libs_external` | Third party sources, used as they are |
@@ -27,17 +27,26 @@ The tests of arca build when it is the top level project, or with `ARCA_BUILD_TE
 `arcstd` is a static library, with `ARCA_BUILD_SHARED=ON` a shared one; the project then places `libarcstd.dll` beside
 its executables. `ArcQml` is always static.
 
-A project includes the public headers by `#include <arcstd/...>`. They come in two kinds:
+A project includes the headers of an area by `#include <arcstd/<area>/...>`, the folder is the namespace:
 
-- The interface: the workflow layer `arcstd/workflow/` and the general helpers in `meta`, `math`, `util`, `txt`, `io`
-  and `system`. A project names the types it works with by the typedefs of the workflows, e.g.
-  `workflow_ground::scope_type`, `workflow_settings::validator_type<T>` or `workflow_script::table_type<...>`.
-- What the templates of the workflows need: `framework`, `signal`, `execution` and `lua`. They are reached through
-  the typedefs, not included directly.
+| Area | Helpers |
+|---|---|
+| `setting` | `setting_store` owns the settings and keeps them in the settings file; the settings, their validators and type erased views |
+| `lua` | `lua_engine` owns the Lua state, loads the scripts and runs their functions; the values, tables and functions of scripts |
+| `cache` | `cache_store` keeps text values beyond the run, for scripts as `cache.get` and `cache.set` |
+| `web` | `web_fetcher` fetches web pages, for scripts as `web.fetch` |
+| `signal` | Signals, their adapter and connections, `queued_connections` run slots on the thread pool |
+| `execution` | `scope` and `launch`, work on the thread pool |
+| `io` | csv and zip readers |
+| `system` | The file system |
+| `meta`, `math`, `util` | Type traits, math and general utilities |
 
-The private headers lie beside them: the cache and the web fetch (`core`), the Lua state, the property tree of the
-settings file and the execution library. They are listed in `arcstd/CMakeLists.txt` and refuse to be included by a
-project, with an `#error`.
+A helper object names the types it hands out as type aliases, e.g. `setting_store::validator_type<T>` or
+`lua_engine::table_type<...>`.
+
+The private headers lie beside the public ones: the database of a cache, the web request, the Lua state, the property
+tree of the settings file and the execution library. They are listed in `arcstd/CMakeLists.txt` and refuse to be
+included by a project, with an `#error`.
 
 A shared `arcstd` exports what is marked `ARCSTD_EXPORT`. Third party libraries in the public headers are the Boost
 headers, magic_enum and incbin; Lua, sol2 and the others are private.
