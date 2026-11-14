@@ -15,7 +15,7 @@
 #include <variant>
 #include <vector>
 
-namespace arcstd::framework
+namespace arcstd::setting
 {
 namespace detail
 {
@@ -249,4 +249,4 @@ template<underlying_setting_type F, underlying_setting_type T>
   }
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::setting

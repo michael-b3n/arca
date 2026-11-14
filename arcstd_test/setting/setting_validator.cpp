@@ -1,4 +1,4 @@
-#include <arcstd/framework/setting_validator.hpp>
+#include <arcstd/setting/setting_validator.hpp>
 #include <arcstd/util/exception.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-namespace arcstd::framework
+namespace arcstd::setting
 {
 
 namespace
@@ -25,7 +25,7 @@ enum class language
 
 } // namespace
 
-TEST_CASE("setting_validator_range_limits_plain_values", "[framework]")
+TEST_CASE("setting_validator_range_limits_plain_values", "[setting]")
 {
   using namespace std::chrono_literals;
 
@@ -70,7 +70,7 @@ TEST_CASE("setting_validator_range_limits_plain_values", "[framework]")
   }
 }
 
-TEST_CASE("setting_validator_range_limits_wrapped_values", "[framework]")
+TEST_CASE("setting_validator_range_limits_wrapped_values", "[setting]")
 {
   using namespace std::chrono_literals;
 
@@ -113,7 +113,7 @@ TEST_CASE("setting_validator_range_limits_wrapped_values", "[framework]")
   }
 }
 
-TEST_CASE("setting_validator_range_leaves_other_types_alone", "[framework]")
+TEST_CASE("setting_validator_range_leaves_other_types_alone", "[setting]")
 {
   using names_type = std::vector<std::string>;
 
@@ -134,7 +134,7 @@ TEST_CASE("setting_validator_range_leaves_other_types_alone", "[framework]")
   }
 }
 
-TEST_CASE("setting_validator_range_type_erased_wraps_a_validator", "[framework]")
+TEST_CASE("setting_validator_range_type_erased_wraps_a_validator", "[setting]")
 {
   using namespace std::chrono_literals;
 
@@ -174,7 +174,7 @@ TEST_CASE("setting_validator_range_type_erased_wraps_a_validator", "[framework]"
   }
 }
 
-TEST_CASE("setting_validator_list_holds_the_available_values", "[framework]")
+TEST_CASE("setting_validator_list_holds_the_available_values", "[setting]")
 {
   using names_type = std::vector<std::string>;
 
@@ -246,7 +246,7 @@ TEST_CASE("setting_validator_list_holds_the_available_values", "[framework]")
   }
 }
 
-TEST_CASE("setting_validator_list_type_erased_wraps_a_validator", "[framework]")
+TEST_CASE("setting_validator_list_type_erased_wraps_a_validator", "[setting]")
 {
   using names_type = std::vector<std::string>;
 
@@ -290,4 +290,4 @@ TEST_CASE("setting_validator_list_type_erased_wraps_a_validator", "[framework]")
   }
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::setting

@@ -1,6 +1,6 @@
-#include "arcstd/framework/setting_validator.hpp"
+#include "arcstd/setting/setting_validator.hpp"
 
-namespace arcstd::framework::detail
+namespace arcstd::setting::detail
 {
 
 ///
@@ -26,4 +26,4 @@ auto setting_validator_connector::notify_changed() -> void
   }
 }
 
-} // namespace arcstd::framework::detail
+} // namespace arcstd::setting::detail

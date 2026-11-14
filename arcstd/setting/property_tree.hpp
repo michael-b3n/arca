@@ -1,11 +1,11 @@
 #pragma once
 
 #if !defined(ARCSTD_INTERNAL)
-  #error "arcstd/framework/property_tree.hpp is a private header of arcstd"
+  #error "arcstd/setting/property_tree.hpp is a private header of arcstd"
 #endif
 
-#include "arcstd/framework/property.hpp"
-#include "arcstd/framework/property_parser.hpp"
+#include "arcstd/setting/property.hpp"
+#include "arcstd/setting/property_parser.hpp"
 #include "arcstd/util/exception.hpp"
 
 #include <filesystem>
@@ -13,7 +13,7 @@
 #include <mutex>
 #include <optional>
 
-namespace arcstd::framework
+namespace arcstd::setting
 {
 
 ///
@@ -102,4 +102,4 @@ auto property_tree::read(const property_path_type& path) const -> std::optional<
   return property_parser::read<T>(path, tree_);
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::setting

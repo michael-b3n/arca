@@ -1,7 +1,7 @@
 #pragma once
 
 #include "arcstd/export.hpp"
-#include "arcstd/workflow/workflow_settings.hpp"
+#include "arcstd/setting/setting_store.hpp"
 
 #include <memory>
 #include <type_traits>
@@ -15,7 +15,7 @@ namespace arcstd::workflow
 class ARCSTD_EXPORT workflow_settings_base
 {
 public: // Structors
-  workflow_settings_base(std::shared_ptr<workflow_settings> workflow_settings);
+  workflow_settings_base(std::shared_ptr<setting::setting_store> setting_store);
   virtual ~workflow_settings_base() noexcept;
   workflow_settings_base(const workflow_settings_base&) = delete;
   workflow_settings_base(workflow_settings_base&&) = delete;
@@ -27,10 +27,10 @@ protected: // Typedefs
   using setting_value_t = typename std::remove_cv_t<std::remove_pointer_t<T>>::value_type;
 
   template<typename T>
-  using setting_type = workflow_settings::setting_non_owning_ptr_type<T>;
+  using setting_type = setting::setting_store::setting_non_owning_ptr_type<T>;
 
 protected: // Variables
-  std::shared_ptr<workflow_settings> workflow_settings_;
+  std::shared_ptr<setting::setting_store> setting_store_;
 };
 
 } // namespace arcstd::workflow

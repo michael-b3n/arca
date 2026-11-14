@@ -12,10 +12,10 @@ namespace arcstd::workflow
 ///
 ///
 workflow_cache::workflow_cache(
-  std::shared_ptr<workflow_settings> workflow_settings, std::shared_ptr<workflow_script> workflow_script
+  std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script
 )
   : workflow_script_{std::move(workflow_script)}
-  , folder_{workflow_settings->data_folder() / folder_name}
+  , folder_{setting_store->data_folder() / folder_name}
 {
   registrations_
     ///

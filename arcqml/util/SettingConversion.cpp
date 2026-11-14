@@ -29,7 +29,7 @@ namespace
 
 // Typedefs
 template<typename T>
-using setting_ptr = arcstd::workflow::workflow_settings::setting_type_erased_non_owning_ptr_type<T>;
+using setting_ptr = arcstd::setting::setting_store::setting_type_erased_non_owning_ptr_type<T>;
 
 ///
 /// Protected numeric cast between integers.
@@ -331,7 +331,7 @@ auto tryNormalizeQVariant(const QVariant& variant) -> QVariant
 ///
 ///
 auto toDefaultSettingValue(const QVariant& value)
-  -> std::optional<arcstd::workflow::workflow_settings::setting_type_erased_variant_type>
+  -> std::optional<arcstd::setting::setting_store::setting_type_erased_variant_type>
 {
   const auto v = tryNormalizeQVariant(value);
   switch(v.metaType().id())

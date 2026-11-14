@@ -16,7 +16,7 @@ namespace arcstd::workflow
 class ARCSTD_EXPORT workflow_template_settings final : public workflow_settings_base
 {
 public: // Structors
-  workflow_template_settings(std::shared_ptr<workflow_settings> workflow_settings);
+  workflow_template_settings(std::shared_ptr<setting::setting_store> setting_store);
   ~workflow_template_settings() noexcept override = default;
 
   // clang-format off
@@ -55,7 +55,7 @@ public: // Typedefs
   using result = result_type<result_t>;
 
 public: // Structors
-  workflow_template(std::shared_ptr<workflow_settings> workflow_settings, std::shared_ptr<workflow_script> workflow_script);
+  workflow_template(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script);
   ~workflow_template() noexcept override;
 
 public: // Modifiers

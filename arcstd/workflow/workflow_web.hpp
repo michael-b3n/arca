@@ -1,9 +1,9 @@
 #pragma once
 
 #include "arcstd/export.hpp"
+#include "arcstd/setting/setting_store.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
 #include "arcstd/workflow/workflow_script.hpp"
-#include "arcstd/workflow/workflow_settings.hpp"
 #include "arcstd/workflow/workflow_settings_base.hpp"
 
 #include <chrono>
@@ -23,7 +23,7 @@ namespace arcstd::workflow
 class ARCSTD_EXPORT workflow_web_settings final : public workflow_settings_base
 {
 public: // Structors
-  workflow_web_settings(std::shared_ptr<workflow_settings> workflow_settings);
+  workflow_web_settings(std::shared_ptr<setting::setting_store> setting_store);
   ~workflow_web_settings() noexcept override = default;
 
 public: // Variables
@@ -52,7 +52,7 @@ public: // Typedefs
   using page_type = std::expected<std::string, std::string>;
 
 public: // Structors
-  workflow_web(std::shared_ptr<workflow_settings> workflow_settings, std::shared_ptr<workflow_script> workflow_script);
+  workflow_web(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script);
   ~workflow_web() noexcept override;
 
 public: // Operations

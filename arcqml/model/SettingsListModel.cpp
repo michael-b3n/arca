@@ -105,7 +105,7 @@ auto getValidatorType(const auto& setting) -> SettingsListModel::ValidatorType
 ///
 ///
 SettingsListModel::SettingsListModel(
-  std::shared_ptr<arcstd::workflow::workflow_settings> workflowSettings, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::setting::setting_store> workflowSettings, const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QAbstractListModel{parent}
   , workflowSettings_{std::move(workflowSettings)}
@@ -119,7 +119,7 @@ SettingsListModel::SettingsListModel(
 
   // Settings may also be created after this model was constructed, e.g. by the QML layer.
   workflowSettings_->connect_queued(
-    &arcstd::workflow::workflow_settings_signals::setting_created,
+    &arcstd::setting::setting_store_signals::setting_created,
     [this](const std::string& path)
     {
       LOG_DEBUG("notify setting created: path=\"{}\"", path)
@@ -262,7 +262,7 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
   addEntry(path, setting);
   const auto rowIndex = arcstd::math::arithmetic::subtract(entries_.size(), decltype(entries_.size()){1}).value();
   setting->signal_adapter.connect_queued(
-    &arcstd::workflow::workflow_settings::setting_signals_type::value_changed,
+    &arcstd::setting::setting_store::setting_signals_type::value_changed,
     [this, path, rowIndex]()
     {
       LOG_DEBUG("notify setting value changed: path=\"{}\", row={}", path, rowIndex)
@@ -275,7 +275,7 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
     connections_
   );
   setting->signal_adapter.connect_queued(
-    &arcstd::workflow::workflow_settings::setting_signals_type::validator_changed,
+    &arcstd::setting::setting_store::setting_signals_type::validator_changed,
     [this, setting, path, rowIndex]()
     {
       using value_type = std::remove_pointer_t<std::remove_cvref_t<decltype(setting)>>::value_type;

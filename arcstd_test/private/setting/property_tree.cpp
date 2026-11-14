@@ -1,4 +1,4 @@
-#include <arcstd/framework/property_tree.hpp>
+#include <arcstd/setting/property_tree.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string>
 
-namespace arcstd::framework
+namespace arcstd::setting
 {
 namespace
 {
@@ -33,7 +33,7 @@ auto write_file(const std::filesystem::path& path, const std::string& content) -
 
 } // namespace
 
-TEST_CASE("property_tree_whitespace", "[framework]")
+TEST_CASE("property_tree_whitespace", "[setting]")
 {
   const auto path = std::filesystem::temp_directory_path() / "arcstd_test_property_tree_whitespace.xml";
   // Whitespace an earlier version piled up between the elements on every write
@@ -53,4 +53,4 @@ TEST_CASE("property_tree_whitespace", "[framework]")
   std::filesystem::remove(path);
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::setting

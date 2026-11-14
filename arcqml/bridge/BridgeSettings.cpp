@@ -1,8 +1,8 @@
 #include "arcqml/bridge/BridgeSettings.hpp"
 #include "arcqml/bridge/SettingBinding.hpp"
 
+#include <arcstd/setting/setting_store.hpp>
 #include <arcstd/util/log.hpp>
-#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <memory>
 #include <utility>
@@ -45,7 +45,7 @@ BridgeSettings* BridgeSettings::create([[maybe_unused]] QQmlEngine* qmlEngine, Q
 ///
 ///
 BridgeSettings::BridgeSettings(
-  std::shared_ptr<arcstd::workflow::workflow_settings> workflowSettings, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::setting::setting_store> workflowSettings, const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QObject{parent}
   , workflowSettings_{std::move(workflowSettings)}
@@ -70,7 +70,7 @@ BridgeSettings::~BridgeSettings() noexcept
 
 ///
 ///
-const std::shared_ptr<arcstd::workflow::workflow_settings>& BridgeSettings::workflowSettings() const
+const std::shared_ptr<arcstd::setting::setting_store>& BridgeSettings::workflowSettings() const
 {
   return workflowSettings_;
 }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "arcstd/export.hpp"
-#include "arcstd/framework/setting_common.hpp"
 #include "arcstd/math/value_range.hpp"
 #include "arcstd/meta/chrono.hpp"
 #include "arcstd/meta/type_traits.hpp"
+#include "arcstd/setting/setting_common.hpp"
 #include "arcstd/util/contains.hpp"
 #include "arcstd/util/log.hpp"
 
@@ -15,7 +15,7 @@
 #include <ranges>
 #include <type_traits>
 
-namespace arcstd::framework
+namespace arcstd::setting
 {
 namespace detail
 {
@@ -89,6 +89,12 @@ protected: // Variables
 };
 
 } // namespace detail
+
+///
+/// Value types a range validator limits: numbers but bool, and durations by their count.
+///
+template<typename T>
+concept setting_validator_range_value_type = detail::setting_validator_range_value_type<T>;
 
 ///
 /// Class for unbound setting validators.
@@ -786,4 +792,4 @@ auto setting_validator_list_type_erased<T>::contains(const plain_underlying_type
   return plain_contains_(value);
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::setting

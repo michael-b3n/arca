@@ -1,6 +1,6 @@
 #include "test_utils/temp_folder.hpp"
 
-#include <arcstd/workflow/workflow_settings.hpp>
+#include <arcstd/setting/setting_store.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -12,7 +12,7 @@
 #include <tuple>
 #include <vector>
 
-namespace arcstd::workflow
+namespace arcstd::setting
 {
 namespace
 {
@@ -33,12 +33,12 @@ enum class other_color
 
 } // namespace
 
-TEST_CASE("workflow_settings_keeps_values_beyond_the_run", "[workflow]")
+TEST_CASE("setting_store_keeps_values_beyond_the_run", "[setting]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_settings_keeps_values_beyond_the_run"};
+  const auto folder = test_utils::temp_folder{"setting_store_keeps_values_beyond_the_run"};
   using colors = std::vector<color>;
   {
-    auto settings = workflow_settings{folder.path().string()};
+    auto settings = setting_store{folder.path().string()};
     // Created with the default, then changed
     const auto flag = settings.create_setting("test.flag", false);
     const auto maybe = settings.create_setting("test.maybe", std::optional<bool>{});
@@ -63,9 +63,9 @@ TEST_CASE("workflow_settings_keeps_values_beyond_the_run", "[workflow]")
     CHECK(some->value(color::blue));
     CHECK(list->value(colors{color::blue, color::red}));
   }
-  CHECK(std::filesystem::exists(folder.path() / workflow_settings::settings_file_name));
+  CHECK(std::filesystem::exists(folder.path() / setting_store::settings_file_name));
   // The stored values win over other defaults
-  auto settings = workflow_settings{folder.path().string()};
+  auto settings = setting_store{folder.path().string()};
   CHECK(settings.create_setting("test.flag", false)->value() == true);
   CHECK(settings.create_setting("test.maybe", std::optional<bool>{true})->value() == std::optional{false});
   CHECK(settings.create_setting("test.count", std::int32_t{7})->value() == 2);
@@ -78,18 +78,18 @@ TEST_CASE("workflow_settings_keeps_values_beyond_the_run", "[workflow]")
   CHECK(settings.create_setting("test.unchanged", std::int32_t{6})->value() == 5);
 }
 
-TEST_CASE("workflow_settings_takes_the_default_for_a_stored_value_that_does_not_fit", "[workflow]")
+TEST_CASE("setting_store_takes_the_default_for_a_stored_value_that_does_not_fit", "[setting]")
 {
-  const auto folder = test_utils::temp_folder{"workflow_settings_takes_the_default_for_a_stored_value_that_does_not_fit"};
+  const auto folder = test_utils::temp_folder{"setting_store_takes_the_default_for_a_stored_value_that_does_not_fit"};
   {
-    auto settings = workflow_settings{folder.path().string()};
+    auto settings = setting_store{folder.path().string()};
     std::ignore = settings.create_setting("test.one", color::green);
     std::ignore = settings.create_setting("test.same", color::red);
     std::ignore = settings.create_setting("test.list", std::vector<color>{color::red, color::green});
     std::ignore = settings.create_setting("test.some", std::optional{color::green});
     std::ignore = settings.create_setting("test.text", std::string{"text"});
   }
-  auto settings = workflow_settings{folder.path().string()};
+  auto settings = setting_store{folder.path().string()};
   // A name of no value of the enum, also as one of a list
   CHECK(settings.create_setting("test.one", other_color::yellow)->value() == other_color::yellow);
   CHECK(settings.create_setting("test.same", other_color::yellow)->value() == other_color::red);
@@ -102,4 +102,4 @@ TEST_CASE("workflow_settings_takes_the_default_for_a_stored_value_that_does_not_
   CHECK(settings.create_setting("test.text", std::int32_t{4})->value() == 4);
 }
 
-} // namespace arcstd::workflow
+} // namespace arcstd::setting

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "arcstd/framework/setting.hpp"
-#include "arcstd/framework/setting_common.hpp"
 #include "arcstd/lua/function_cast.hpp"
+#include "arcstd/setting/setting.hpp"
+#include "arcstd/setting/setting_common.hpp"
 
 #include <memory>
 #include <string>
@@ -33,10 +33,10 @@ using function_table = std::vector<std::pair<std::string, function>>;
 /// \see function_cast. \p setting must live as long.
 /// \return the functions by name
 ///
-template<framework::underlying_setting_type T>
-[[nodiscard]] auto setting_cast(framework::setting<T>& setting, const std::weak_ptr<const void>& registered) -> function_table
+template<setting::underlying_setting_type T>
+[[nodiscard]] auto setting_cast(setting::setting<T>& setting, const std::weak_ptr<const void>& registered) -> function_table
 {
-  using erased_type = framework::setting_type_erased_type_from<T>;
+  using erased_type = setting::setting_type_erased_type_from<T>;
 
   auto functions = function_table{};
   ///
@@ -46,7 +46,7 @@ template<framework::underlying_setting_type T>
   functions.emplace_back(
     names::function_get,
     function_cast(
-      [&setting]() -> erased_type { return framework::create_setting_value_converter<T, erased_type>()(setting.value()); },
+      [&setting]() -> erased_type { return setting::create_setting_value_converter<T, erased_type>()(setting.value()); },
       registered
     )
   );
@@ -60,7 +60,7 @@ template<framework::underlying_setting_type T>
     names::function_set,
     function_cast(
       [&setting](const erased_type& value) -> bool
-      { return setting.value(framework::create_setting_value_converter<erased_type, T>()(value)); },
+      { return setting.value(setting::create_setting_value_converter<erased_type, T>()(value)); },
       registered
     )
   );

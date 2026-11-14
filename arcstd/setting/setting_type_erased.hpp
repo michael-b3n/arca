@@ -1,11 +1,11 @@
 #pragma once
 
-#include "arcstd/framework/setting.hpp"
+#include "arcstd/setting/setting.hpp"
 
 #include <functional>
 #include <memory>
 
-namespace arcstd::framework
+namespace arcstd::setting
 {
 
 ///
@@ -108,4 +108,4 @@ auto setting_type_erased<T>::value(const value_type& v) -> bool
   return set_(v);
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::setting

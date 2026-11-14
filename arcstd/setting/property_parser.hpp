@@ -1,7 +1,7 @@
 #pragma once
 
 #if !defined(ARCSTD_INTERNAL)
-  #error "arcstd/framework/property_parser.hpp is a private header of arcstd"
+  #error "arcstd/setting/property_parser.hpp is a private header of arcstd"
 #endif
 
 #include "arcstd/meta/chrono.hpp"
@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace arcstd::framework
+namespace arcstd::setting
 {
 
 ///
@@ -291,4 +291,4 @@ auto property_parser::write(const property_path_type& path, property_tree_type& 
   );
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::setting

@@ -160,17 +160,17 @@ struct offered_script final
 
 ///
 ///
-workflow_script_settings::workflow_script_settings(std::shared_ptr<workflow_settings> workflow_settings)
-  : workflow_settings_base{std::move(workflow_settings)}
-  , enabled{workflow_settings_->create_setting("script.enabled", true)}
-  , folder{workflow_settings_->data_folder() / folder_name}
+workflow_script_settings::workflow_script_settings(std::shared_ptr<setting::setting_store> setting_store)
+  : workflow_settings_base{std::move(setting_store)}
+  , enabled{setting_store_->create_setting("script.enabled", true)}
+  , folder{setting_store_->data_folder() / folder_name}
 {
 }
 
 ///
 ///
-workflow_script::workflow_script(std::shared_ptr<workflow_settings> workflow_settings, bundled_provider_type bundled)
-  : workflow_base{std::move(workflow_settings)}
+workflow_script::workflow_script(std::shared_ptr<setting::setting_store> setting_store, bundled_provider_type bundled)
+  : workflow_base{std::move(setting_store)}
   , bundled_{std::move(bundled)}
   , state_owner_{std::make_unique<lua::state_owner>()}
 {

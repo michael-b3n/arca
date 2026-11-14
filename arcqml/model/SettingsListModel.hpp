@@ -1,8 +1,8 @@
 #pragma once
 
+#include <arcstd/setting/setting_store.hpp>
 #include <arcstd/util/non_owning_ptr.hpp>
 #include <arcstd/workflow/workflow_base.hpp>
-#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <QAbstractListModel>
 #include <QList>
@@ -78,11 +78,11 @@ private: // Typedefs
     WrapperType wrapperType;
     ValidatorType validatorType;
     QString postfix;
-    arcstd::workflow::workflow_settings::setting_type_erased_non_owning_ptr_variant_type setting;
+    arcstd::setting::setting_store::setting_type_erased_non_owning_ptr_variant_type setting;
   };
 
   // Variables
-  std::shared_ptr<arcstd::workflow::workflow_settings> workflowSettings_;
+  std::shared_ptr<arcstd::setting::setting_store> workflowSettings_;
   std::vector<Entry> entries_;
   arcstd::workflow::workflow_ground::connections_type connections_;
 
@@ -107,8 +107,7 @@ public: // Typedefs
 
 public: // Structors
   explicit SettingsListModel(
-    std::shared_ptr<arcstd::workflow::workflow_settings> workflowSettings,
-    arcstd::util::non_owning_ptr<QObject> parent = nullptr
+    std::shared_ptr<arcstd::setting::setting_store> workflowSettings, arcstd::util::non_owning_ptr<QObject> parent = nullptr
   );
   ~SettingsListModel() noexcept override;
 

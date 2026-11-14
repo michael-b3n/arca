@@ -10,14 +10,12 @@ namespace arcstd::workflow
 
 ///
 ///
-workflow_web_settings::workflow_web_settings(std::shared_ptr<workflow_settings> workflow_settings)
-  : workflow_settings_base{std::move(workflow_settings)}
-  , retry_pause{workflow_settings_->create_setting(
+workflow_web_settings::workflow_web_settings(std::shared_ptr<setting::setting_store> setting_store)
+  : workflow_settings_base{std::move(setting_store)}
+  , retry_pause{setting_store_->create_setting(
       "web.retry_pause",
       std::chrono::seconds{60},
-      std::make_shared<framework::setting_validator_range<std::chrono::seconds>>(
-        std::chrono::seconds{0}, std::chrono::hours{24}
-      )
+      std::make_shared<setting::setting_validator_range<std::chrono::seconds>>(std::chrono::seconds{0}, std::chrono::hours{24})
     )}
 {
 }
@@ -25,9 +23,9 @@ workflow_web_settings::workflow_web_settings(std::shared_ptr<workflow_settings> 
 ///
 ///
 workflow_web::workflow_web(
-  std::shared_ptr<workflow_settings> workflow_settings, std::shared_ptr<workflow_script> workflow_script
+  std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script
 )
-  : workflow_base{std::move(workflow_settings)}
+  : workflow_base{std::move(setting_store)}
   , workflow_script_{std::move(workflow_script)}
 {
   registrations_

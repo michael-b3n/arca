@@ -2,9 +2,9 @@
 
 #include "arcqml/util/SettingConversion.hpp"
 
+#include <arcstd/setting/setting_store.hpp>
 #include <arcstd/util/non_owning_ptr.hpp>
 #include <arcstd/workflow/workflow_base.hpp>
-#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <QObject>
 #include <QString>
@@ -118,7 +118,7 @@ private: // Implementation
   /// \return the validator of a new setting of type \p T
   ///
   template<typename T>
-  [[nodiscard]] auto settingValidator() const -> arcstd::workflow::workflow_settings::validator_type<T>;
+  [[nodiscard]] auto settingValidator() const -> arcstd::setting::setting_store::validator_type<T>;
 };
 
 } // namespace arcqml

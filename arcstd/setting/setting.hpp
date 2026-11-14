@@ -1,14 +1,14 @@
 #pragma once
 
-#include "arcstd/framework/property.hpp"
-#include "arcstd/framework/setting_common.hpp"
-#include "arcstd/framework/setting_validator.hpp"
+#include "arcstd/setting/property.hpp"
+#include "arcstd/setting/setting_common.hpp"
+#include "arcstd/setting/setting_validator.hpp"
 #include "arcstd/signal/adapter.hpp"
 #include "arcstd/util/visit_helper.hpp"
 
 #include <memory>
 
-namespace arcstd::framework
+namespace arcstd::setting
 {
 
 ///
@@ -194,4 +194,4 @@ auto setting<T>::validate() -> void
   );
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::setting

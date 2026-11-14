@@ -25,8 +25,8 @@ set(ARCSTD_PRIVATE_INC_FILES
   core/core_fetch_web_content.hpp
   execution/execution.hpp
   execution/scope_data.hpp
-  framework/property_parser.hpp
-  framework/property_tree.hpp
+  setting/property_parser.hpp
+  setting/property_tree.hpp
   lua/internal_scripts.hpp
   lua/names.hpp
   lua/object_cast.hpp

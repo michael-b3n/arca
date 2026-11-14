@@ -1,7 +1,7 @@
 #pragma once
 
+#include <arcstd/setting/setting_store.hpp>
 #include <arcstd/workflow/workflow_script.hpp>
-#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -23,14 +23,14 @@ namespace arcstd::test_utils
 /// An absolute folder name replaces the local data folder, so the tests leave it alone.
 ///
 [[nodiscard]] inline auto make_script_settings(const std::filesystem::path& data_folder, const bool enabled = false)
-  -> std::shared_ptr<workflow::workflow_settings>
+  -> std::shared_ptr<setting::setting_store>
 {
   {
-    const auto writer = std::make_shared<workflow::workflow_settings>(data_folder.string());
+    const auto writer = std::make_shared<setting::setting_store>(data_folder.string());
     const auto settings = workflow::workflow_script_settings{writer};
     std::ignore = settings.enabled->value(enabled);
   }
-  return std::make_shared<workflow::workflow_settings>(data_folder.string());
+  return std::make_shared<setting::setting_store>(data_folder.string());
 }
 
 ///

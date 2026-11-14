@@ -1,11 +1,11 @@
-#include "arcstd/workflow/workflow_settings.hpp"
-#include "arcstd/framework/property_tree.hpp"
+#include "arcstd/setting/setting_store.hpp"
+#include "arcstd/setting/property_tree.hpp"
 #include "arcstd/system/filesystem.hpp"
 
 #include <algorithm>
 #include <ranges>
 
-namespace arcstd::workflow
+namespace arcstd::setting
 {
 namespace
 {
@@ -13,39 +13,38 @@ namespace
 ///
 /// \return the path of the setting of \p path in the property tree
 ///
-[[nodiscard]] auto tree_path(const std::string& path) -> framework::property_tree::path_type
+[[nodiscard]] auto tree_path(const std::string& path) -> property_tree::path_type
 {
-  return framework::property_tree::path_type{std::string(workflow_settings::settings_root_name)} /
-         framework::property_tree::path_type{path};
+  return property_tree::path_type{std::string(setting_store::settings_root_name)} / property_tree::path_type{path};
 }
 
 } // namespace
 
 ///
 ///
-auto workflow_settings::settings_file_path(const std::optional<std::string_view> folder_name) -> std::filesystem::path
+auto setting_store::settings_file_path(const std::optional<std::string_view> folder_name) -> std::filesystem::path
 {
   return system::filesystem::local_data_folder(folder_name) / settings_file_name;
 }
 
 ///
 ///
-workflow_settings::workflow_settings(const std::optional<std::string_view> folder_name)
+setting_store::setting_store(const std::optional<std::string_view> folder_name)
   : data_folder_{system::filesystem::local_data_folder(folder_name)}
-  , tree_{framework::property_tree::create(data_folder_ / settings_file_name)}
+  , tree_{property_tree::create(data_folder_ / settings_file_name)}
 {
 }
 
 ///
 ///
-auto workflow_settings::data_folder() const -> const std::filesystem::path&
+auto setting_store::data_folder() const -> const std::filesystem::path&
 {
   return data_folder_;
 }
 
 ///
 ///
-auto workflow_settings::type_erased_settings() const -> std::vector<setting_data>
+auto setting_store::type_erased_settings() const -> std::vector<setting_data>
 {
   const auto lock = std::scoped_lock{mtx_};
   const auto to_setting_data = [](const auto& data)
@@ -60,7 +59,7 @@ auto workflow_settings::type_erased_settings() const -> std::vector<setting_data
 
 ///
 ///
-auto workflow_settings::type_erased_setting(const std::string& path) const
+auto setting_store::type_erased_setting(const std::string& path) const
   -> std::optional<setting_type_erased_non_owning_ptr_variant_type>
 {
   const auto lock = std::scoped_lock{mtx_};
@@ -74,8 +73,8 @@ auto workflow_settings::type_erased_setting(const std::string& path) const
 
 ///
 ///
-auto workflow_settings::stored_value(
-  const framework::property_tree& tree, const std::string& path, const setting_type_erased_variant_type& type
+auto setting_store::stored_value(
+  const property_tree& tree, const std::string& path, const setting_type_erased_variant_type& type
 ) -> std::optional<setting_type_erased_variant_type>
 {
   return std::visit(
@@ -91,11 +90,10 @@ auto workflow_settings::stored_value(
 
 ///
 ///
-auto workflow_settings::store_value(
-  framework::property_tree& tree, const std::string& path, const setting_type_erased_variant_type& value
-) -> void
+auto setting_store::store_value(property_tree& tree, const std::string& path, const setting_type_erased_variant_type& value)
+  -> void
 {
   std::visit([&](const auto& v) { tree.write(tree_path(path), v); }, value);
 }
 
-} // namespace arcstd::workflow
+} // namespace arcstd::setting

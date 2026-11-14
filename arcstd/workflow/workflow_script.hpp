@@ -1,8 +1,6 @@
 #pragma once
 
 #include "arcstd/export.hpp"
-#include "arcstd/framework/setting.hpp"
-#include "arcstd/framework/setting_common.hpp"
 #include "arcstd/lua/embedded_scripts.hpp"
 #include "arcstd/lua/function_cast.hpp"
 #include "arcstd/lua/lock.hpp"
@@ -11,12 +9,14 @@
 #include "arcstd/lua/setting_cast.hpp"
 #include "arcstd/lua/value.hpp"
 #include "arcstd/lua/value_cast.hpp"
+#include "arcstd/setting/setting.hpp"
+#include "arcstd/setting/setting_common.hpp"
+#include "arcstd/setting/setting_store.hpp"
 #include "arcstd/signal/adapter.hpp"
 #include "arcstd/signal/common.hpp"
 #include "arcstd/util/path.hpp"
 #include "arcstd/util/string_literal.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
-#include "arcstd/workflow/workflow_settings.hpp"
 #include "arcstd/workflow/workflow_settings_base.hpp"
 
 #include <concepts>
@@ -61,7 +61,7 @@ concept script_manifest = requires {
 class ARCSTD_EXPORT workflow_script_settings final : public workflow_settings_base
 {
 public: // Structors
-  workflow_script_settings(std::shared_ptr<workflow_settings> workflow_settings);
+  workflow_script_settings(std::shared_ptr<setting::setting_store> setting_store);
   ~workflow_script_settings() noexcept override = default;
 
 public: // Constants
@@ -125,7 +125,7 @@ public: // Structors
   ///
   /// Construct the workflow, \p bundled shall provide the compiled scripts when called.
   ///
-  workflow_script(std::shared_ptr<workflow_settings> workflow_settings, bundled_provider_type bundled);
+  workflow_script(std::shared_ptr<setting::setting_store> setting_store, bundled_provider_type bundled);
   ~workflow_script() noexcept override;
 
 public: // Accessors
@@ -168,8 +168,8 @@ public: // Modifiers
   /// kept, \see lua::setting_cast. \p setting must live as long.
   /// \return the registration to keep, one of nothing if the path can not be registered, the reason is logged
   ///
-  template<framework::underlying_setting_type T>
-  [[nodiscard]] auto register_setting(framework::setting<T>& setting) const -> registration_type;
+  template<setting::underlying_setting_type T>
+  [[nodiscard]] auto register_setting(setting::setting<T>& setting) const -> registration_type;
 
   ///
   /// Run the function of the manifest \p M of the script named \p script. Blocks until it returns, it may wait
@@ -233,8 +233,8 @@ auto workflow_script::register_function(const util::path& p, F&& function) const
 
 ///
 ///
-template<framework::underlying_setting_type T>
-auto workflow_script::register_setting(framework::setting<T>& setting) const -> registration_type
+template<setting::underlying_setting_type T>
+auto workflow_script::register_setting(setting::setting<T>& setting) const -> registration_type
 {
   auto registered = std::make_shared<const std::monostate>();
   auto functions = lua::setting_cast(setting, registered);

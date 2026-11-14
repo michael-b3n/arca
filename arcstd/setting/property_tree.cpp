@@ -1,4 +1,4 @@
-#include "arcstd/framework/property_tree.hpp"
+#include "arcstd/setting/property_tree.hpp"
 #include "arcstd/util/contains.hpp"
 #include "arcstd/util/exception.hpp"
 #include "arcstd/util/log.hpp"
@@ -9,7 +9,7 @@
 #include <fstream>
 #include <ranges>
 
-namespace arcstd::framework
+namespace arcstd::setting
 {
 
 ///
@@ -104,4 +104,4 @@ property_tree::~property_tree() noexcept
   }
 }
 
-} // namespace arcstd::framework
+} // namespace arcstd::setting

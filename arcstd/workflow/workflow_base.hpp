@@ -3,10 +3,10 @@
 #include "arcstd/execution/launch.hpp"
 #include "arcstd/execution/scope.hpp"
 #include "arcstd/framework/process_params.hpp"
+#include "arcstd/setting/setting_store.hpp"
 #include "arcstd/signal/adapter.hpp"
 #include "arcstd/signal/common.hpp"
 #include "arcstd/signal/queued_connections.hpp"
-#include "arcstd/workflow/workflow_settings.hpp"
 #include "arcstd/workflow/workflow_settings_base.hpp"
 
 #include <concepts>
@@ -83,7 +83,7 @@ template<std::derived_from<workflow_settings_base> S>
 class workflow_base<S> : public workflow_ground
 {
 protected: // Structors
-  workflow_base(std::shared_ptr<workflow_settings> workflow_settings);
+  workflow_base(std::shared_ptr<setting::setting_store> setting_store);
   ~workflow_base() noexcept override = default;
 
 public: // Typedefs
@@ -102,8 +102,8 @@ private: // Variables
 ///
 ///
 template<std::derived_from<workflow_settings_base> S>
-workflow_base<S>::workflow_base(std::shared_ptr<workflow_settings> workflow_settings)
-  : settings_{std::make_unique<S>(std::move(workflow_settings))}
+workflow_base<S>::workflow_base(std::shared_ptr<setting::setting_store> setting_store)
+  : settings_{std::make_unique<S>(std::move(setting_store))}
 {
 }
 

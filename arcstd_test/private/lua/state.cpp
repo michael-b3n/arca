@@ -1,9 +1,9 @@
 #include "test_utils/registrations.hpp"
 
-#include <arcstd/framework/property_tree.hpp>
-#include <arcstd/framework/setting.hpp>
 #include <arcstd/lua/state.hpp>
 #include <arcstd/lua/state_owner.hpp>
+#include <arcstd/setting/property_tree.hpp>
+#include <arcstd/setting/setting.hpp>
 #include <arcstd/util/exception.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -34,18 +34,18 @@ enum class color
   green
 };
 
-template<framework::underlying_setting_type T>
+template<setting::underlying_setting_type T>
 [[nodiscard]] auto make_setting(
-  framework::property_tree& tree,
+  setting::property_tree& tree,
   const std::string& name,
   T value,
   std::string postfix = {},
-  framework::setting_validator<T> validator = std::make_shared<framework::setting_validator_unbound>()
-) -> std::unique_ptr<framework::setting<T>>
+  setting::setting_validator<T> validator = std::make_shared<setting::setting_validator_unbound>()
+) -> std::unique_ptr<setting::setting<T>>
 {
-  return std::make_unique<framework::setting<T>>(
+  return std::make_unique<setting::setting<T>>(
     name,
-    tree.create_property(framework::property_tree::path_type{name}, std::move(value)),
+    tree.create_property(setting::property_tree::path_type{name}, std::move(value)),
     std::move(postfix),
     std::move(validator)
   );
@@ -200,9 +200,9 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
 
   SECTION("of a setting")
   {
-    const auto tree = std::make_shared<framework::property_tree>();
+    const auto tree = std::make_shared<setting::property_tree>();
     auto setting = make_setting<std::int32_t>(
-      *tree, "numbers.number", 5, "ms", std::make_shared<framework::setting_validator_range<std::int32_t>>(0, 10)
+      *tree, "numbers.number", 5, "ms", std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
     );
     {
       const auto registered = s.register_setting("numbers.number", *setting);
@@ -287,7 +287,7 @@ TEST_CASE("lua_state_registration_waits_for_the_running_script", "[lua]")
 TEST_CASE("lua_state_register_setting", "[lua]")
 {
   // The properties reach the tree through shared_from_this
-  const auto tree = std::make_shared<framework::property_tree>();
+  const auto tree = std::make_shared<setting::property_tree>();
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
   auto keep = test_utils::registrations{};
@@ -296,7 +296,7 @@ TEST_CASE("lua_state_register_setting", "[lua]")
   SECTION("range validated")
   {
     auto setting = make_setting<std::int32_t>(
-      *tree, "numbers.number", 1, "ms", std::make_shared<framework::setting_validator_range<std::int32_t>>(0, 10)
+      *tree, "numbers.number", 1, "ms", std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
     );
     REQUIRE(keep(s.register_setting("numbers.number", *setting)));
     CHECK(run("return root.interface.numbers.number.get()").get<std::int32_t>() == 1);

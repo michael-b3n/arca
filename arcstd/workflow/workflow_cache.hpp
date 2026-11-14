@@ -1,10 +1,10 @@
 #pragma once
 
 #include "arcstd/export.hpp"
+#include "arcstd/setting/setting_store.hpp"
 #include "arcstd/util/identifier.hpp"
 #include "arcstd/workflow/workflow_base.hpp"
 #include "arcstd/workflow/workflow_script.hpp"
-#include "arcstd/workflow/workflow_settings.hpp"
 
 #include <filesystem>
 #include <map>
@@ -39,7 +39,7 @@ class ARCSTD_EXPORT workflow_cache final : public workflow_base<void>
   workflow_script::registration_type registrations_;
 
 public: // Structors
-  workflow_cache(std::shared_ptr<workflow_settings> workflow_settings, std::shared_ptr<workflow_script> workflow_script);
+  workflow_cache(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<workflow_script> workflow_script);
   ~workflow_cache() noexcept override;
 
 public: // Modifiers
