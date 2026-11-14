@@ -275,12 +275,7 @@ auto lua_engine::register_functions(const util::path& p, function_table function
 
 ///
 ///
-auto lua_engine::run(
-  const script_name_type& script,
-  const util::path& id,
-  const std::function<value()>& input,
-  const std::function<bool(const value&)>& output
-) const -> void
+auto lua_engine::call(const script_name_type& script, const util::path& id, const value& input) const -> std::optional<value>
 {
   auto state = state_owner_->lock();
   const auto function = state->traverse_get<sol::optional<sol::protected_function>>(
@@ -288,12 +283,9 @@ auto lua_engine::run(
   );
   if(!function)
   {
-    return;
+    return std::nullopt;
   }
-  if(const auto result = state.call(*function, to_object(*state, input())); result && !output(to_value(*result)))
-  {
-    LOG_ERROR("lua script output rejected: script=\"{}\", function=\"{}\"", script, id.string());
-  }
+  return state.call(*function, to_object(*state, input)).transform([](const sol::object& result) { return to_value(result); });
 }
 
 ///

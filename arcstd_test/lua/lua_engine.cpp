@@ -2,7 +2,7 @@
 #include "test_utils/scripts.hpp"
 #include "test_utils/temp_folder.hpp"
 
-#include <arcstd/lua/embedded_scripts.hpp>
+#include <arcstd/lua/embedded_script.hpp>
 #include <arcstd/lua/lua_engine.hpp>
 #include <arcstd/lua/script_table.hpp>
 

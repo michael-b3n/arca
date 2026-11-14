@@ -1,10 +1,10 @@
 #pragma once
 
 #include "arcstd/export.hpp"
-#include "arcstd/lua/embedded_scripts.hpp"
+#include "arcstd/lua/embedded_script.hpp"
 #include "arcstd/lua/function_cast.hpp"
-#include "arcstd/lua/lock.hpp"
 #include "arcstd/lua/registration.hpp"
+#include "arcstd/lua/script_lock.hpp"
 #include "arcstd/lua/script_table.hpp"
 #include "arcstd/lua/setting_functions.hpp"
 #include "arcstd/lua/value.hpp"
@@ -14,8 +14,8 @@
 #include "arcstd/setting/setting_store.hpp"
 #include "arcstd/signal/adapter.hpp"
 #include "arcstd/signal/common.hpp"
+#include "arcstd/util/log.hpp"
 #include "arcstd/util/path.hpp"
-#include "arcstd/util/string_literal.hpp"
 
 #include <concepts>
 #include <cstddef>
@@ -108,13 +108,9 @@ public: // Typedefs
   using bundled_provider_type = std::remove_const_t<decltype(bundled_)>;
   using script_name_type = decltype(scripts_)::key_type;
   using scripts_type = decltype(scripts_);
-  using lock_type = lua::lock;
+  using lock_type = script_lock;
   using registration_type = registration;
   using embedded_script_type = embedded_script;
-  template<util::string_literal Key, typename T>
-  using field_type = field<Key, T>;
-  template<typename... Fields>
-  using table_type = script_table<Fields...>;
 
 public: // Structors
   ///
@@ -198,12 +194,8 @@ private: // Implementation
   [[nodiscard]] auto scripts(const std::vector<util::path>& ids) const -> scripts_type;
   [[nodiscard]] auto register_function(const util::path& p, function function) const -> registration_type;
   [[nodiscard]] auto register_functions(const util::path& p, function_table functions) const -> registration_type;
-  auto run(
-    const script_name_type& script,
-    const util::path& id,
-    const std::function<value()>& input,
-    const std::function<bool(const value&)>& output
-  ) const -> void;
+  [[nodiscard]] auto call(const script_name_type& script, const util::path& id, const value& input) const
+    -> std::optional<value>;
   auto load(const std::stop_token& stop_token) -> void;
   auto load_folder(const std::filesystem::path& folder, const std::stop_token& stop_token) -> void;
   auto load_script(std::string_view file, std::string_view code) -> void;
@@ -238,17 +230,17 @@ auto lua_engine::register_setting(setting::setting<T>& setting) const -> registr
 template<script_manifest M>
 auto lua_engine::run(const script_name_type& script, const typename M::input& input) const -> std::optional<typename M::output>
 {
-  auto output = std::optional<typename M::output>{};
-  run(
-    script,
-    util::path{M::id},
-    [&] { return value_cast<typename M::input>::to(input); },
-    [&](const value& value)
-    {
-      output = value_cast<typename M::output>::from(value);
-      return output.has_value();
-    }
-  );
+  const auto id = util::path{M::id};
+  const auto result = call(script, id, value_cast<typename M::input>::to(input));
+  if(!result)
+  {
+    return std::nullopt;
+  }
+  auto output = value_cast<typename M::output>::from(*result);
+  if(!output)
+  {
+    LOG_ERROR("lua script output rejected: script=\"{}\", function=\"{}\"", script, id.string());
+  }
   return output;
 }
 

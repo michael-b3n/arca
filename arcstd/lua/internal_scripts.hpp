@@ -4,7 +4,7 @@
   #error "arcstd/lua/internal_scripts.hpp is a private header of arcstd"
 #endif
 
-#include "arcstd/lua/embedded_scripts.hpp"
+#include "arcstd/lua/embedded_script.hpp"
 
 #include <optional>
 #include <span>
