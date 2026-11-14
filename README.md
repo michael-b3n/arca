@@ -42,7 +42,8 @@ A project includes the headers of an area by `#include <arcstd/<area>/...>`, the
 | `meta`, `math`, `util` | Type traits, math and general utilities |
 
 A helper object names the types it hands out as type aliases, e.g. `setting_store::validator_type<T>` or
-`lua_engine::table_type<...>`.
+`lua_engine::registration_type`. A project calls `execution::shutdown_thread_pool()` before it ends, once its objects
+that launch work are gone.
 
 The private headers lie beside the public ones: the database of a cache, the web request, the Lua state, the property
 tree of the settings file and the execution library. They are listed in `arcstd/CMakeLists.txt` and refuse to be
