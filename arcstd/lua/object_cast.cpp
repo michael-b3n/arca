@@ -47,7 +47,7 @@ constexpr auto max_table_depth = std::size_t{100};
       return value{value_opaque{}};
     }
     const auto table = object.as<sol::table>();
-    auto result = value_table{.entries = {}, .length = table.size()};
+    auto result = value_table{};
     table.for_each([&](const sol::object& key, const sol::object& item)
                    { result.entries.emplace_back(to_value(key, depth - 1), to_value(item, depth - 1)); });
     return value{std::move(result)};
@@ -76,7 +76,7 @@ auto to_object(sol::state_view lua, const value& v) -> sol::object
       }
       else if constexpr(std::is_same_v<T, value_table>)
       {
-        const auto sequence = std::min(held.length, held.entries.size());
+        const auto sequence = held.length();
         auto table = lua.create_table(numeric_cast<int>(sequence), numeric_cast<int>(held.entries.size() - sequence));
         std::ranges::for_each(
           held.entries, [&](const auto& entry) { table[to_object(lua, entry.first)] = to_object(lua, entry.second); }

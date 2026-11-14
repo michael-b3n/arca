@@ -136,6 +136,43 @@ TEST_CASE("lua_value_cast_converts_containers", "[lua]")
   CHECK_FALSE(cast<flags>(lua, "{x = 1}"));
 }
 
+TEST_CASE("lua_value_cast_reads_a_table_by_its_keys", "[lua]")
+{
+  // Built in C++, the sequence of a table is its keys 1, 2, 3, ... as in Lua
+  using numbers = std::map<std::int64_t, std::string>;
+  using list = std::vector<std::string>;
+  CHECK(
+    value_cast<list>::from(
+      value_cast<numbers>::to({
+        {2, "b"},
+        {1, "a"}
+  })
+    ) == list{"a", "b"}
+  );
+  CHECK_FALSE(
+    value_cast<list>::from(
+      value_cast<numbers>::to({
+        {1, "a"},
+        {3, "c"}
+  })
+    )
+  );
+  CHECK(
+    value_cast<numbers>::to({
+                              {2, "b"},
+                              {3, "c"}
+  })
+      .index() == value{value_table{}}.index()
+  );
+  CHECK(
+    std::get<value_table>(value_cast<numbers>::to({
+                            {2, "b"},
+                            {3, "c"}
+  }))
+      .length() == 0
+  );
+}
+
 TEST_CASE("lua_value_cast_takes_plain_value_types_only", "[lua]")
 {
   STATIC_REQUIRE(value_castable<bool>);

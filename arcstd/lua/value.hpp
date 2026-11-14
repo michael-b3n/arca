@@ -1,7 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <ranges>
 #include <string>
 #include <utility>
 #include <variant>
@@ -31,17 +33,18 @@ struct value_opaque final
 };
 
 ///
-/// Lua table: its entries by key, and its length as Lua counts it, the border of its sequence.
-/// Handed to Lua only the entries count.
+/// Lua table, its entries by key.
 ///
 struct value_table final
 {
   // Variables
   std::vector<std::pair<value, value>> entries;
-  std::size_t length{0};
 
-  // Operators
-  auto operator==(const value_table& other) const -> bool;
+  // Accessors
+  ///
+  /// \return the length of the sequence of the table: how many of the keys 1, 2, 3, ... it has in a row
+  ///
+  [[nodiscard]] auto length() const -> std::size_t;
 };
 
 ///
@@ -60,9 +63,19 @@ struct value final : std::variant<value_nil, bool, std::int64_t, double, std::st
 
 ///
 ///
-inline auto value_table::operator==(const value_table& other) const -> bool
+inline auto value_table::length() const -> std::size_t
 {
-  return length == other.length && entries == other.entries;
+  const auto is_index = [](const value& key)
+  {
+    const auto index = std::get_if<value::integer_type>(&key);
+    return index && *index > 0;
+  };
+  auto indices = entries | std::views::keys | std::views::filter(is_index) |
+                 std::views::transform([](const value& key) { return std::get<value::integer_type>(key); }) |
+                 std::ranges::to<std::vector>();
+  std::ranges::sort(indices);
+  const auto end = std::ranges::mismatch(indices, std::views::iota(value::integer_type{1})).in1;
+  return static_cast<std::size_t>(std::ranges::distance(indices.begin(), end));
 }
 
 } // namespace arcstd::lua

@@ -196,13 +196,13 @@ struct value_cast<std::map<K, T>> final
 ///
 inline auto detail::sequence(const value_table& table) -> std::vector<value>
 {
-  auto result = std::vector<value>(table.length);
+  auto result = std::vector<value>(table.length());
   std::ranges::for_each(
     table.entries,
     [&](const auto& entry)
     {
       const auto index = std::get_if<value::integer_type>(&entry.first);
-      if(index && *index >= 1 && std::cmp_less_equal(*index, table.length))
+      if(index && *index >= 1 && std::cmp_less_equal(*index, result.size()))
       {
         result[static_cast<std::size_t>(*index - 1)] = entry.second;
       }
@@ -354,7 +354,7 @@ auto value_cast<std::optional<T>>::from(const value& v) -> std::optional<std::op
 template<value_castable T>
 auto value_cast<std::vector<T>>::to(const std::vector<T>& v) -> value
 {
-  auto table = value_table{.entries = {}, .length = v.size()};
+  auto table = value_table{};
   std::ranges::for_each(
     v,
     [&](const T& item)
@@ -370,7 +370,7 @@ auto value_cast<std::vector<T>>::from(const value& v) -> std::optional<std::vect
 {
   const auto table = std::get_if<value_table>(&v);
   // Else e.g. a table by key would be read as an empty list
-  if(!table || table->entries.size() != table->length)
+  if(!table || table->entries.size() != table->length())
   {
     return std::nullopt;
   }
