@@ -1,16 +1,39 @@
 #include "arcstd/lua/state.hpp"
 #include "arcstd/lua/object_cast.hpp"
+#include "arcstd/util/exception.hpp"
 #include "arcstd/util/log.hpp"
 
 #include <algorithm>
 #include <format>
+#include <memory>
 #include <optional>
 #include <ranges>
+#include <span>
 #include <string>
 #include <utility>
+#include <variant>
 
 namespace arcstd::lua
 {
+namespace
+{
+
+///
+/// \return \p function for as long as \p registered lives, called after that it throws: the script gets the error
+///
+[[nodiscard]] auto guarded(function function, std::weak_ptr<const void> registered) -> lua::function
+{
+  return [function = std::move(function), registered = std::move(registered)](const std::span<const value> arguments)
+  {
+    if(registered.expired())
+    {
+      throw util::exception{"the function is not registered anymore"};
+    }
+    return function(arguments);
+  };
+}
+
+} // namespace
 
 ///
 ///
@@ -36,30 +59,32 @@ auto state::operator->() const -> sol::state*
 
 ///
 ///
-auto state::register_function(const util::path& p, function function, std::shared_ptr<const void> registered) -> registration
+auto state::register_function(const util::path& p, function function) -> registration
 {
   auto parent = free_parent(p);
   if(!parent)
   {
     return {};
   }
-  parent->set_function(p.sections().back(), to_object_function(std::move(function)));
+  auto registered = std::make_shared<const std::monostate>();
+  parent->set_function(p.sections().back(), to_object_function(guarded(std::move(function), registered)));
   return registration{data_, p, std::move(registered)};
 }
 
 ///
 ///
-auto state::register_functions(const util::path& p, function_table functions, std::shared_ptr<const void> registered)
-  -> registration
+auto state::register_functions(const util::path& p, function_table functions) -> registration
 {
   auto parent = free_parent(p);
   if(!parent)
   {
     return {};
   }
+  auto registered = std::make_shared<const std::monostate>();
   auto node = parent->create_named(p.sections().back());
   std::ranges::for_each(
-    functions, [&](auto& entry) { node.set_function(entry.first, to_object_function(std::move(entry.second))); }
+    functions,
+    [&](auto& entry) { node.set_function(entry.first, to_object_function(guarded(std::move(entry.second), registered))); }
   );
   return registration{data_, p, std::move(registered)};
 }

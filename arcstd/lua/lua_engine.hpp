@@ -6,7 +6,7 @@
 #include "arcstd/lua/lock.hpp"
 #include "arcstd/lua/registration.hpp"
 #include "arcstd/lua/script_table.hpp"
-#include "arcstd/lua/setting_cast.hpp"
+#include "arcstd/lua/setting_functions.hpp"
 #include "arcstd/lua/value.hpp"
 #include "arcstd/lua/value_cast.hpp"
 #include "arcstd/setting/setting.hpp"
@@ -166,7 +166,7 @@ public: // Modifiers
 
   ///
   /// Register \p setting for scripts at setting and its own path, for as long as the registration is
-  /// kept, \see setting_cast. \p setting must live as long.
+  /// kept, \see setting_functions. \p setting must live as long.
   /// \return the registration to keep, one of nothing if the path can not be registered, the reason is logged
   ///
   template<setting::underlying_setting_type T>
@@ -196,11 +196,8 @@ public: // Modifiers
 
 private: // Implementation
   [[nodiscard]] auto scripts(const std::vector<util::path>& ids) const -> scripts_type;
-  [[nodiscard]] auto register_function(const util::path& p, function function, std::shared_ptr<const void> registered) const
-    -> registration_type;
-  [[nodiscard]] auto register_functions(
-    const util::path& p, function_table functions, std::shared_ptr<const void> registered
-  ) const -> registration_type;
+  [[nodiscard]] auto register_function(const util::path& p, function function) const -> registration_type;
+  [[nodiscard]] auto register_functions(const util::path& p, function_table functions) const -> registration_type;
   auto run(
     const script_name_type& script,
     const util::path& id,
@@ -225,9 +222,7 @@ auto lua_engine::scripts() const -> scripts_type
 template<function_castable F>
 auto lua_engine::register_function(const util::path& p, F&& function) const -> registration_type
 {
-  auto registered = std::make_shared<const std::monostate>();
-  auto cast = function_cast(std::forward<F>(function), registered);
-  return register_function(p, std::move(cast), std::move(registered));
+  return register_function(p, function_cast(std::forward<F>(function)));
 }
 
 ///
@@ -235,9 +230,7 @@ auto lua_engine::register_function(const util::path& p, F&& function) const -> r
 template<setting::underlying_setting_type T>
 auto lua_engine::register_setting(setting::setting<T>& setting) const -> registration_type
 {
-  auto registered = std::make_shared<const std::monostate>();
-  auto functions = setting_cast(setting, registered);
-  return register_functions(util::path{setting_node} / util::path{setting.path}, std::move(functions), std::move(registered));
+  return register_functions(util::path{setting_node} / util::path{setting.path}, setting_functions(setting));
 }
 
 ///

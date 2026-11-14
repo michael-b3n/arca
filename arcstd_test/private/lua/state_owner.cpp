@@ -1,5 +1,6 @@
 #include "test_utils/registrations.hpp"
 
+#include <arcstd/lua/function_cast.hpp>
 #include <arcstd/lua/state_owner.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -86,7 +87,7 @@ TEST_CASE("lua_state_owner_is_locked_again_from_a_script", "[lua]")
     auto s = owner.lock();
     s->set("value", 7);
     // A copy kept by the state itself would keep it alive forever
-    CHECK(keep(s.register_function("read_value", [&owner]() { return owner.lock()->get<int>("value"); })));
+    CHECK(keep(s.register_function("read_value", function_cast([&owner]() { return owner.lock()->get<int>("value"); }))));
   }
   CHECK(owner.lock()->script("return root.interface.read_value() * 2").get<int>() == 14);
 }

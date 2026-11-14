@@ -6,10 +6,7 @@
 
 #include "arcstd/lua/function_cast.hpp"
 #include "arcstd/lua/registration.hpp"
-#include "arcstd/lua/setting_cast.hpp"
 #include "arcstd/lua/sol.hpp"
-#include "arcstd/setting/setting.hpp"
-#include "arcstd/setting/setting_common.hpp"
 #include "arcstd/util/path.hpp"
 
 #include <atomic>
@@ -19,7 +16,6 @@
 #include <optional>
 #include <string_view>
 #include <utility>
-#include <variant>
 
 namespace arcstd::lua
 {
@@ -72,37 +68,17 @@ public: // Accessors
 
 public: // Operations
   ///
-  /// Register a function at \p p, the last section is its name, for as long as the registration is kept.
-  /// What the function reaches must live as long, \see registration. \p function takes and returns C++
-  /// values, what a script passes and gets is converted, \see function_cast.
+  /// Register \p function at \p p, the last section is its name, for as long as the registration is kept. What it
+  /// reaches must live as long. Once taken back, a script still holding the function gets an error calling it.
   /// \return the registration, one of nothing if \p p can not be registered
   ///
-  template<function_castable F>
-  [[nodiscard]] auto register_function(const util::path& p, F&& function) -> registration;
+  [[nodiscard]] auto register_function(const util::path& p, function function) -> registration;
 
   ///
-  /// Register \p function at \p p, the last section is its name, for as long as the registration is kept:
-  /// the registration keeps \p registered, which the function watches, \see function_cast.
+  /// Register \p functions as table at \p p, for as long as the registration is kept, \see register_function.
   /// \return the registration, one of nothing if \p p can not be registered
   ///
-  [[nodiscard]] auto register_function(const util::path& p, function function, std::shared_ptr<const void> registered)
-    -> registration;
-
-  ///
-  /// Register \p setting at \p p, as table with the functions get(), set(value) and postfix(), for as long as the
-  /// registration is kept. \p setting must live as long.
-  /// \return the registration, one of nothing if the path can not be registered
-  ///
-  template<setting::underlying_setting_type T>
-  [[nodiscard]] auto register_setting(const util::path& p, setting::setting<T>& setting) -> registration;
-
-  ///
-  /// Register \p functions as table at \p p, for as long as the registration is kept: the registration keeps
-  /// \p registered, which the functions watch, \see function_cast.
-  /// \return the registration, one of nothing if \p p can not be registered
-  ///
-  [[nodiscard]] auto register_functions(const util::path& p, function_table functions, std::shared_ptr<const void> registered)
-    -> registration;
+  [[nodiscard]] auto register_functions(const util::path& p, function_table functions) -> registration;
 
   ///
   /// Run a user script in an environment of its own, so its globals do not reach other scripts.
@@ -122,26 +98,6 @@ private: // Implementation
   [[nodiscard]] auto free_parent(const util::path& p) -> std::optional<sol::table>;
   [[nodiscard]] auto run(const std::function<sol::protected_function_result()>& code) -> std::optional<sol::object>;
 };
-
-///
-///
-template<function_castable F>
-auto state::register_function(const util::path& p, F&& function) -> registration
-{
-  auto registered = std::make_shared<const std::monostate>();
-  auto cast = function_cast(std::forward<F>(function), registered);
-  return register_function(p, std::move(cast), std::move(registered));
-}
-
-///
-///
-template<setting::underlying_setting_type T>
-auto state::register_setting(const util::path& p, setting::setting<T>& setting) -> registration
-{
-  auto registered = std::make_shared<const std::monostate>();
-  auto functions = setting_cast(setting, registered);
-  return register_functions(p, std::move(functions), std::move(registered));
-}
 
 ///
 ///

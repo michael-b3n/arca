@@ -9,8 +9,9 @@
 #include <expected>
 #include <format>
 #include <functional>
-#include <memory>
+#include <map>
 #include <span>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -23,6 +24,11 @@ namespace arcstd::lua
 /// An exception it throws is an error for the script.
 ///
 using function = std::function<std::vector<value>(std::span<const value>)>;
+
+///
+/// Functions of a table for scripts, by name.
+///
+using function_table = std::map<std::string, function>;
 
 namespace detail
 {
@@ -106,22 +112,6 @@ template<typename R, typename... A>
   };
 }
 
-///
-/// \return \p function for as long as \p registered lives, called after that it throws
-///
-template<typename R, typename... A>
-[[nodiscard]] auto guarded(std::weak_ptr<const void> registered, std::function<R(A...)> function) -> std::function<R(A...)>
-{
-  return [registered = std::move(registered), function = std::move(function)](A... arguments) -> R
-  {
-    if(registered.expired())
-    {
-      throw util::exception{"the function is not registered anymore"};
-    }
-    return function(std::forward<A>(arguments)...);
-  };
-}
-
 } // namespace detail
 
 ///
@@ -140,16 +130,6 @@ template<function_castable F>
 [[nodiscard]] auto function_cast(F&& function) -> lua::function
 {
   return detail::wrapped(std::function{std::forward<F>(function)});
-}
-
-///
-/// function_cast of a function taken back later: once \p registered is gone, calling it is an error for the script.
-/// \return the function to hand to the Lua state
-///
-template<function_castable F>
-[[nodiscard]] auto function_cast(F&& function, std::weak_ptr<const void> registered) -> lua::function
-{
-  return detail::wrapped(detail::guarded(std::move(registered), std::function{std::forward<F>(function)}));
 }
 
 } // namespace arcstd::lua

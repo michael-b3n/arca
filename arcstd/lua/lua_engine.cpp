@@ -261,18 +261,16 @@ auto lua_engine::scripts(const std::vector<util::path>& ids) const -> scripts_ty
 
 ///
 ///
-auto lua_engine::register_function(const util::path& p, function function, std::shared_ptr<const void> registered) const
-  -> registration_type
+auto lua_engine::register_function(const util::path& p, function function) const -> registration_type
 {
-  return state_owner_->lock().register_function(p, std::move(function), std::move(registered));
+  return state_owner_->lock().register_function(p, std::move(function));
 }
 
 ///
 ///
-auto lua_engine::register_functions(const util::path& p, function_table functions, std::shared_ptr<const void> registered) const
-  -> registration_type
+auto lua_engine::register_functions(const util::path& p, function_table functions) const -> registration_type
 {
-  return state_owner_->lock().register_functions(p, std::move(functions), std::move(registered));
+  return state_owner_->lock().register_functions(p, std::move(functions));
 }
 
 ///

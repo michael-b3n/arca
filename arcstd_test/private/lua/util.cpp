@@ -1,5 +1,6 @@
 #include "test_utils/registrations.hpp"
 
+#include <arcstd/lua/function_cast.hpp>
 #include <arcstd/lua/internal_scripts.hpp>
 #include <arcstd/lua/state_owner.hpp>
 
@@ -53,7 +54,7 @@ TEST_CASE("lua_util", "[lua]")
     CHECK(check("root.interface.util.dump({}) == '{}'"));
     s->script("cyclic = {} cyclic.self = cyclic");
     CHECK(check("root.interface.util.dump(cyclic) == '{\\n  [\"self\"] = <cycle>\\n}'"));
-    CHECK(keep(s.register_function("a.b.value", []() { return 3; })));
+    CHECK(keep(s.register_function("a.b.value", function_cast([]() { return 3; }))));
     CHECK(check("root.interface.util.at('a.b.value')() == 3 and root.interface.util.at('a.missing.value') == nil"));
   }
 
@@ -85,11 +86,11 @@ TEST_CASE("lua_state_register_takes_no_name_of_the_state", "[lua]")
   auto s = owner.lock();
   auto keep = test_utils::registrations{};
   CHECK(s->script("return util == nil").get<bool>());
-  CHECK_FALSE(keep(s.register_function("util", []() { return 1; })));
-  CHECK_FALSE(keep(s.register_function("util.split", []() { return 1; })));
+  CHECK_FALSE(keep(s.register_function("util", function_cast([]() { return 1; }))));
+  CHECK_FALSE(keep(s.register_function("util.split", function_cast([]() { return 1; }))));
   // Neither what scripts have of Lua
-  CHECK_FALSE(keep(s.register_function("pairs", []() { return 1; })));
-  CHECK_FALSE(keep(s.register_function("string.upper", []() { return 1; })));
+  CHECK_FALSE(keep(s.register_function("pairs", function_cast([]() { return 1; }))));
+  CHECK_FALSE(keep(s.register_function("string.upper", function_cast([]() { return 1; }))));
   CHECK(s->script("return type(root.interface.util.split) == 'function'").get<bool>());
 }
 
