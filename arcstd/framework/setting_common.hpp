@@ -62,7 +62,7 @@ template<typename E>
   requires(std::is_enum_v<E>)
 [[nodiscard]] auto to_type_erased_setting(const std::optional<E>& v) -> std::optional<std::string>
 {
-  return v ? to_type_erased_setting(*v) : std::nullopt;
+  return v ? std::optional{to_type_erased_setting(*v)} : std::nullopt;
 }
 
 ///
@@ -98,7 +98,7 @@ template<typename T>
   requires(std::is_same_v<T, std::optional<typename T::value_type>> && std::is_enum_v<typename T::value_type>)
 [[nodiscard]] auto from_type_erased_setting(const std::optional<std::string>& v) -> T
 {
-  return v ? from_type_erased_setting<typename T::value_type>(*v) : std::nullopt;
+  return v ? T{from_type_erased_setting<typename T::value_type>(*v)} : T{};
 }
 
 ///
