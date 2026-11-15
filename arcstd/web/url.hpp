@@ -4,7 +4,7 @@
 
 #include <string_view>
 
-namespace arcstd::util::url
+namespace arcstd::web
 {
 
 ///
@@ -12,4 +12,4 @@ namespace arcstd::util::url
 ///
 [[nodiscard]] ARCSTD_EXPORT auto is_web_url(std::string_view url) -> bool;
 
-} // namespace arcstd::util::url
+} // namespace arcstd::web

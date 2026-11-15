@@ -1,11 +1,11 @@
-#include <arcstd/util/url.hpp>
+#include <arcstd/web/url.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
-namespace arcstd::util::url
+namespace arcstd::web
 {
 
-TEST_CASE("is_web_url", "[util]")
+TEST_CASE("is_web_url", "[web]")
 {
   CHECK(is_web_url("https://www.bibleserver.com/NG%C3%9C.ELB/Johannes3%2C16-18"));
   CHECK(is_web_url("http://example.com"));
@@ -24,4 +24,4 @@ TEST_CASE("is_web_url", "[util]")
   CHECK_FALSE(is_web_url(""));
 }
 
-} // namespace arcstd::util::url
+} // namespace arcstd::web
