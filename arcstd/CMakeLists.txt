@@ -8,14 +8,6 @@ project(arcstd)
 file(GLOB ARCSTD_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.cpp")
 file(GLOB ARCSTD_INC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.hpp")
 
-# Include OS specific sources and headers
-if(WIN32)
-  file(GLOB ARCSTD_WINDOWS_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/windows/*.cpp")
-  file(GLOB ARCSTD_WINDOWS_INC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/windows/*.hpp")
-  list(APPEND ARCSTD_SRC_FILES ${ARCSTD_WINDOWS_SRC_FILES})
-  list(APPEND ARCSTD_INC_FILES ${ARCSTD_WINDOWS_INC_FILES})
-endif()
-
 #
 # The private headers, all others are the interface. A private header refuses to be included without
 # ARCSTD_INTERNAL, which only the sources of arcstd and the tests of its internals define.

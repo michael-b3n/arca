@@ -10,7 +10,7 @@ namespace arcstd::system
 {
 
 ///
-/// Filesystem class for windows implementation.
+/// Places of the file system the app uses.
 ///
 struct ARCSTD_EXPORT filesystem final
 {
