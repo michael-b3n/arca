@@ -1,6 +1,7 @@
 #include "arcstd/execution/thread_pool.hpp"
 #include "arcstd/execution/execution.hpp"
 #include "arcstd/util/log.hpp"
+#include "arcstd/util/no_destructor.hpp"
 
 #include <beman/execution/detail/thread_pool_backend.hpp>
 
@@ -25,12 +26,11 @@ struct thread_pool final
 };
 
 ///
-/// \return the thread pool, never destroyed, \see shutdown_thread_pool
+/// \return the thread pool, never destroyed: its destructor would run too late, \see shutdown_thread_pool
 ///
 [[nodiscard]] auto pool() -> thread_pool&
 {
-  // NOLINTNEXTLINE(cppcoreguidelines-owning-memory) never destroyed, a destructor would run too late
-  static auto* const instance = new thread_pool{};
+  static auto instance = util::no_destructor<thread_pool>{};
   return *instance;
 }
 
