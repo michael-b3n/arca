@@ -15,6 +15,11 @@ cache_store::cache_store(const std::filesystem::path& data_folder, std::shared_p
   : lua_engine_{std::move(lua_engine)}
   , folder_{data_folder / folder_name}
 {
+  if(!lua_engine_)
+  {
+    return;
+  }
+
   registrations_
     ///
     /// \lua Reads a text value from a cache. A cache keeps its values after the app closes. Each cache is the SQLite file

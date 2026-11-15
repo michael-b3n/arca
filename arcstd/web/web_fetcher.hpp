@@ -54,7 +54,8 @@ public: // Typedefs
 
 public: // Structors
   ///
-  /// Construct the fetcher with its settings in \p setting_store and its function for the scripts of \p lua_engine.
+  /// Construct the fetcher with its settings in \p setting_store and its function for the scripts of \p lua_engine,
+  /// none without one.
   ///
   web_fetcher(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine);
   ~web_fetcher() noexcept;

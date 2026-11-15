@@ -13,7 +13,6 @@
 
 namespace arcstd::cache
 {
-
 class cache_database;
 
 ///
@@ -36,7 +35,7 @@ class ARCSTD_EXPORT cache_store final
 public: // Structors
   ///
   /// Construct the store of the caches in the folder "cache" of \p data_folder, with its functions for the scripts
-  /// of \p lua_engine.
+  /// of \p lua_engine, none without one.
   ///
   cache_store(const std::filesystem::path& data_folder, std::shared_ptr<lua::lua_engine> lua_engine);
   ~cache_store() noexcept;

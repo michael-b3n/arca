@@ -26,6 +26,11 @@ web_fetcher::web_fetcher(std::shared_ptr<setting::setting_store> setting_store, 
   : settings_{std::move(setting_store)}
   , lua_engine_{std::move(lua_engine)}
 {
+  if(!lua_engine_)
+  {
+    return;
+  }
+
   registrations_
     ///
     /// \lua How long a failed url is not requested again, `Web > Pause after a failure`. With 0 s a script may
