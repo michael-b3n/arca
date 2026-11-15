@@ -14,6 +14,7 @@ namespace
 ///
 /// Callback function for libcurl to write received data.
 ///
+// NOLINTNEXTLINE(misc-const-correctness) curl calls it with the signature it documents
 auto write_callback(char* ptr, std::size_t size, std::size_t nmemb, void* userdata) -> std::size_t
 {
   const auto total_size = size * nmemb;

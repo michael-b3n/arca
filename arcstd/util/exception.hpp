@@ -24,8 +24,8 @@ public: // Structors
   );
 
 public: // Accessors
-  [[nodiscard]] inline auto where() const -> const std::source_location& { return location_; }
-  [[nodiscard]] inline auto stack() const -> const std::stacktrace& { return stacktrace_; }
+  [[nodiscard]] auto where() const -> const std::source_location& { return location_; }
+  [[nodiscard]] auto stack() const -> const std::stacktrace& { return stacktrace_; }
 
 protected: // Variables
   const std::source_location location_;

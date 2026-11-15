@@ -75,7 +75,7 @@ auto shared_scope_guard::creator::create([[maybe_unused]] scope_guard::on_destru
     instance_ = instance;
     is_initial_instance = true;
   }
-  return {scope_guard([instance]() mutable { instance.reset(); }), is_initial_instance};
+  return {scope_guard([instance] mutable { instance.reset(); }), is_initial_instance};
 }
 
 ///

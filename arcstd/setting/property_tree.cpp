@@ -28,7 +28,7 @@ auto property_tree::create(const std::filesystem::path& tree_file_path) -> prope
   if(!result)
   {
     result = std::make_shared<property_tree>(tree_file_path);
-    auto it_empty = std::ranges::find_if(trees_, [&](const auto& t) { return !t.lock(); });
+    const auto it_empty = std::ranges::find_if(trees_, [&](const auto& t) { return !t.lock(); });
     if(it_empty != std::ranges::cend(trees_))
     {
       *it_empty = result;
@@ -46,8 +46,8 @@ auto property_tree::create(const std::filesystem::path& tree_file_path) -> prope
 property_tree::property_tree(const std::filesystem::path& tree_file_path)
   : tree_file_path_{tree_file_path}
 {
-  auto view = trees_ | std::views::transform([](const auto& tree) { return tree.lock(); }) |
-              std::views::filter([](const auto& tree) { return static_cast<bool>(tree); });
+  const auto view = trees_ | std::views::transform([](const auto& tree) { return tree.lock(); }) |
+                    std::views::filter([](const auto& tree) { return static_cast<bool>(tree); });
   if(util::contains(view, [&](const auto t) { return t->tree_file_path_ == tree_file_path; }))
   {
     throw util::exception(std::format("property_tree already existing: file={}", tree_file_path.generic_string()));

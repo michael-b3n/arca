@@ -39,7 +39,7 @@ public: // Typedefs
     DoubleValueType,
     StringValueType,
     TimeValueType,
-    PathValueType
+    PathValueType,
   };
   Q_ENUM(ValueType)
 
@@ -101,7 +101,7 @@ public: // Typedefs
     /// One past the last role of this model. Proxy models begin the roles they add here, so
     /// that a role added above cannot silently take a value one of them already uses.
     ///
-    EndRole
+    EndRole,
   };
   Q_ENUM(Role)
 

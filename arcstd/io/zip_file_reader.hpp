@@ -40,7 +40,7 @@ public: // Typedefs
     bzip2,   // BZIP2 compression
     lzma,    // LZMA compression
     zstd,    // Zstandard compression
-    xz       // XZ compression
+    xz,      // XZ compression
   };
 
   ///
@@ -52,7 +52,7 @@ public: // Typedefs
     trad_pkware,
     aes_128,
     aes_192,
-    aes_256
+    aes_256,
   };
 
   ///
@@ -61,7 +61,7 @@ public: // Typedefs
   enum class query_flag
   {
     exclude_directories,
-    case_insensitive
+    case_insensitive,
   };
   using query_flags_type = util::bitflags<query_flag>;
 

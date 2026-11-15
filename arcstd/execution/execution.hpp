@@ -1,6 +1,6 @@
 #pragma once
 
-#if !defined(ARCSTD_INTERNAL)
+#ifndef ARCSTD_INTERNAL
   #error "private header of arcstd, a project includes the public ones only"
 #endif
 
@@ -8,7 +8,7 @@
 // library, the alias below is the one place to change once the standard library ships it.
 
 // The library reads its configuration while being included, every translation unit has to see the same one.
-#if defined(INCLUDED_BEMAN_EXECUTION_DETAIL_COMMON)
+#ifdef INCLUDED_BEMAN_EXECUTION_DETAIL_COMMON
   #error "beman.execution was included without its configuration, include arcstd/execution/execution.hpp instead"
 #endif
 

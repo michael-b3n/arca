@@ -40,7 +40,7 @@ template<string_view_type... S>
 [[nodiscard]] constexpr auto split(const std::string_view data, const auto delimiter) -> std::vector<std::string>
   requires(std::convertible_to<decltype(delimiter), std::string_view> || std::convertible_to<decltype(delimiter), char>)
 {
-  const auto delimiter_size = [&]() -> std::size_t
+  const auto delimiter_size = [&] -> std::size_t
   {
     if constexpr(std::convertible_to<decltype(delimiter), std::string_view>)
     {
@@ -162,7 +162,7 @@ template<string_view_type... S>
     {
       const auto data_without_suffix = data.substr(0, suffix_pos);
       static constexpr auto is_digit = [](const unsigned char c) { return std::isdigit(c); };
-      auto reverse = data_without_suffix | std::views::reverse | std::views::take_while(is_digit);
+      const auto reverse = data_without_suffix | std::views::reverse | std::views::take_while(is_digit);
       const auto digit_count = std::ranges::count(reverse, std::size_t{0});
       return digit_count == 0 ? std::string_view::npos : suffix_pos - digit_count;
     }

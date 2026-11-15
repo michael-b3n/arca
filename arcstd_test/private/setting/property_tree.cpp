@@ -28,7 +28,7 @@ auto write_file(const std::filesystem::path& path, const std::string& content) -
 
 [[nodiscard]] auto load_and_store(const std::filesystem::path& path) -> std::string
 {
-  auto tree = property_tree::create(path);
+  const auto tree = property_tree::create(path);
   const auto value = property<std::string>{
     property_node{tree, "settings.name"},
     std::string{"default"}

@@ -123,7 +123,7 @@ SettingsListModel::SettingsListModel(
     [this](const std::string& path)
     {
       LOG_DEBUG("notify setting created: path=\"{}\"", path)
-      QMetaObject::invokeMethod(this, [this, path]() { appendSetting(path); }, Qt::QueuedConnection);
+      QMetaObject::invokeMethod(this, [this, path] { appendSetting(path); }, Qt::QueuedConnection);
     },
     connections_
   );
@@ -263,20 +263,18 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
   const auto rowIndex = arcstd::math::arithmetic::subtract(entries_.size(), decltype(entries_.size()){1}).value();
   setting->signal_adapter.connect_queued(
     &arcstd::setting::setting_store::setting_signals_type::value_changed,
-    [this, path, rowIndex]()
+    [this, path, rowIndex]
     {
       LOG_DEBUG("notify setting value changed: path=\"{}\", row={}", path, rowIndex)
       QMetaObject::invokeMethod(
-        this,
-        [this, rowIndex]() { emit dataChanged(index(rowIndex), index(rowIndex), {Role::ValueRole}); },
-        Qt::QueuedConnection
+        this, [this, rowIndex] { emit dataChanged(index(rowIndex), index(rowIndex), {Role::ValueRole}); }, Qt::QueuedConnection
       );
     },
     connections_
   );
   setting->signal_adapter.connect_queued(
     &arcstd::setting::setting_store::setting_signals_type::validator_changed,
-    [this, setting, path, rowIndex]()
+    [this, setting, path, rowIndex]
     {
       using value_type = std::remove_pointer_t<std::remove_cvref_t<decltype(setting)>>::value_type;
       arcstd::util::visit_lambdas(
@@ -288,7 +286,7 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
           LOG_DEBUG("notify setting validator changed: path=\"{}\", row={}", path, rowIndex)
           QMetaObject::invokeMethod(
             this,
-            [this, rowIndex]() { emit dataChanged(index(rowIndex), index(rowIndex), {Role::ListValidatorDataRole}); },
+            [this, rowIndex] { emit dataChanged(index(rowIndex), index(rowIndex), {Role::ListValidatorDataRole}); },
             Qt::QueuedConnection
           );
         }
@@ -307,7 +305,7 @@ void SettingsListModel::addEntry(std::string path, const auto& setting)
     LOG_ERROR("max entries count exceeded: path=\"{}\" not added", path);
     return;
   }
-  auto categories = toCategories(path);
+  const auto categories = toCategories(path);
   entries_.emplace_back(
     Entry{
       .path = std::move(path),

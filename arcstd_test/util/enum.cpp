@@ -17,14 +17,14 @@ enum class enum_test_type
 {
   a,
   b,
-  c
+  c,
 };
 
 enum class enum_test_offset_type : std::int8_t
 {
   a = -1,
   b = 0,
-  c = 1
+  c = 1,
 };
 
 TEST_CASE("enum_type concept", "[util]")

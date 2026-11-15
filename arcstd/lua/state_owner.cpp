@@ -58,7 +58,7 @@ state_owner::state_owner()
   // Often enough to stop in time, rare enough to cost nothing
   static constexpr auto stop_check_interval = 1'000'000;
 
-  auto s = lock();
+  const auto s = lock();
 
   // io, os, package and debug are left out, they would give scripts access to files and processes
   s->open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::string, sol::lib::table, sol::lib::utf8);

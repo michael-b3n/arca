@@ -234,7 +234,7 @@ inline auto value_cast<bool>::to(const bool v) -> value
 inline auto value_cast<bool>::from(const value& v) -> std::optional<bool>
 {
   const auto boolean = std::get_if<bool>(&v);
-  return boolean ? std::optional{*boolean} : std::nullopt;
+  return (boolean != nullptr) ? std::optional{*boolean} : std::nullopt;
 }
 
 ///
@@ -277,7 +277,7 @@ auto value_cast<T>::from(const value& v) -> std::optional<T>
     return static_cast<T>(*integer);
   }
   const auto number = std::get_if<value::number_type>(&v);
-  return number ? std::optional{static_cast<T>(*number)} : std::nullopt;
+  return (number != nullptr) ? std::optional{static_cast<T>(*number)} : std::nullopt;
 }
 
 ///
@@ -292,7 +292,7 @@ inline auto value_cast<std::string>::to(const std::string& v) -> value
 inline auto value_cast<std::string>::from(const value& v) -> std::optional<std::string>
 {
   const auto string = std::get_if<std::string>(&v);
-  return string ? std::optional{*string} : std::nullopt;
+  return (string != nullptr) ? std::optional{*string} : std::nullopt;
 }
 
 ///
@@ -368,7 +368,7 @@ auto value_cast<std::vector<T>>::from(const value& v) -> std::optional<std::vect
 {
   const auto table = std::get_if<value_table>(&v);
   // Else e.g. a table by key would be read as an empty list
-  if(!table || table->entries.size() != table->length())
+  if((table == nullptr) || table->entries.size() != table->length())
   {
     return std::nullopt;
   }
@@ -395,7 +395,7 @@ template<value_castable K, value_castable T>
 auto value_cast<std::map<K, T>>::from(const value& v) -> std::optional<std::map<K, T>>
 {
   const auto table = std::get_if<value_table>(&v);
-  if(!table)
+  if(table == nullptr)
   {
     return std::nullopt;
   }

@@ -184,8 +184,8 @@ registering_object::registering_object(std::shared_ptr<lua_engine> lua_engine, s
   : lua_engine_{std::move(lua_engine)}
   , name_{std::move(name)}
 {
-  auto nested = lua_engine_->register_function(name_ + ".nested.value", [this]() { return value; });
-  auto twice = lua_engine_->register_function(name_ + ".twice", [this]() { return 2 * value; });
+  auto nested = lua_engine_->register_function(name_ + ".nested.value", [this] { return value; });
+  auto twice = lua_engine_->register_function(name_ + ".twice", [this] { return 2 * value; });
   registered = nested && twice;
   registrations_ << std::move(nested) << std::move(twice);
 }
@@ -316,12 +316,12 @@ TEST_CASE("lua_engine_ends_loading_once_destroyed", "[lua]")
 
   auto engine = std::make_unique<lua_engine>(test_utils::make_script_settings(folder.path(), true), bundled);
   auto loaded = std::atomic<bool>{false};
-  const auto connection = engine->connect(&lua_engine_signals::scripts_loaded, [&]() { loaded = true; });
+  const auto connection = engine->connect(&lua_engine_signals::scripts_loaded, [&] { loaded = true; });
   engine->load_scripts();
   std::this_thread::sleep_for(std::chrono::milliseconds{100});
   REQUIRE_FALSE(loaded);
   // The endless script is stopped and the loader joins
-  auto destroyed = std::async(std::launch::async, [&]() { engine.reset(); });
+  const auto destroyed = std::async(std::launch::async, [&] { engine.reset(); });
   CHECK(destroyed.wait_for(std::chrono::seconds{5}) == std::future_status::ready);
 }
 

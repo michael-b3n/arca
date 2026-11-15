@@ -110,7 +110,7 @@ auto queued_connections::queued(S slot) -> F
   return [this, gate = gate_, slot = std::move(slot)](auto&&... args)
   {
     // std::make_tuple copies the arguments, the slot runs after the emission returned.
-    auto task = [gate, slot, args = std::make_tuple(std::forward<decltype(args)>(args)...)]() mutable
+    auto task = [gate, slot, args = std::make_tuple(std::forward<decltype(args)>(args)...)] mutable
     {
       if(!gate->closed)
       {

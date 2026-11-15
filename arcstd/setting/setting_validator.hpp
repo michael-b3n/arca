@@ -321,7 +321,7 @@ public: // Operators
   /// Contains overload for vector underlying types. \see contains
   ///
   [[nodiscard]] auto contains(const plain_underlying_type& value) const -> bool
-    requires(is_vector_type);
+    requires is_vector_type;
 };
 
 ///
@@ -720,7 +720,7 @@ auto setting_validator_list<T>::contains(const T& value) const -> bool
 ///
 template<underlying_setting_type T>
 auto setting_validator_list<T>::contains(const plain_underlying_type& value) const -> bool
-  requires(is_vector_type)
+  requires is_vector_type
 {
   const auto lock = std::scoped_lock{mtx_};
   return std::ranges::binary_search(list_, value);
@@ -731,8 +731,8 @@ auto setting_validator_list<T>::contains(const plain_underlying_type& value) con
 template<underlying_setting_type_erased_type T>
 setting_validator_list_type_erased<T>::setting_validator_list_type_erased(const auto& validator)
   requires(detail::type_erased_validator_param_requirement<T, setting_validator_list, decltype(validator)>)
-  : empty_{[validator]() { return validator->empty(); }}
-  , available_{[validator]()
+  : empty_{[validator] { return validator->empty(); }}
+  , available_{[validator]
                {
                  using type = typename detail::validator_t<decltype(validator)>::plain_underlying_type;
                  static constexpr auto to_type_erased_value =

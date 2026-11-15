@@ -73,8 +73,8 @@ TEST_CASE("signal_type multiple slots", "[signal]")
   auto sig = signal_type<void()>{};
   auto count = 0;
 
-  const auto con1 = sig.connect([&count]() { ++count; });
-  const auto con2 = sig.connect([&count]() { ++count; });
+  const auto con1 = sig.connect([&count] { ++count; });
+  const auto con2 = sig.connect([&count] { ++count; });
 
   sig();
   CHECK(count == 2);
@@ -89,7 +89,7 @@ TEST_CASE("scoped_connection disconnects on destruction", "[signal]")
   auto count = 0;
 
   {
-    const auto scoped = scoped_connection_type{sig.connect([&count]() { ++count; })};
+    const auto scoped = scoped_connection_type{sig.connect([&count] { ++count; })};
     sig();
     CHECK(count == 1);
   }
@@ -103,7 +103,7 @@ TEST_CASE("connection_type manual disconnect", "[signal]")
   auto sig = signal_type<void()>{};
   auto count = 0;
 
-  auto con = sig.connect([&count]() { ++count; });
+  const auto con = sig.connect([&count] { ++count; });
   sig();
   CHECK(count == 1);
 
@@ -117,7 +117,7 @@ TEST_CASE("connection_block_type temporarily blocks signal", "[signal]")
   auto sig = signal_type<void()>{};
   auto count = 0;
 
-  const auto con = sig.connect([&count]() { ++count; });
+  const auto con = sig.connect([&count] { ++count; });
 
   sig();
   CHECK(count == 1);
@@ -139,8 +139,8 @@ TEST_CASE("connection_store stores and disconnects connections", "[signal]")
 
   {
     auto store = connection_store{};
-    store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
-    store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
+    store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
+    store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
 
     sig();
     CHECK(count == 2);
@@ -156,8 +156,8 @@ TEST_CASE("connection_store clear disconnects all", "[signal]")
   auto count = 0;
 
   auto store = connection_store{};
-  store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
-  store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
+  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
+  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
 
   sig();
   CHECK(count == 2);
@@ -173,7 +173,7 @@ TEST_CASE("connection_store add after clear", "[signal]")
   auto count = 0;
 
   auto store = connection_store{};
-  store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
+  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
 
   sig();
   CHECK(count == 1);
@@ -182,7 +182,7 @@ TEST_CASE("connection_store add after clear", "[signal]")
   sig();
   CHECK(count == 1);
 
-  store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
+  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
   sig();
   CHECK(count == 2);
 }

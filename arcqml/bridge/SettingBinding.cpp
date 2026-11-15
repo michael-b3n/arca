@@ -186,7 +186,7 @@ void SettingBinding::bind()
     {
       setting->signal_adapter.connect_queued(
         &arcstd::setting::setting_store::setting_signals_type::value_changed,
-        [this]() { QMetaObject::invokeMethod(this, [this]() { emit valueChanged(); }, Qt::QueuedConnection); },
+        [this] { QMetaObject::invokeMethod(this, [this] { emit valueChanged(); }, Qt::QueuedConnection); },
         connections_
       );
     },

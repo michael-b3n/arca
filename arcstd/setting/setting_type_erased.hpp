@@ -82,7 +82,7 @@ template<underlying_setting_type U>
 template<underlying_setting_type_erased_type T>
 template<underlying_setting_type U>
 setting_type_erased<T>::setting_type_erased(const std::shared_ptr<setting<U>>& setting)
-  : get_{[setting, converter = create_setting_value_converter<U, value_type>()]() { return converter(setting->value()); }}
+  : get_{[setting, converter = create_setting_value_converter<U, value_type>()] { return converter(setting->value()); }}
   , set_{[setting, converter = create_setting_value_converter<value_type, U>()](const value_type& v)
          { return setting->value(converter(v)); }}
   , signal_adapter{*setting}

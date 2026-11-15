@@ -39,7 +39,7 @@ struct arithmetic final
   {
     overflow,
     underflow,
-    undefined
+    undefined,
   };
 
   template<arithmetic_type T>

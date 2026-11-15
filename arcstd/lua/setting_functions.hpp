@@ -25,7 +25,7 @@ template<setting::underlying_setting_type T>
   functions.emplace(
     "get",
     function_cast(
-      [&setting]() -> erased_type { return setting::create_setting_value_converter<T, erased_type>()(setting.value()); }
+      [&setting] -> erased_type { return setting::create_setting_value_converter<T, erased_type>()(setting.value()); }
     )
   );
   ///
@@ -45,7 +45,7 @@ template<setting::underlying_setting_type T>
   /// \lua <setting>.postfix()
   /// \return the text shown after the value, e.g. its unit, or an empty text
   ///
-  functions.emplace("postfix", function_cast([&setting]() { return setting.postfix; }));
+  functions.emplace("postfix", function_cast([&setting] { return setting.postfix; }));
   return functions;
 }
 

@@ -15,7 +15,7 @@ enum class const_map_test_enum
 {
   a,
   b,
-  c
+  c,
 };
 
 // Constants

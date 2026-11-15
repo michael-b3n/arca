@@ -33,7 +33,7 @@ namespace
 enum class color
 {
   red,
-  green
+  green,
 };
 
 template<setting::underlying_setting_type T>
@@ -174,8 +174,8 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
   auto s = state_owner.lock();
   const auto runs = [&](const std::string& code) { return s.run_script("test.lua", code).has_value(); };
   auto twice = s.register_function("a.b.twice", function_cast([](int x) { return 2 * x; }));
-  auto value = s.register_function("a.value", function_cast([]() { return 1; }));
-  const auto other = s.register_function("other.value", function_cast([]() { return 2; }));
+  auto value = s.register_function("a.value", function_cast([] { return 1; }));
+  const auto other = s.register_function("other.value", function_cast([] { return 2; }));
   REQUIRE((twice && value && other));
   // A script holding the function
   REQUIRE(runs("held = a.b.twice assert(held(2) == 4)"));
@@ -224,8 +224,8 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
     auto all = lua::registration{};
     CHECK_FALSE(all);
     // Added one after the other, also one of nothing
-    all << std::move(twice) << std::move(value) << s.register_function("a.value", function_cast([]() { return 0; }))
-        << s.register_function("more.value", function_cast([]() { return 3; }));
+    all << std::move(twice) << std::move(value) << s.register_function("a.value", function_cast([] { return 0; }))
+        << s.register_function("more.value", function_cast([] { return 3; }));
     CHECK(all);
     CHECK_FALSE((twice || value));
     CHECK(runs("assert(a.b.twice(1) == 2 and a.value() == 1 and more.value() == 3)"));
@@ -247,7 +247,7 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
     auto late = lua::registration{};
     {
       const auto owner = lua::state_owner{};
-      late = owner.lock().register_function("f", function_cast([]() { return 1; }));
+      late = owner.lock().register_function("f", function_cast([] { return 1; }));
       REQUIRE(late);
     }
     late = {};
@@ -260,30 +260,30 @@ TEST_CASE("lua_state_registration_waits_for_the_running_script", "[lua]")
   const auto state_owner = lua::state_owner{};
   auto started = std::promise<void>{};
   auto proceed = std::promise<void>{};
-  auto wait = state_owner.lock().register_function(
+  const auto wait = state_owner.lock().register_function(
     "f.wait",
     function_cast(
-      [&]()
+      [&]
       {
         started.set_value();
         proceed.get_future().wait();
       }
     )
   );
-  auto value = state_owner.lock().register_function("f.value", function_cast([]() { return 5; }));
+  auto value = state_owner.lock().register_function("f.value", function_cast([] { return 5; }));
   REQUIRE((wait && value));
 
   // The script is inside f.wait, with f.value still to call
   auto script = std::async(
     std::launch::async,
-    [&]()
+    [&]
     {
       const auto result = state_owner.lock().run_script("waiting.lua", "f.wait() return f.value()");
       return result ? result->as<int>() : -1;
     }
   );
   started.get_future().wait();
-  auto taken_back = std::async(std::launch::async, [&]() { value = {}; });
+  const auto taken_back = std::async(std::launch::async, [&] { value = {}; });
   CHECK(taken_back.wait_for(std::chrono::milliseconds{200}) == std::future_status::timeout);
   proceed.set_value();
   // The script ran to its end with the function, only then it was taken back
@@ -411,7 +411,7 @@ TEST_CASE("lua_state_stops_scripts", "[lua]")
   const auto function = GENERATE(as<std::string>{}, "endless", "calls", "catching", "coroutines", "nested", "closing");
   CAPTURE(function);
   // From another thread, the running code holds the lock
-  const auto stopping = std::jthread{[&]()
+  const auto stopping = std::jthread{[&]
                                      {
                                        std::this_thread::sleep_for(std::chrono::milliseconds{100});
                                        state_owner.shutdown();

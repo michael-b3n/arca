@@ -83,7 +83,7 @@ zip_file_reader::zip_file_reader(const std::filesystem::path& zip_path, const st
   zip_handle_ = zip_open(zip_path.string().c_str(), flags, &error_code);
   if(zip_handle_ == nullptr)
   {
-    const auto msg = [&]() -> std::string_view
+    const auto msg = [&] -> std::string_view
     {
       switch(error_code)
       {
@@ -179,7 +179,7 @@ auto zip_file_reader::comment() const -> std::string
     const auto* const c = zip_get_archive_comment(zip_handle_, &length, unchanged_flag);
     if((c != nullptr) && length > 0)
     {
-      return std::string(c, static_cast<std::size_t>(length));
+      return {c, static_cast<std::size_t>(length)};
     }
   }
   return {};
@@ -274,7 +274,7 @@ auto zip_file_reader::read_entry_as_string(const zip_entry& entry) const -> std:
   {
     return {};
   }
-  return std::string(reinterpret_cast<const char*>(data.data()), data.size());
+  return {reinterpret_cast<const char*>(data.data()), data.size()};
 }
 
 ///
@@ -328,7 +328,7 @@ auto zip_file_reader::create_entry(const zip_stat_t& stat) const -> zip_entry
 {
   const auto valid = [&](const std::uint64_t flag) -> bool { return stat.valid & flag; };
   return zip_entry{
-    .comment = [&]() -> std::string
+    .comment = [&] -> std::string
     {
       if(is_open())
       {
@@ -336,7 +336,7 @@ auto zip_file_reader::create_entry(const zip_stat_t& stat) const -> zip_entry
         const auto* const c = zip_file_get_comment(zip_handle_, stat.index, &length, unchanged_flag);
         if(c && length >= 0)
         {
-          return std::string(c, static_cast<std::size_t>(length));
+          return {c, static_cast<std::size_t>(length)};
         }
         else
         {
@@ -371,7 +371,7 @@ auto zip_file_reader::error_message() const -> std::string
     const auto* const strerror = zip_error_strerror(error);
     if(strerror != nullptr)
     {
-      return std::string(strerror);
+      return {strerror};
     }
   }
   return std::string{"unknown error"};

@@ -1,6 +1,6 @@
 #pragma once
 
-#if !defined(ARCSTD_INTERNAL)
+#ifndef ARCSTD_INTERNAL
   #error "private header of arcstd, a project includes the public ones only"
 #endif
 

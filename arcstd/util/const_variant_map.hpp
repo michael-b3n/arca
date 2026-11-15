@@ -101,7 +101,7 @@ template<detail::const_variant_mappable... P>
 constexpr const_variant_map<P...>::const_variant_map(P&&... p)
   : elements_{std::tuple{std::forward<P>(p)...}}
 {
-  auto get_key = [&]<std::size_t I>() -> key_variant_type { return std::get<I>(elements_).first; };
+  auto get_key = [&]<std::size_t I> -> key_variant_type { return std::get<I>(elements_).first; };
   auto keys = [&]<std::size_t... I>(std::index_sequence<I...>)
   { return std::array{get_key.template operator()<I>()...}; }(std::make_index_sequence<size>{});
   std::ranges::for_each(
@@ -123,7 +123,7 @@ template<typename T>
 constexpr auto const_variant_map<P...>::contains(T&& key) const -> bool
   requires(meta::contains_v<key_variant_type, std::decay_t<T>>)
 {
-  auto key_found = [&]<std::size_t I>() -> bool
+  auto key_found = [&]<std::size_t I> -> bool
   { return key_variant_type(std::get<I>(elements_).first) == key_variant_type(key); };
   auto found = [&]<std::size_t... I>(std::index_sequence<I...>)
   { return std::array{key_found.template operator()<I>()...}; }(std::make_index_sequence<size>{});
@@ -137,7 +137,7 @@ template<typename T>
 constexpr auto const_variant_map<P...>::at(T&& key) const -> value_variant_type
   requires(meta::contains_v<key_variant_type, std::decay_t<T>>)
 {
-  auto do_on_key_found = [&]<std::size_t I>() -> std::optional<value_variant_type>
+  auto do_on_key_found = [&]<std::size_t I> -> std::optional<value_variant_type>
   {
     if constexpr(std::is_same_v<typename std::tuple_element_t<I, tuple_type>::first_type, std::decay_t<T>>)
     {
@@ -167,7 +167,7 @@ template<typename T, typename F>
 constexpr auto const_variant_map<P...>::visit(T&& key, F&& f) const -> bool
   requires(meta::contains_v<key_variant_type, std::decay_t<T>>)
 {
-  auto do_on_key_found = [&]<std::size_t I>() -> bool
+  auto do_on_key_found = [&]<std::size_t I> -> bool
   {
     if constexpr(std::is_same_v<typename std::tuple_element_t<I, tuple_type>::first_type, std::decay_t<T>>)
     {
@@ -190,7 +190,7 @@ template<typename F>
 constexpr auto const_variant_map<P...>::visit_until(F&& f) const -> void
   requires(std::is_invocable_r_v<bool, F, key_variant_type, value_variant_type>)
 {
-  auto visitor = [&]<std::size_t I>()
+  auto visitor = [&]<std::size_t I>
   { return f(key_variant_type(std::get<I>(elements_).first), value_variant_type(std::get<I>(elements_).second)); };
   [&]<std::size_t... I>(std::index_sequence<I...>)
   { (... && visitor.template operator()<I>()); }(std::make_index_sequence<size>{});

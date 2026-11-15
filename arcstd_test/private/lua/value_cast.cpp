@@ -66,7 +66,7 @@ TEST_CASE("lua_value_cast_converts_basic_values", "[lua]")
 
 TEST_CASE("lua_value_cast_throws_for_an_integer_lua_can_not_hold", "[lua]")
 {
-  auto lua = sol::state{};
+  const auto lua = sol::state{};
   using limits = std::numeric_limits<std::uint64_t>;
   const auto largest = static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max());
   CHECK(round_trip(lua, largest) == largest);

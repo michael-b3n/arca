@@ -1,11 +1,11 @@
 #pragma once
 
-#if !defined(ARCSTD_INTERNAL)
+#ifndef ARCSTD_INTERNAL
   #error "private header of arcstd, a project includes the public ones only"
 #endif
 
 // sol2 reads its configuration while being included, every translation unit has to see the same one.
-#if defined(SOL_HPP)
+#ifdef SOL_HPP
   #error "sol2 was included without its configuration, include arcstd/lua/sol.hpp instead of <sol/sol.hpp>"
 #endif
 

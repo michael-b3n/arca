@@ -105,7 +105,7 @@ auto setting<T>::value(const value_type& v) -> bool
     validator,
     [&]([[maybe_unused]] const setting_validator_unbound::sptr_type&) -> bool
     {
-      decltype(auto) old_value = value_.exchange(v);
+      const auto old_value = value_.exchange(v);
       if(old_value != v)
       {
         notify(&setting_signals::value_changed);
@@ -115,7 +115,7 @@ auto setting<T>::value(const value_type& v) -> bool
     [&](const setting_validator_range<value_type>::sptr_type& validator_range) -> bool
     {
       const auto validated_value = validator_range->validate(v);
-      decltype(auto) old_value = value_.exchange(validated_value);
+      const auto old_value = value_.exchange(validated_value);
       if(old_value != validated_value)
       {
         notify(&setting_signals::value_changed);
@@ -129,7 +129,7 @@ auto setting<T>::value(const value_type& v) -> bool
       const auto contains = validator_list->contains(v) || validator_list->empty();
       if(contains)
       {
-        decltype(auto) old_value = value_.exchange(v);
+        const auto old_value = value_.exchange(v);
         if(old_value != v)
         {
           notify(&setting_signals::value_changed);
@@ -151,7 +151,7 @@ auto setting<T>::validate() -> void
     [&](const setting_validator_range<value_type>::sptr_type& validator_range)
     {
       const auto validated_value = validator_range->validate(value_.value());
-      decltype(auto) old_value = value_.exchange(validated_value);
+      const auto old_value = value_.exchange(validated_value);
       if(old_value != validated_value)
       {
         notify(&setting_signals::value_changed);
@@ -170,18 +170,18 @@ auto setting<T>::validate() -> void
           {
             auto new_value = value_.value();
             std::erase_if(new_value, [&](const auto& v) { return !validator_list->contains(v); });
-            decltype(auto) old_value = value_.exchange(std::move(new_value));
+            const auto old_value = value_.exchange(std::move(new_value));
             return old_value != new_value;
           }
           else if constexpr(setting_validator_list<value_type>::is_optional_type)
           {
-            decltype(auto) old_value = value_.exchange(std::nullopt);
+            const auto old_value = value_.exchange(std::nullopt);
             return old_value != std::nullopt;
           }
           else
           {
             const auto new_value = validator_list->available().front();
-            decltype(auto) old_value = value_.exchange(new_value);
+            const auto old_value = value_.exchange(new_value);
             return old_value != new_value;
           }
         }();

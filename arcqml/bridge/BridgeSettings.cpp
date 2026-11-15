@@ -86,14 +86,14 @@ bool BridgeSettings::contains(const QString& path) const
 ///
 SettingBinding* BridgeSettings::binding(const QString& path, const QVariant& defaultValue)
 {
-  return bindingOf(path, defaultValue, [&]() { return std::make_unique<SettingBinding>(path, defaultValue); });
+  return bindingOf(path, defaultValue, [&] { return std::make_unique<SettingBinding>(path, defaultValue); });
 }
 
 ///
 ///
 SettingBinding* BridgeSettings::binding(const QString& path, const QVariant& defaultValue, const QVariantList& available)
 {
-  return bindingOf(path, defaultValue, [&]() { return std::make_unique<SettingBinding>(path, defaultValue, available); });
+  return bindingOf(path, defaultValue, [&] { return std::make_unique<SettingBinding>(path, defaultValue, available); });
 }
 
 ///
@@ -102,9 +102,7 @@ SettingBinding* BridgeSettings::binding(
   const QString& path, const QVariant& defaultValue, const QVariant& minimum, const QVariant& maximum
 )
 {
-  return bindingOf(
-    path, defaultValue, [&]() { return std::make_unique<SettingBinding>(path, defaultValue, minimum, maximum); }
-  );
+  return bindingOf(path, defaultValue, [&] { return std::make_unique<SettingBinding>(path, defaultValue, minimum, maximum); });
 }
 
 ///

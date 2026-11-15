@@ -21,14 +21,14 @@ enum class color
 {
   red,
   green,
-  blue
+  blue,
 };
 
 // Shares "red" with color, a stored "green" names none of its values
 enum class other_color
 {
   red,
-  yellow
+  yellow,
 };
 
 } // namespace

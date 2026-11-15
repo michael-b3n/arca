@@ -16,7 +16,7 @@ template<typename T>
   requires(!meta::is_templated_v<T>)
 struct rtti_name_impl final
 {
-  static constexpr std::string_view value = []()
+  static constexpr std::string_view value = []
   {
     static constexpr std::string_view end_pattern = ">::";
     static constexpr std::string_view middle_pattern = "::";

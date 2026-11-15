@@ -20,7 +20,7 @@ enum class logger_level
   debug,
   info,
   warning,
-  error
+  error,
 };
 
 ///

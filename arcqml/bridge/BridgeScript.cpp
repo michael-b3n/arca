@@ -28,11 +28,11 @@ BridgeScript::BridgeScript(
 {
   luaEngine_->connect_queued(
     &arcstd::lua::lua_engine_signals::scripts_loaded,
-    [this]()
+    [this]
     {
       QMetaObject::invokeMethod(
         this,
-        [this]()
+        [this]
         {
           updateScripts();
           if(loading_)
@@ -87,7 +87,7 @@ void BridgeScript::load(std::vector<std::filesystem::path> files)
   emit loadingChanged();
   LOG_DEBUG("load scripts anew: files_to_import={}", files.size());
   // Starting the loading waits for the one before to end, scripts_loaded ends the loading here
-  auto importAndLoad = [this, files = std::move(files)]()
+  auto importAndLoad = [this, files = std::move(files)]
   {
     std::ignore = luaEngine_->import_scripts(files);
     luaEngine_->load_scripts();

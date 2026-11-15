@@ -126,7 +126,7 @@ inline auto init_log(const std::optional<std::string_view> folder_name, std::str
   latest_sink->set_pattern(std::string{log_pattern});
 
   const auto sinks = std::vector<spdlog::sink_ptr>{file_sink, latest_sink};
-  auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+  const auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
   logger->set_level(to_spdlog_level(global_log_level()));
   logger->flush_on(spdlog::level::info);
   spdlog::register_logger(logger);

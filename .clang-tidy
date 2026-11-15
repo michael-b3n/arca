@@ -65,6 +65,11 @@ HeaderFilterRegex: '(arcstd|arcqml|arcstd_test)[/\].*\.hpp$'
 ExcludeHeaderFilterRegex: '(build|libs_external)[/\].*'
 
 #
+# Compile flags of GCC that clang does not know, e.g. from the flags of Qt.
+#
+RemovedArgs: ['-fno-keep-inline-dllexport']
+
+#
 # Findings are advisory, the build must not fail on them.
 #
 WarningsAsErrors: ""
@@ -116,3 +121,9 @@ CheckOptions:
   #
   modernize-use-auto.MinTypeNameLength: "5"
   performance-unnecessary-value-param.AllowedTypes: "std::string_view;std::span"
+
+  #
+  # The last enumerator of a multi-line enum ends with a comma. A braced initializer of one element over several
+  # lines, e.g. a member with a lambda, gets none: the check can not tell the two apart.
+  #
+  readability-trailing-comma.MultiLineCommaPolicy: Ignore

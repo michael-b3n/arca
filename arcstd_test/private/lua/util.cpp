@@ -13,7 +13,7 @@ namespace arcstd::lua
 
 TEST_CASE("lua_util", "[lua]")
 {
-  auto owner = state_owner{};
+  const auto owner = state_owner{};
   auto s = owner.lock();
   auto keep = test_utils::registrations{};
   const auto check = [&](const std::string& code) { return s->script("return " + code).get<bool>(); };
@@ -82,7 +82,7 @@ TEST_CASE("lua_util", "[lua]")
 
 TEST_CASE("lua_state_register_takes_no_name_of_the_state", "[lua]")
 {
-  auto owner = state_owner{};
+  const auto owner = state_owner{};
   auto s = owner.lock();
   auto keep = test_utils::registrations{};
   CHECK(s->script("return util == nil").get<bool>());
@@ -97,7 +97,7 @@ TEST_CASE("lua_state_register_takes_no_name_of_the_state", "[lua]")
 TEST_CASE("lua_embedded_scripts_add_themselves", "[lua]")
 {
   const auto owner = state_owner{};
-  auto s = owner.lock();
+  const auto s = owner.lock();
   // Each at the node it names
   CHECK(s->script("return type(root.interface.util) == 'table'").get<bool>());
   CHECK(s->script("return type(root.system.readonly) == 'function'").get<bool>());
@@ -135,7 +135,7 @@ TEST_CASE("lua_system_util_removes_a_path", "[lua]")
 TEST_CASE("lua_scripts_compile", "[lua]")
 {
   const auto owner = state_owner{};
-  auto s = owner.lock();
+  const auto s = owner.lock();
   REQUIRE_FALSE(internal::all().empty());
   CHECK(internal::find("init.lua"));
   CHECK_FALSE(internal::find("missing.lua"));

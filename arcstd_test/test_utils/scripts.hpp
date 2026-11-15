@@ -39,8 +39,8 @@ namespace arcstd::test_utils
 inline auto load_scripts(lua::lua_engine& engine) -> void
 {
   const auto loaded = std::make_shared<std::promise<void>>();
-  auto done = loaded->get_future();
-  const auto connection = engine.connect(&lua::lua_engine_signals::scripts_loaded, [loaded]() { loaded->set_value(); });
+  const auto done = loaded->get_future();
+  const auto connection = engine.connect(&lua::lua_engine_signals::scripts_loaded, [loaded] { loaded->set_value(); });
   engine.load_scripts();
   REQUIRE(done.wait_for(std::chrono::seconds{10}) == std::future_status::ready);
 }

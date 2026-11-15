@@ -23,13 +23,13 @@ TEST_CASE("lua_state_owner_setup", "[lua]")
 
 TEST_CASE("lua_state_keeps_the_state_alive", "[lua]")
 {
-  auto s = state_owner{}.lock();
+  const auto s = state_owner{}.lock();
   CHECK(s->script("return type(root) == 'table'").get<bool>());
 }
 
 TEST_CASE("lua_state_owner_keeps_the_state_when_moved", "[lua]")
 {
-  auto owner = state_owner{};
+  const auto owner = state_owner{};
   const auto moved = std::move(owner);
   // NOLINTNEXTLINE(bugprone-use-after-move) a move is a copy
   owner.lock()->set("value", 1);
@@ -66,7 +66,7 @@ TEST_CASE("lua_state_owner_is_locked_from_several_threads", "[lua]")
     for(auto i = 0; i < thread_count; ++i)
     {
       threads.emplace_back(
-        [copy = owner]()
+        [copy = owner]
         {
           for(auto j = 0; j < increments; ++j)
           {

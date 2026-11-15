@@ -240,7 +240,7 @@ TEST_CASE("setting_validator_list_holds_the_available_values", "[setting]")
   {
     auto validator = setting_validator_list<std::string>{};
     auto changes = 0;
-    validator.connect_on_changed([&]() { ++changes; });
+    validator.connect_on_changed([&] { ++changes; });
     REQUIRE(validator.available(names_type{"a"}));
     CHECK(changes == 1);
   }

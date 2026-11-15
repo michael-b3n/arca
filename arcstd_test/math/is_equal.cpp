@@ -62,7 +62,7 @@ TEST_CASE("is_equal integral with comparable type", "[math]")
   enum class scoped_enum : int
   {
     a = 1,
-    b = 2
+    b = 2,
   };
   // Scoped enums are not equality comparable with int, so only the char overloads apply here.
   static_assert(!std::equality_comparable_with<scoped_enum, int>);

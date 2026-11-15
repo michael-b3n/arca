@@ -294,7 +294,7 @@ auto lua_engine::load(const std::stop_token& stop_token) -> void
 {
   // Loaded anew, so a script gone from the folder is gone
   {
-    auto state = state_owner_->lock();
+    const auto state = state_owner_->lock();
     state->traverse_get<sol::table>(names::node_root, names::node_system)[names::node_scripts] = sol::lua_nil;
     state->traverse_get<sol::table>(names::node_root, names::node_interface)[names::node_scripts] = state->create_table();
     const auto lock = std::scoped_lock{mtx_};
@@ -311,13 +311,12 @@ auto lua_engine::load(const std::stop_token& stop_token) -> void
     {
       const auto& folder = settings().folder;
       auto error = std::error_code{};
-      if(!std::filesystem::exists(folder, error))
+      if((!std::filesystem::exists(folder, error)) && (!std::filesystem::create_directories(folder, error)))
+
       {
-        if(!std::filesystem::create_directories(folder, error))
-        {
-          LOG_ERROR("failed to create script folder: folder=\"{}\", error={}", folder.generic_string(), error.message());
-        }
+        LOG_ERROR("failed to create script folder: folder=\"{}\", error={}", folder.generic_string(), error.message());
       }
+
       load_folder(folder, stop_token);
     }
   }

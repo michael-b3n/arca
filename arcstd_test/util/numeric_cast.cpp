@@ -31,7 +31,7 @@ TEST_CASE("numeric_cast_rt at runtime", "[util]")
   CHECK(numeric_cast_rt<std::uint8_t>(255) == 255);
   CHECK(numeric_cast_rt<std::int64_t>(std::numeric_limits<std::int32_t>::max()) == 2147483647);
 
-  auto lvalue = 1.9;
+  const auto lvalue = 1.9;
   CHECK(numeric_cast_rt<int>(lvalue) == 1);
   const auto const_lvalue = 1.9;
   CHECK(numeric_cast_rt<int>(const_lvalue) == 1);
