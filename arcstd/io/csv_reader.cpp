@@ -3,9 +3,9 @@
 #include "arcstd/util/log.hpp"
 #include "arcstd/util/ranges.hpp"
 
-#include <algorithm>
 #include <rapidcsv.h>
 
+#include <algorithm>
 #include <format>
 #include <sstream>
 

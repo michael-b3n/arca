@@ -30,6 +30,8 @@ if(PROJECT_IS_TOP_LEVEL)
   set(CMAKE_CXX_STANDARD 26)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_EXTENSIONS OFF)
+  # arca has no modules, the scan for them adds GCC flags clang-tidy does not know.
+  set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
   add_compile_options(-Wall -Wpedantic)
   set(CMAKE_COMPILE_WARNING_AS_ERROR ON)

@@ -5,7 +5,6 @@
 #include "arcstd/lua/function_cast.hpp"
 #include "arcstd/lua/registration.hpp"
 #include "arcstd/lua/script_lock.hpp"
-#include "arcstd/lua/script_table.hpp"
 #include "arcstd/lua/setting_functions.hpp"
 #include "arcstd/lua/value.hpp"
 #include "arcstd/lua/value_cast.hpp"
@@ -33,7 +32,6 @@
 #include <thread>
 #include <type_traits>
 #include <utility>
-#include <variant>
 #include <vector>
 
 namespace arcstd::lua
