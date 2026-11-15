@@ -39,7 +39,7 @@ class ARCSTD_EXPORT scoped_timer_logger final
   const timer timer_;
 
 public: // Structors
-  scoped_timer_logger(std::source_location&& source_location = std::source_location::current());
+  scoped_timer_logger(std::source_location source_location = std::source_location::current());
   ~scoped_timer_logger();
 };
 

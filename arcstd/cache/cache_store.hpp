@@ -49,7 +49,7 @@ public: // Modifiers
   ///
   /// Cache \p value for \p key in the cache \p name, std::nullopt removes it.
   ///
-  auto set(const util::identifier& name, const std::string& key, std::optional<std::string> value) -> void;
+  auto set(const util::identifier& name, const std::string& key, const std::optional<std::string>& value) -> void;
 
   ///
   /// Cache each of \p values for its key in the cache \p name, all of them or none.

@@ -31,6 +31,7 @@ TEST_CASE("lua_state_owner_keeps_the_state_when_moved", "[lua]")
 {
   // NOLINTNEXTLINE(misc-const-correctness) moved from below
   auto owner = state_owner{};
+  // NOLINTNEXTLINE(performance-move-const-arg) the move under test is a copy
   const auto moved = std::move(owner);
   // NOLINTNEXTLINE(bugprone-use-after-move) a move is a copy
   owner.lock()->set("value", 1);

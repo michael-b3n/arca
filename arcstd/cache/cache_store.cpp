@@ -73,9 +73,9 @@ auto cache_store::get(const util::identifier& name, const std::string& key) -> s
 
 ///
 ///
-auto cache_store::set(const util::identifier& name, const std::string& key, std::optional<std::string> value) -> void
+auto cache_store::set(const util::identifier& name, const std::string& key, const std::optional<std::string>& value) -> void
 {
-  cache(name).set(key, std::move(value));
+  cache(name).set(key, value);
 }
 
 ///

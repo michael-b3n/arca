@@ -2,6 +2,7 @@
 #include "arcqml/util/SettingConversion.hpp"
 
 #include <arcstd/math/arithmetic.hpp>
+#include <arcstd/meta/contains.hpp>
 #include <arcstd/util/contains.hpp>
 #include <arcstd/util/exception.hpp>
 #include <arcstd/util/log.hpp>
@@ -13,6 +14,7 @@
 #include <optional>
 #include <ranges>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 
 namespace arcqml
@@ -50,15 +52,10 @@ constexpr auto getValueType(const auto& setting) -> SettingsListModel::ValueType
   using value_type = SettingRawValueType<std::remove_cvref_t<decltype(setting)>>;
   // clang-format off
   if constexpr(std::is_same_v<value_type, bool>) { return SettingsListModel::ValueType::BoolValueType; }
-  else if constexpr(std::is_same_v<value_type, std::int32_t>) { return SettingsListModel::ValueType::IntValueType; }
-  else if constexpr(std::is_same_v<value_type, std::int64_t>) { return SettingsListModel::ValueType::IntValueType; }
-  else if constexpr(std::is_same_v<value_type, std::uint32_t>) { return SettingsListModel::ValueType::IntValueType; }
-  else if constexpr(std::is_same_v<value_type, std::uint64_t>) { return SettingsListModel::ValueType::IntValueType; }
+  else if constexpr(arcstd::meta::contains_v<std::tuple<std::int32_t, std::int64_t, std::uint32_t, std::uint64_t>, value_type>) { return SettingsListModel::ValueType::IntValueType; }
   else if constexpr(std::is_same_v<value_type, double>) { return SettingsListModel::ValueType::DoubleValueType; }
   else if constexpr(std::is_same_v<value_type, std::string>) { return SettingsListModel::ValueType::StringValueType; }
-  else if constexpr(std::is_same_v<value_type, std::chrono::milliseconds>) { return SettingsListModel::ValueType::TimeValueType; }
-  else if constexpr(std::is_same_v<value_type, std::chrono::seconds>) { return SettingsListModel::ValueType::TimeValueType; }
-  else if constexpr(std::is_same_v<value_type, std::chrono::minutes>) { return SettingsListModel::ValueType::TimeValueType; }
+  else if constexpr(arcstd::meta::contains_v<std::tuple<std::chrono::milliseconds, std::chrono::seconds, std::chrono::minutes>, value_type>) { return SettingsListModel::ValueType::TimeValueType; }
   else if constexpr(std::is_same_v<value_type, std::filesystem::path>) { return SettingsListModel::ValueType::PathValueType; }
   else { static_assert(alwaysFalse<value_type>, "Unsupported setting value type"); }
   // clang-format on
@@ -267,7 +264,10 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
     {
       LOG_DEBUG("notify setting value changed: path=\"{}\", row={}", path, rowIndex)
       QMetaObject::invokeMethod(
-        this, [this, rowIndex] { emit dataChanged(index(rowIndex), index(rowIndex), {Role::ValueRole}); }, Qt::QueuedConnection
+        this,
+        [this, rowIndex]
+        { emit dataChanged(index(static_cast<int>(rowIndex)), index(static_cast<int>(rowIndex)), {Role::ValueRole}); },
+        Qt::QueuedConnection
       );
     },
     connections_
@@ -286,7 +286,12 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
           LOG_DEBUG("notify setting validator changed: path=\"{}\", row={}", path, rowIndex)
           QMetaObject::invokeMethod(
             this,
-            [this, rowIndex] { emit dataChanged(index(rowIndex), index(rowIndex), {Role::ListValidatorDataRole}); },
+            [this, rowIndex]
+            {
+              emit dataChanged(
+                index(static_cast<int>(rowIndex)), index(static_cast<int>(rowIndex)), {Role::ListValidatorDataRole}
+              );
+            },
             Qt::QueuedConnection
           );
         }

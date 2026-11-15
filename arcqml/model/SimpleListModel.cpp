@@ -58,16 +58,13 @@ bool SimpleListModel::setData(const QModelIndex& index, const QVariant& value, c
   {
     return false;
   }
-  switch(role)
+  if(role != ValueRole)
   {
-  case ValueRole:
-  {
-    entries_.at(static_cast<std::size_t>(index.row())) = value;
-    emit dataChanged(index, index, {role});
-    return true;
+    return false;
   }
-  default: return false;
-  }
+  entries_.at(static_cast<std::size_t>(index.row())) = value;
+  emit dataChanged(index, index, {role});
+  return true;
 }
 
 ///
