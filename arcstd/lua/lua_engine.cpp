@@ -206,7 +206,7 @@ auto lua_engine::load_scripts() -> void
 
 ///
 ///
-auto lua_engine::import_scripts(const std::vector<std::filesystem::path>& files) -> std::size_t
+auto lua_engine::import_scripts(const std::vector<std::filesystem::path>& files) const -> std::size_t
 {
   const auto& folder = settings().folder;
   auto error = std::error_code{};
@@ -285,7 +285,8 @@ auto lua_engine::call(const script_name_type& script, const util::path& id, cons
   {
     return std::nullopt;
   }
-  return state.call(*function, to_object(*state, input)).transform([](const sol::object& result) { return to_value(result); });
+  return state.call(*function, to_object(state->lua_state(), input))
+    .transform([](const sol::object& result) { return to_value(result); });
 }
 
 ///

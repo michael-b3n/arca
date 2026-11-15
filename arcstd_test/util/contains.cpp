@@ -17,7 +17,8 @@ TEST_CASE("contains element", "[util]")
   static_assert(contains(values, 1));
   static_assert(contains(values, 3));
   static_assert(!contains(values, 4));
-  static_assert(!contains(std::array<int, 0>{}, 1));
+  static constexpr auto none = std::array<int, 0>{};
+  static_assert(!contains(none, 1));
 
   // The element only needs to be equality comparable with the range value type.
   static constexpr auto strings = std::array{std::string_view{"a"}, std::string_view{"b"}};
@@ -35,7 +36,8 @@ TEST_CASE("contains predicate", "[util]")
   static_assert(contains(values, [](const auto e) { return e == 2; }));
   static_assert(!contains(values, [](const auto e) { return e > 3; }));
   static_assert(contains(values, [](const auto e) { return e % 2 == 0; }));
-  static_assert(!contains(std::array<int, 0>{}, [](const auto) { return true; }));
+  static constexpr auto none = std::array<int, 0>{};
+  static_assert(!contains(none, [](const auto) { return true; }));
 }
 
 TEST_CASE("contains predicate on view", "[util]")

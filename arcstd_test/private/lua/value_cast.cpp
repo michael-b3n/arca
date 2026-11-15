@@ -24,9 +24,9 @@ namespace
 /// \return \p v converted to Lua and back
 ///
 template<value_castable T>
-[[nodiscard]] auto round_trip(sol::state_view lua, const T& v) -> std::optional<T>
+[[nodiscard]] auto round_trip(const sol::state& lua, const T& v) -> std::optional<T>
 {
-  return value_cast<T>::from(to_value(to_object(lua, value_cast<T>::to(v))));
+  return value_cast<T>::from(to_value(to_object(lua.lua_state(), value_cast<T>::to(v))));
 }
 
 ///

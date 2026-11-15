@@ -50,7 +50,8 @@ cache_store::cache_store(const std::filesystem::path& data_folder, std::shared_p
     ///
     << lua_engine_->register_function(
          "cache.set_all",
-         [this](const std::string& name, std::map<std::string, std::string> values) { set_all(util::identifier{name}, values); }
+         [this](const std::string& name, const std::map<std::string, std::string>& values)
+         { set_all(util::identifier{name}, values); }
        )
     ///
     /// \lua Removes all values of a cache, \see `cache.get`.

@@ -27,6 +27,7 @@ auto filesystem::executable_folder() -> std::filesystem::path
 ///
 auto filesystem::local_data_folder(const std::optional<std::string_view> folder_name) -> std::filesystem::path
 {
+  // NOLINTNEXTLINE(concurrency-mt-unsafe) nothing in the app changes the environment
   const auto* const appdata = std::getenv("LOCALAPPDATA");
   if(appdata == nullptr)
   {

@@ -230,7 +230,7 @@ auto property_parser::read(const property_path_type& path, const property_tree_t
   if(*has_value)
   {
     const auto value = read<typename Optional::value_type>(path / path_name_value, tree);
-    return value.has_value() ? Optional{value.value()} : std::nullopt;
+    return value.transform([](auto v) { return Optional{std::move(v)}; });
   }
   else
   {

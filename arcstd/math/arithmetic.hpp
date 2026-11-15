@@ -381,11 +381,7 @@ constexpr auto arithmetic_operation<T>::multiply(T first, T second) -> arithmeti
   {
     return T{0};
   }
-  else if(max % second == 0 && first > max / second)
-  {
-    return std::unexpected{arithmetic::error_code::overflow};
-  }
-  else if(first - T{1} > max / second)
+  else if((max % second == 0 && first > max / second) || first - T{1} > max / second)
   {
     return std::unexpected{arithmetic::error_code::overflow};
   }

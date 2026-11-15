@@ -273,7 +273,7 @@ namespace detail
 template<typename F, typename S, std::size_t N, bool BidirectionalFlag, std::size_t... Is>
 consteval auto make_const_map_impl(std::pair<F, S> (&&p)[N], [[maybe_unused]] std::index_sequence<Is...> /*sequence*/) -> auto
 {
-  return const_map<F, S, N, BidirectionalFlag>(std::forward<decltype(p[Is])>(p[Is])...);
+  return const_map<F, S, N, BidirectionalFlag>(std::move(p[Is])...);
 }
 
 } // namespace detail
@@ -285,7 +285,7 @@ template<typename F, typename S, std::size_t N>
 consteval auto make_const_map(std::pair<F, S> (&&p)[N]) -> auto
 {
   static constexpr auto unidirectional = false;
-  return detail::make_const_map_impl<F, S, N, unidirectional>(std::forward<decltype(p)>(p), std::make_index_sequence<N>{});
+  return detail::make_const_map_impl<F, S, N, unidirectional>(std::move(p), std::make_index_sequence<N>{});
 }
 
 ///
@@ -295,7 +295,7 @@ template<typename F, typename S, std::size_t N>
 consteval auto make_const_bimap(std::pair<F, S> (&&p)[N]) -> auto
 {
   static constexpr auto bidirectional = true;
-  return detail::make_const_map_impl<F, S, N, bidirectional>(std::forward<decltype(p)>(p), std::make_index_sequence<N>{});
+  return detail::make_const_map_impl<F, S, N, bidirectional>(std::move(p), std::make_index_sequence<N>{});
 }
 
 } // namespace arcstd::util

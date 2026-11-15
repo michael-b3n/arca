@@ -29,6 +29,7 @@ struct thread_pool final
 ///
 [[nodiscard]] auto pool() -> thread_pool&
 {
+  // NOLINTNEXTLINE(cppcoreguidelines-owning-memory) never destroyed, a destructor would run too late
   static auto* const instance = new thread_pool{};
   return *instance;
 }
@@ -39,18 +40,19 @@ struct thread_pool final
 ///
 auto shutdown_thread_pool() noexcept -> void
 {
+  auto& p = pool();
   auto backend = std::shared_ptr<backend_type>{};
   {
-    auto& p = pool();
     const auto lock = std::scoped_lock{p.mtx};
+    // Work in flight holds the pool too, the last one to let go would join its own thread
+    if(p.backend.use_count() > 1)
+    {
+      LOG_WARN("thread pool still runs work, it is kept");
+      return;
+    }
     backend = std::exchange(p.backend, nullptr);
   }
-  // Work in flight holds the pool too, the last one to let go would join its own thread
-  if(backend.use_count() > 1)
-  {
-    LOG_WARN("thread pool still runs work, it is left alive");
-    std::ignore = new std::shared_ptr<backend_type>{std::move(backend)};
-  }
+  // Destroyed here, outside the lock, it joins its threads
 }
 
 } // namespace arcstd::execution

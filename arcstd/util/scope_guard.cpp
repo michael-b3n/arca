@@ -8,7 +8,7 @@ namespace arcstd::util
 ///
 ///
 scope_guard::scope_guard(std::move_only_function<void()>&& on_destruction)
-  : on_destruction_{std::forward<decltype(on_destruction)>(on_destruction)}
+  : on_destruction_{std::move(on_destruction)}
 {
 }
 
@@ -75,7 +75,7 @@ auto shared_scope_guard::creator::create([[maybe_unused]] scope_guard::on_destru
     instance_ = instance;
     is_initial_instance = true;
   }
-  return {scope_guard([instance] mutable { instance.reset(); }), is_initial_instance};
+  return {scope_guard([instance] mutable { instance = nullptr; }), is_initial_instance};
 }
 
 ///

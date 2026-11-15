@@ -38,12 +38,7 @@ QVariant SimpleListModel::data(const QModelIndex& index, const int role) const
   {
     return {};
   }
-  const auto& entry = entries_.at(static_cast<std::size_t>(index.row()));
-  switch(role)
-  {
-  case ValueRole: return entry;
-  default: return {};
-  }
+  return role == ValueRole ? entries_.at(static_cast<std::size_t>(index.row())) : QVariant{};
 }
 
 ///
@@ -110,7 +105,7 @@ bool SimpleListModel::remove(const QModelIndex& index)
     return false;
   }
   beginRemoveRows(QModelIndex(), index.row(), index.row());
-  entries_.erase(std::next(std::begin(entries_), static_cast<std::size_t>(index.row())));
+  entries_.erase(std::next(std::begin(entries_), index.row()));
   endRemoveRows();
   return true;
 }

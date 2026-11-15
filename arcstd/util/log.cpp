@@ -25,8 +25,8 @@ namespace
 ///
 /// Constants
 ///
-const auto logger_name = std::string{"main"};
-const auto latest_log_file_name = std::string{"latest.log"};
+constexpr auto logger_name = std::string_view{"main"};
+constexpr auto latest_log_file_name = std::string_view{"latest.log"};
 
 ///
 /// Convert u8 string view to normal string.
@@ -112,7 +112,7 @@ inline auto init_log(const std::optional<std::string_view> folder_name, std::str
   handlers.after_open = [header = std::move(header)](const spdlog::filename_t&, std::FILE* file)
   {
     std::print(file, "{}", header);
-    std::fflush(file);
+    std::ignore = std::fflush(file);
   };
 
   const auto file_sink =
@@ -126,7 +126,7 @@ inline auto init_log(const std::optional<std::string_view> folder_name, std::str
   latest_sink->set_pattern(std::string{log_pattern});
 
   const auto sinks = std::vector<spdlog::sink_ptr>{file_sink, latest_sink};
-  const auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+  const auto logger = std::make_shared<spdlog::logger>(std::string{logger_name}, sinks.begin(), sinks.end());
   logger->set_level(to_spdlog_level(global_log_level()));
   logger->flush_on(spdlog::level::info);
   spdlog::register_logger(logger);
@@ -139,7 +139,7 @@ inline auto init_log(const std::optional<std::string_view> folder_name, std::str
 ///
 inline auto get_logger() -> std::shared_ptr<spdlog::logger>
 {
-  return spdlog::get(logger_name);
+  return spdlog::get(std::string{logger_name});
 }
 
 } // namespace

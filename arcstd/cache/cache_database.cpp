@@ -107,7 +107,7 @@ auto cache_database::get(const std::string& key) const -> std::optional<std::str
 
 ///
 ///
-auto cache_database::set(const std::string& key, std::optional<std::string> value) -> void
+auto cache_database::set(const std::string& key, const std::optional<std::string>& value) -> void
 {
   const auto lock = std::scoped_lock{mtx_};
   if(const auto& statement = value ? set_ : remove_)

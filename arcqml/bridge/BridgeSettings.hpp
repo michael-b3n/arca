@@ -15,10 +15,10 @@
 #include <map>
 #include <memory>
 
-namespace arcstd::lua
+namespace arcstd::setting
 {
 class setting_store;
-} // namespace arcstd::lua
+} // namespace arcstd::setting
 
 namespace arcqml
 {

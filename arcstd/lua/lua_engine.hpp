@@ -116,7 +116,7 @@ public: // Structors
   /// when called.
   ///
   lua_engine(std::shared_ptr<setting::setting_store> setting_store, bundled_provider_type bundled);
-  ~lua_engine() noexcept;
+  ~lua_engine() noexcept override;
 
 public: // Accessors
   ///
@@ -148,7 +148,7 @@ public: // Modifiers
   /// scripts are loaded anew, \see load_scripts.
   /// \return number of files copied, the others are logged
   ///
-  [[nodiscard]] auto import_scripts(const std::vector<std::filesystem::path>& files) -> std::size_t;
+  [[nodiscard]] auto import_scripts(const std::vector<std::filesystem::path>& files) const -> std::size_t;
 
   ///
   /// Register a function for scripts at \p p, e.g. "web.fetch", for as long as the registration is kept.

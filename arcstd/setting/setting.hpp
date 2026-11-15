@@ -170,7 +170,7 @@ auto setting<T>::validate() -> void
           {
             auto new_value = value_.value();
             std::erase_if(new_value, [&](const auto& v) { return !validator_list->contains(v); });
-            const auto old_value = value_.exchange(std::move(new_value));
+            const auto old_value = value_.exchange(new_value);
             return old_value != new_value;
           }
           else if constexpr(setting_validator_list<value_type>::is_optional_type)

@@ -70,7 +70,7 @@ public: // Modifiers
   ///
   /// Cache \p value for \p key, none removes it.
   ///
-  auto set(const std::string& key, std::optional<std::string> value) -> void;
+  auto set(const std::string& key, const std::optional<std::string>& value) -> void;
 
   ///
   /// Cache each of \p values for its key in one transaction, all of them or none.

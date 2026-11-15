@@ -90,8 +90,7 @@ template<enum_type E>
 template<enum_type E>
 [[nodiscard]] constexpr auto to_enum(const std::string_view name) -> std::optional<E>
 {
-  const auto value = magic_enum::enum_cast<E>(name);
-  return value ? *value : std::optional<E>{std::nullopt};
+  return magic_enum::enum_cast<E>(name);
 }
 
 ///

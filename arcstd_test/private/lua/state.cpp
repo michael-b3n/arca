@@ -227,6 +227,7 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
     all << std::move(twice) << std::move(value) << s.register_function("a.value", function_cast([] { return 0; }))
         << s.register_function("more.value", function_cast([] { return 3; }));
     CHECK(all);
+    // NOLINTNEXTLINE(bugprone-use-after-move) moved from, they hold nothing
     CHECK_FALSE((twice || value));
     CHECK(runs("assert(a.b.twice(1) == 2 and a.value() == 1 and more.value() == 3)"));
     all = {};

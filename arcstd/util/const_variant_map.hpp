@@ -65,7 +65,7 @@ public: // Accessors
   /// \return true if key was found, false otherwise
   ///
   template<typename T>
-  [[nodiscard]] constexpr auto contains(T&& key) const -> bool
+  [[nodiscard]] constexpr auto contains(const T& key) const -> bool
     requires(meta::contains_v<key_variant_type, std::decay_t<T>>);
 
   ///
@@ -74,7 +74,7 @@ public: // Accessors
   /// \return copied value corresponding to key packed in a variant
   ///
   template<typename T>
-  [[nodiscard]] constexpr auto at(T&& key) const -> value_variant_type
+  [[nodiscard]] constexpr auto at(const T& key) const -> value_variant_type
     requires(meta::contains_v<key_variant_type, std::decay_t<T>>);
 
 public: // Operations
@@ -83,7 +83,7 @@ public: // Operations
   /// \return true if the key was found
   ///
   template<typename T, typename F>
-  constexpr auto visit(T&& key, F&& f) const -> bool
+  constexpr auto visit(const T& key, F&& f) const -> bool
     requires(meta::contains_v<key_variant_type, std::decay_t<T>>);
 
   ///
@@ -120,7 +120,7 @@ constexpr const_variant_map<P...>::const_variant_map(P&&... p)
 ///
 template<detail::const_variant_mappable... P>
 template<typename T>
-constexpr auto const_variant_map<P...>::contains(T&& key) const -> bool
+constexpr auto const_variant_map<P...>::contains(const T& key) const -> bool
   requires(meta::contains_v<key_variant_type, std::decay_t<T>>)
 {
   auto key_found = [&]<std::size_t I> -> bool
@@ -134,7 +134,7 @@ constexpr auto const_variant_map<P...>::contains(T&& key) const -> bool
 ///
 template<detail::const_variant_mappable... P>
 template<typename T>
-constexpr auto const_variant_map<P...>::at(T&& key) const -> value_variant_type
+constexpr auto const_variant_map<P...>::at(const T& key) const -> value_variant_type
   requires(meta::contains_v<key_variant_type, std::decay_t<T>>)
 {
   auto do_on_key_found = [&]<std::size_t I> -> std::optional<value_variant_type>
@@ -164,7 +164,7 @@ constexpr auto const_variant_map<P...>::at(T&& key) const -> value_variant_type
 ///
 template<detail::const_variant_mappable... P>
 template<typename T, typename F>
-constexpr auto const_variant_map<P...>::visit(T&& key, F&& f) const -> bool
+constexpr auto const_variant_map<P...>::visit(const T& key, F&& f) const -> bool
   requires(meta::contains_v<key_variant_type, std::decay_t<T>>)
 {
   auto do_on_key_found = [&]<std::size_t I> -> bool

@@ -59,9 +59,9 @@ template<string_view_type... S>
       std::views::take_while([&]([[maybe_unused]] const auto /*i*/) { return current_index != std::string_view::npos; }),
     [&]([[maybe_unused]] const auto)
     {
-      const auto pos = data.substr(current_index).find(delimiter);
-      result.emplace_back(data.substr(current_index, pos));
-      current_index = pos != std::string_view::npos ? current_index + pos + delimiter_size : std::string_view::npos;
+      const auto length = data.substr(current_index).find(delimiter);
+      result.emplace_back(data.substr(current_index, length));
+      current_index = length != std::string_view::npos ? current_index + length + delimiter_size : std::string_view::npos;
     }
   );
   return result;
@@ -113,7 +113,9 @@ template<string_view_type... S>
     throw util::exception{"postfix cannot be empty"};
   }
   return postfix.size() <= data.size() &&
-         std::equal(std::cbegin(postfix), std::cend(postfix), std::prev(std::cend(data), postfix.size()));
+         std::equal(
+           std::cbegin(postfix), std::cend(postfix), std::prev(std::cend(data), static_cast<std::ptrdiff_t>(postfix.size()))
+         );
 }
 
 ///

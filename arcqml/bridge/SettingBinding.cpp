@@ -35,7 +35,14 @@ template<typename T>
       std::format(R"(validator value does not match the default value: value="{}")", value.toString().toStdString())
     };
   }
-  return std::get<T>(*toDefaultSettingValue(converted));
+  const auto settingValue = toDefaultSettingValue(converted);
+  if(!settingValue)
+  {
+    throw arcstd::util::exception{
+      std::format(R"(validator value of no setting type: value="{}")", value.toString().toStdString())
+    };
+  }
+  return std::get<T>(*settingValue);
 }
 
 } // namespace

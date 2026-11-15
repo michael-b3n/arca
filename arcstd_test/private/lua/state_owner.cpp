@@ -29,7 +29,8 @@ TEST_CASE("lua_state_keeps_the_state_alive", "[lua]")
 
 TEST_CASE("lua_state_owner_keeps_the_state_when_moved", "[lua]")
 {
-  const auto owner = state_owner{};
+  // NOLINTNEXTLINE(misc-const-correctness) moved from below
+  auto owner = state_owner{};
   const auto moved = std::move(owner);
   // NOLINTNEXTLINE(bugprone-use-after-move) a move is a copy
   owner.lock()->set("value", 1);
@@ -49,6 +50,7 @@ TEST_CASE("lua_state_owner_logs", "[lua]")
 TEST_CASE("lua_state_owner_copies_share_the_state", "[lua]")
 {
   const auto owner = state_owner{};
+  // NOLINTNEXTLINE(performance-unnecessary-copy-initialization) the copy is under test
   const auto copy = owner;
   owner.lock()->set("value", 42);
   CHECK(copy.lock()->get<int>("value") == 42);
