@@ -1,5 +1,6 @@
 #include "arcstd/execution/scope.hpp"
 #include "arcstd/execution/execution.hpp"
+#include "arcstd/execution/launch.hpp"
 #include "arcstd/util/exception.hpp"
 #include "arcstd/util/log.hpp"
 
@@ -37,9 +38,8 @@ struct scope::impl final
 };
 
 ///
-/// Compiled here, so the library and the project built on it share the one thread pool.
 ///
-auto detail::launch(std::move_only_function<void()> work, scope& scope) -> void
+auto launch(std::move_only_function<void()> work, scope& scope) -> void
 {
   ex::spawn(
     ex::schedule(ex::get_parallel_scheduler()) | ex::then(std::move(work)) | ex::upon_error(&log_launch_error),

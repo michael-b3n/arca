@@ -9,18 +9,6 @@
 namespace arcstd::execution
 {
 
-class scope;
-
-namespace detail
-{
-
-///
-/// Run \p work on the thread pool, detached in \p scope, \see execution::launch
-///
-ARCSTD_EXPORT auto launch(std::move_only_function<void()> work, scope& scope) -> void;
-
-} // namespace detail
-
 ///
 /// Scope holding launched work, \see launch. Destruction requests a stop and
 /// waits for the work, so the work may refer to whatever outlives the scope.
@@ -28,7 +16,7 @@ ARCSTD_EXPORT auto launch(std::move_only_function<void()> work, scope& scope) ->
 class ARCSTD_EXPORT scope final
 {
   // Friends
-  friend ARCSTD_EXPORT auto detail::launch(std::move_only_function<void()> work, scope& scope) -> void;
+  friend ARCSTD_EXPORT auto launch(std::move_only_function<void()> work, scope& scope) -> void;
 
   // Typedefs
   struct impl;

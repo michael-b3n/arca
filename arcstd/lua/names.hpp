@@ -1,7 +1,7 @@
 #pragma once
 
 #if !defined(ARCSTD_INTERNAL)
-  #error "arcstd/lua/names.hpp is a private header of arcstd"
+  #error "private header of arcstd, a project includes the public ones only"
 #endif
 
 #include <string_view>

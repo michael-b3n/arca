@@ -1,7 +1,7 @@
 #pragma once
 
 #if !defined(ARCSTD_INTERNAL)
-  #error "arcstd/lua/state.hpp is a private header of arcstd"
+  #error "private header of arcstd, a project includes the public ones only"
 #endif
 
 #include "arcstd/lua/function_cast.hpp"

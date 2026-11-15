@@ -1,7 +1,7 @@
 #pragma once
 
 #if !defined(ARCSTD_INTERNAL)
-  #error "arcstd/execution/execution.hpp is a private header of arcstd"
+  #error "private header of arcstd, a project includes the public ones only"
 #endif
 
 // beman.execution implements std::execution of C++26. Include this header instead of the

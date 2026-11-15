@@ -1,7 +1,7 @@
 #pragma once
 
 #if !defined(ARCSTD_INTERNAL)
-  #error "arcstd/web/web_request.hpp is a private header of arcstd"
+  #error "private header of arcstd, a project includes the public ones only"
 #endif
 
 #include <expected>
@@ -27,7 +27,7 @@ public: // Typedefs
     not_found,      ///< HTTP 404 or 410, the server has no such page
     invalid_url,    ///< Invalid URL provided
     timeout,        ///< Request timed out
-    unknown         ///< Unknown error occurred
+    unknown,        ///< Unknown error occurred
   };
 
 public: // Structors

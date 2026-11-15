@@ -1,7 +1,7 @@
 #pragma once
 
 #if !defined(ARCSTD_INTERNAL)
-  #error "arcstd/setting/property_tree.hpp is a private header of arcstd"
+  #error "private header of arcstd, a project includes the public ones only"
 #endif
 
 #include "arcstd/setting/property_parser.hpp"
@@ -9,7 +9,6 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
-#include <optional>
 
 namespace arcstd::setting
 {
