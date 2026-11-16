@@ -27,7 +27,8 @@ concept similar_arithmetic_types =
   (... && arithmetic_type<T>) && ((... && std::integral<T>) || (... && std::floating_point<T>));
 
 ///
-/// Integer and floating point arithmetics guard for save math operations guaranteeing over- and underflow protection.
+/// Integer and floating point arithmetics guard for save math operations guaranteeing over- and
+/// underflow protection.
 ///
 struct arithmetic final
 {
@@ -58,7 +59,8 @@ struct arithmetic final
   /// \return result of `first + second`
   ///
   template<arithmetic_type T>
-  [[nodiscard]] static constexpr auto add(expected_type<T> first, expected_type<T> second) -> expected_type<T>;
+  [[nodiscard]] static constexpr auto add(expected_type<T> first, expected_type<T> second)
+    -> expected_type<T>;
 
   ///
   /// Subtract two values of an integer type `T`.
@@ -72,7 +74,8 @@ struct arithmetic final
   /// \return result of `first - second`
   ///
   template<arithmetic_type T>
-  [[nodiscard]] static constexpr auto subtract(expected_type<T> first, expected_type<T> second) -> expected_type<T>;
+  [[nodiscard]] static constexpr auto subtract(expected_type<T> first, expected_type<T> second)
+    -> expected_type<T>;
 
   ///
   /// Multiply two values of an integer type `T`.
@@ -86,7 +89,8 @@ struct arithmetic final
   /// \return result of `first * second`
   ///
   template<arithmetic_type T>
-  [[nodiscard]] static constexpr auto multiply(expected_type<T> first, expected_type<T> second) -> expected_type<T>;
+  [[nodiscard]] static constexpr auto multiply(expected_type<T> first, expected_type<T> second)
+    -> expected_type<T>;
 
   ///
   /// Divide two values of an integer type `T`.
@@ -100,7 +104,8 @@ struct arithmetic final
   /// \return result of `first / second`
   ///
   template<arithmetic_type T>
-  [[nodiscard]] static constexpr auto divide(expected_type<T> first, expected_type<T> second) -> expected_type<T>;
+  [[nodiscard]] static constexpr auto divide(expected_type<T> first, expected_type<T> second)
+    -> expected_type<T>;
 
   ///
   /// Clamp to lowest or max value depending on under- or overflow.
@@ -172,11 +177,14 @@ constexpr auto arithmetic::add(const T first, const T second) -> expected_type<T
 ///
 ///
 template<arithmetic_type T>
-constexpr auto arithmetic::add(const expected_type<T> first, const expected_type<T> second) -> expected_type<T>
+constexpr auto arithmetic::add(const expected_type<T> first, const expected_type<T> second)
+  -> expected_type<T>
 {
   using op = detail::arithmetic_operation<T>;
-  return first.and_then([&](const T first_v)
-                        { return second.and_then([&](const T second_v) { return op::add(first_v, second_v); }); });
+  return first.and_then(
+    [&](const T first_v)
+    { return second.and_then([&](const T second_v) { return op::add(first_v, second_v); }); }
+  );
 }
 
 ///
@@ -190,11 +198,14 @@ constexpr auto arithmetic::subtract(const T first, const T second) -> expected_t
 ///
 ///
 template<arithmetic_type T>
-constexpr auto arithmetic::subtract(const expected_type<T> first, const expected_type<T> second) -> expected_type<T>
+constexpr auto arithmetic::subtract(const expected_type<T> first, const expected_type<T> second)
+  -> expected_type<T>
 {
   using op = detail::arithmetic_operation<T>;
-  return first.and_then([&](const T first_v)
-                        { return second.and_then([&](const T second_v) { return op::subtract(first_v, second_v); }); });
+  return first.and_then(
+    [&](const T first_v)
+    { return second.and_then([&](const T second_v) { return op::subtract(first_v, second_v); }); }
+  );
 }
 
 ///
@@ -208,11 +219,14 @@ constexpr auto arithmetic::multiply(const T first, const T second) -> expected_t
 ///
 ///
 template<arithmetic_type T>
-constexpr auto arithmetic::multiply(const expected_type<T> first, const expected_type<T> second) -> expected_type<T>
+constexpr auto arithmetic::multiply(const expected_type<T> first, const expected_type<T> second)
+  -> expected_type<T>
 {
   using op = detail::arithmetic_operation<T>;
-  return first.and_then([&](const T first_v)
-                        { return second.and_then([&](const T second_v) { return op::multiply(first_v, second_v); }); });
+  return first.and_then(
+    [&](const T first_v)
+    { return second.and_then([&](const T second_v) { return op::multiply(first_v, second_v); }); }
+  );
 }
 
 ///
@@ -226,11 +240,14 @@ constexpr auto arithmetic::divide(const T first, const T second) -> expected_typ
 ///
 ///
 template<arithmetic_type T>
-constexpr auto arithmetic::divide(const expected_type<T> first, const expected_type<T> second) -> expected_type<T>
+constexpr auto arithmetic::divide(const expected_type<T> first, const expected_type<T> second)
+  -> expected_type<T>
 {
   using op = detail::arithmetic_operation<T>;
-  return first.and_then([&](const T first_v)
-                        { return second.and_then([&](const T second_v) { return op::divide(first_v, second_v); }); });
+  return first.and_then(
+    [&](const T first_v)
+    { return second.and_then([&](const T second_v) { return op::divide(first_v, second_v); }); }
+  );
 }
 
 ///
@@ -262,7 +279,8 @@ namespace detail
 /// \return expected type dependent on `value` classification
 ///
 template<std::floating_point T>
-[[nodiscard]] constexpr auto floating_point_to_expected_type(T value) -> arithmetic::expected_type<T>
+[[nodiscard]] constexpr auto floating_point_to_expected_type(T value)
+  -> arithmetic::expected_type<T>
 {
   switch(std::fpclassify(value))
   {
@@ -396,7 +414,8 @@ constexpr auto arithmetic_operation<T>::multiply(T first, T second) -> arithmeti
 template<std::signed_integral T>
 constexpr auto arithmetic_operation<T>::multiply(T first, T second) -> arithmetic::expected_type<T>
 {
-  // `constexpr std::abs` wrapper, since std::abs(long long) of the standard library is not `constexpr`.
+  // `constexpr std::abs` wrapper, since std::abs(long long) of the standard library is not
+  // `constexpr`.
   constexpr auto abs = [](auto value) -> auto
   {
     if consteval
@@ -430,9 +449,11 @@ constexpr auto arithmetic_operation<T>::multiply(T first, T second) -> arithmeti
   {
     const auto multiplied_sign = sign(first) * sign(second);
     overflow = multiplied_sign == sign_value::positive &&
-               (max % abs(second) == 0 ? (abs(first) > max / abs(second)) : (abs(first) - T{1} > max / abs(second)));
+               (max % abs(second) == 0 ? (abs(first) > max / abs(second))
+                                       : (abs(first) - T{1} > max / abs(second)));
     underflow = multiplied_sign == sign_value::negative &&
-                (min % abs(second) == 0 ? (abs(first) > abs(min / abs(second))) : (abs(first) + T{1} > abs(min / abs(second))));
+                (min % abs(second) == 0 ? (abs(first) > abs(min / abs(second)))
+                                        : (abs(first) + T{1} > abs(min / abs(second))));
   }
   if(overflow)
   {

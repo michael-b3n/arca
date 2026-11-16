@@ -81,10 +81,14 @@ auto web_request::fetch(std::string_view url) -> std::expected<std::string, erro
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
   if(http_code >= 400)
   {
-    LOG_ERROR("fetch url content failed on http request: url=\"{}\", http_error_code={}", url, http_code);
+    LOG_ERROR(
+      "fetch url content failed on http request: url=\"{}\", http_error_code={}", url, http_code
+    );
     curl_easy_cleanup(curl);
     // 404 and 410 are told apart: the page is missing, asking again brings the same answer
-    return std::unexpected(http_code == 404 || http_code == 410 ? error_code::not_found : error_code::request_failed);
+    return std::unexpected(
+      http_code == 404 || http_code == 410 ? error_code::not_found : error_code::request_failed
+    );
   }
 
   curl_easy_cleanup(curl);

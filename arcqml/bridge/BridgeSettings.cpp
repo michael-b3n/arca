@@ -46,7 +46,8 @@ BridgeSettings* BridgeSettings::create([[maybe_unused]] QQmlEngine* qmlEngine, Q
 ///
 ///
 BridgeSettings::BridgeSettings(
-  std::shared_ptr<arcstd::setting::setting_store> settingStore, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::setting::setting_store> settingStore,
+  const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QObject{parent}
   , settingStore_{std::move(settingStore)}
@@ -87,29 +88,46 @@ bool BridgeSettings::contains(const QString& path) const
 ///
 SettingBinding* BridgeSettings::binding(const QString& path, const QVariant& defaultValue)
 {
-  return bindingOf(path, defaultValue, [&] { return std::make_unique<SettingBinding>(path, defaultValue); });
-}
-
-///
-///
-SettingBinding* BridgeSettings::binding(const QString& path, const QVariant& defaultValue, const QVariantList& available)
-{
-  return bindingOf(path, defaultValue, [&] { return std::make_unique<SettingBinding>(path, defaultValue, available); });
+  return bindingOf(
+    path, defaultValue, [&] { return std::make_unique<SettingBinding>(path, defaultValue); }
+  );
 }
 
 ///
 ///
 SettingBinding* BridgeSettings::binding(
-  const QString& path, const QVariant& defaultValue, const QVariant& minimum, const QVariant& maximum
+  const QString& path, const QVariant& defaultValue, const QVariantList& available
 )
 {
-  return bindingOf(path, defaultValue, [&] { return std::make_unique<SettingBinding>(path, defaultValue, minimum, maximum); });
+  return bindingOf(
+    path,
+    defaultValue,
+    [&] { return std::make_unique<SettingBinding>(path, defaultValue, available); }
+  );
+}
+
+///
+///
+SettingBinding* BridgeSettings::binding(
+  const QString& path,
+  const QVariant& defaultValue,
+  const QVariant& minimum,
+  const QVariant& maximum
+)
+{
+  return bindingOf(
+    path,
+    defaultValue,
+    [&] { return std::make_unique<SettingBinding>(path, defaultValue, minimum, maximum); }
+  );
 }
 
 ///
 ///
 SettingBinding* BridgeSettings::bindingOf(
-  const QString& path, const QVariant& defaultValue, const std::function<std::unique_ptr<SettingBinding>()>& create
+  const QString& path,
+  const QVariant& defaultValue,
+  const std::function<std::unique_ptr<SettingBinding>()>& create
 )
 {
   if(path.isEmpty())
@@ -121,7 +139,9 @@ SettingBinding* BridgeSettings::bindingOf(
   {
     if(it->second->defaultValue() != defaultValue)
     {
-      LOG_WARN("setting binding exists with a different default value: path=\"{}\"", path.toStdString());
+      LOG_WARN(
+        "setting binding exists with a different default value: path=\"{}\"", path.toStdString()
+      );
     }
     return it->second.get();
   }

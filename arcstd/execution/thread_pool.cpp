@@ -26,7 +26,8 @@ struct thread_pool final
 };
 
 ///
-/// \return the thread pool, never destroyed: its destructor would run too late, \see shutdown_thread_pool
+/// \return the thread pool, never destroyed: its destructor would run too late, \see
+/// shutdown_thread_pool
 ///
 [[nodiscard]] auto pool() -> thread_pool&
 {
@@ -61,9 +62,10 @@ namespace beman::execution::parallel_scheduler_replacement
 {
 
 ///
-/// The backend of the parallel scheduler, in place of the one the library defaults to. That one is a static of an
-/// inline function: no app can shut it down, and a shared arcstd destroys it after Windows ended its threads, the join
-/// then never returns. The library offers this function to be replaced, std::execution does the same.
+/// The backend of the parallel scheduler, in place of the one the library defaults to. That one is
+/// a static of an inline function: no app can shut it down, and a shared arcstd destroys it after
+/// Windows ended its threads, the join then never returns. The library offers this function to be
+/// replaced, std::execution does the same.
 ///
 auto query_parallel_scheduler_backend() -> std::shared_ptr<parallel_scheduler_backend>
 {

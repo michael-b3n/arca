@@ -51,7 +51,8 @@ public: // Variables
 /// Deduction guide for setting_type_erased.
 ///
 template<underlying_setting_type U>
-setting_type_erased(const std::shared_ptr<setting<U>>& setting) -> setting_type_erased<setting_type_erased_type_from<U>>;
+setting_type_erased(const std::shared_ptr<setting<U>>& setting)
+  -> setting_type_erased<setting_type_erased_type_from<U>>;
 
 namespace detail
 {
@@ -68,7 +69,8 @@ template<underlying_setting_type U>
   using return_type = setting_validator_type_erased<erased_type>;
   return util::visit_lambdas(
     validator,
-    [&](const setting_validator_unbound::sptr_type& validator_unbound) -> return_type { return validator_unbound; },
+    [&](const setting_validator_unbound::sptr_type& validator_unbound) -> return_type
+    { return validator_unbound; },
     [&](const setting_validator_range<U>::sptr_type& validator_range) -> return_type
     { return std::make_shared<setting_validator_range_type_erased<erased_type>>(validator_range); },
     [&](const setting_validator_list<U>::sptr_type& validator_list) -> return_type
@@ -83,7 +85,8 @@ template<underlying_setting_type U>
 template<underlying_setting_type_erased_type T>
 template<underlying_setting_type U>
 setting_type_erased<T>::setting_type_erased(const std::shared_ptr<setting<U>>& setting)
-  : get_{[setting, converter = create_setting_value_converter<U, value_type>()] { return converter(setting->value()); }}
+  : get_{[setting, converter = create_setting_value_converter<U, value_type>()]
+         { return converter(setting->value()); }}
   , set_{[setting, converter = create_setting_value_converter<value_type, U>()](const value_type& v)
          { return setting->value(converter(v)); }}
   , signal_adapter{*setting}

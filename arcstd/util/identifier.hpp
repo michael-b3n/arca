@@ -19,7 +19,8 @@ class ARCSTD_EXPORT identifier final
   std::string value_;
 
 public: // Constants
-  static constexpr auto characters = std::string_view{"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"};
+  static constexpr auto characters =
+    std::string_view{"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"};
 
 public: // Structors
   ///

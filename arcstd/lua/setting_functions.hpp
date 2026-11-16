@@ -8,8 +8,8 @@ namespace arcstd::lua
 {
 
 ///
-/// The functions \p setting offers to scripts: get(), set(value) and postfix(), \see to_function. \p setting must
-/// live as long as they are registered.
+/// The functions \p setting offers to scripts: get(), set(value) and postfix(), \see to_function.
+/// \p setting must live as long as they are registered.
 /// \return the functions by name
 ///
 template<setting::underlying_setting_type T>
@@ -25,7 +25,8 @@ template<setting::underlying_setting_type T>
   functions.emplace(
     "get",
     to_function(
-      [&setting] -> erased_type { return setting::create_setting_value_converter<T, erased_type>()(setting.value()); }
+      [&setting] -> erased_type
+      { return setting::create_setting_value_converter<T, erased_type>()(setting.value()); }
     )
   );
   ///

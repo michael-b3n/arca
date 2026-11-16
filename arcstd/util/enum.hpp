@@ -85,7 +85,8 @@ template<enum_type E>
 ///
 /// Converts string view enum name to enum.
 /// \tparam E enum type
-/// \return optional enum type value, std::nullopt of name does not correspond to any enum value in specified enum type
+/// \return optional enum type value, std::nullopt of name does not correspond to any enum value in
+/// specified enum type
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto to_enum(const std::string_view name) -> std::optional<E>

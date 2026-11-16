@@ -96,7 +96,10 @@ template<typename E>
 /// From enum setting type converter implementation.
 ///
 template<typename T>
-  requires(std::is_same_v<T, std::optional<typename T::value_type>> && std::is_enum_v<typename T::value_type>)
+  requires(
+    std::is_same_v<T, std::optional<typename T::value_type>> &&
+    std::is_enum_v<typename T::value_type>
+  )
 [[nodiscard]] auto from_type_erased_setting(const std::optional<std::string>& v) -> T
 {
   return v ? T{from_type_erased_setting<typename T::value_type>(*v)} : T{};
@@ -106,10 +109,14 @@ template<typename T>
 /// From enum setting type converter implementation.
 ///
 template<typename T>
-  requires(std::is_same_v<T, std::vector<typename T::value_type>> && std::is_enum_v<typename T::value_type>)
+  requires(
+    std::is_same_v<T, std::vector<typename T::value_type>> && std::is_enum_v<typename T::value_type>
+  )
 [[nodiscard]] auto from_type_erased_setting(const std::vector<std::string>& v) -> T
 {
-  return v | std::views::transform([](const auto& item) { return from_type_erased_setting<typename T::value_type>(item); }) |
+  return v |
+         std::views::transform([](const auto& item)
+                               { return from_type_erased_setting<typename T::value_type>(item); }) |
          std::ranges::to<T>();
 }
 
@@ -129,14 +136,19 @@ template<typename E>
 /// \return std::nullopt if \p v names no value of the enum
 ///
 template<typename T>
-  requires(std::is_same_v<T, std::optional<typename T::value_type>> && std::is_enum_v<typename T::value_type>)
-[[nodiscard]] auto try_from_type_erased_setting(const std::optional<std::string>& v) -> std::optional<T>
+  requires(
+    std::is_same_v<T, std::optional<typename T::value_type>> &&
+    std::is_enum_v<typename T::value_type>
+  )
+[[nodiscard]] auto try_from_type_erased_setting(const std::optional<std::string>& v)
+  -> std::optional<T>
 {
   if(!v)
   {
     return T{};
   }
-  return util::to_enum<typename T::value_type>(*v).transform([](const auto value) { return T{value}; });
+  return util::to_enum<typename T::value_type>(*v).transform([](const auto value)
+                                                             { return T{value}; });
 }
 
 ///
@@ -144,16 +156,23 @@ template<typename T>
 /// \return std::nullopt if one of \p v names no value of the enum
 ///
 template<typename T>
-  requires(std::is_same_v<T, std::vector<typename T::value_type>> && std::is_enum_v<typename T::value_type>)
-[[nodiscard]] auto try_from_type_erased_setting(const std::vector<std::string>& v) -> std::optional<T>
+  requires(
+    std::is_same_v<T, std::vector<typename T::value_type>> && std::is_enum_v<typename T::value_type>
+  )
+[[nodiscard]] auto try_from_type_erased_setting(const std::vector<std::string>& v)
+  -> std::optional<T>
 {
-  const auto values = v | std::views::transform([](const auto& item) { return util::to_enum<typename T::value_type>(item); }) |
-                      std::ranges::to<std::vector>();
+  const auto values =
+    v |
+    std::views::transform([](const auto& item)
+                          { return util::to_enum<typename T::value_type>(item); }) |
+    std::ranges::to<std::vector>();
   if(!std::ranges::all_of(values, [](const auto& value) { return value.has_value(); }))
   {
     return std::nullopt;
   }
-  return values | std::views::transform([](const auto& value) { return *value; }) | std::ranges::to<T>();
+  return values | std::views::transform([](const auto& value) { return *value; }) |
+         std::ranges::to<T>();
 }
 
 ///
@@ -176,19 +195,22 @@ using setting_type_erased_variant = meta::combine_pack_t<
   detail::setting_basic_list_variant>;
 
 ///
-/// Concept for all supported base setting types. These types are type erased settings. Supported are:
+/// Concept for all supported base setting types. These types are type erased settings. Supported
+/// are:
 /// - default types including optional and list variants
 ///
 template<typename T>
 concept underlying_setting_type_erased_type = meta::contains_v<setting_type_erased_variant, T>;
 
 ///
-/// Concept for all supported setting types. Base settings types are a subgroup of this. Supported are:
+/// Concept for all supported setting types. Base settings types are a subgroup of this. Supported
+/// are:
 /// - default types including optional and list variants
 /// - enum types
 ///
 template<typename T>
-concept underlying_setting_type = underlying_setting_type_erased_type<T> || detail::type_erasable<T>;
+concept underlying_setting_type =
+  underlying_setting_type_erased_type<T> || detail::type_erasable<T>;
 
 ///
 /// Dummy implementation for from_type_erased_setting for erased setting types.
@@ -207,15 +229,18 @@ template<underlying_setting_type_erased_type E>
 /// Type mapping from underlying setting type to type erased setting type.
 ///
 template<underlying_setting_type T>
-using setting_type_erased_type_from =
-  std::conditional_t<underlying_setting_type_erased_type<T>, T, decltype(detail::to_type_erased_setting(std::declval<T>()))>;
+using setting_type_erased_type_from = std::conditional_t<
+  underlying_setting_type_erased_type<T>,
+  T,
+  decltype(detail::to_type_erased_setting(std::declval<T>()))>;
 
 ///
 /// Convert the type erased setting value \p v, as the settings file holds it.
 /// \return \p v as T, std::nullopt if it names no value of the enum of T
 ///
 template<underlying_setting_type T>
-[[nodiscard]] auto try_from_type_erased_setting(const setting_type_erased_type_from<T>& v) -> std::optional<T>
+[[nodiscard]] auto try_from_type_erased_setting(const setting_type_erased_type_from<T>& v)
+  -> std::optional<T>
 {
   if constexpr(underlying_setting_type_erased_type<T>)
   {
@@ -232,7 +257,10 @@ template<underlying_setting_type T>
 /// \return Converter function from F to T
 ///
 template<underlying_setting_type F, underlying_setting_type T>
-  requires(std::is_same_v<setting_type_erased_type_from<F>, T> || std::is_same_v<F, setting_type_erased_type_from<T>>)
+  requires(
+    std::is_same_v<setting_type_erased_type_from<F>, T> ||
+    std::is_same_v<F, setting_type_erased_type_from<T>>
+  )
 [[nodiscard]] constexpr auto create_setting_value_converter() -> auto
 {
   if constexpr(std::is_same_v<F, T>)

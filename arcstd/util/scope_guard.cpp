@@ -64,8 +64,9 @@ auto scope_guard::destruct() -> void
 
 ///
 ///
-auto shared_scope_guard::creator::create([[maybe_unused]] scope_guard::on_destruction_type&& on_destruction)
-  -> shared_scope_guard
+auto shared_scope_guard::creator::create(
+  [[maybe_unused]] scope_guard::on_destruction_type&& on_destruction
+) -> shared_scope_guard
 {
   auto is_initial_instance = false;
   auto instance = instance_.lock();

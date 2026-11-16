@@ -39,7 +39,10 @@ TEST_CASE("numeric_cast_rt at runtime", "[util]")
   // At runtime an out of range value is reported instead of silently truncated.
   CHECK_THROWS_AS(numeric_cast_rt<std::uint8_t>(256), boost::numeric::positive_overflow);
   CHECK_THROWS_AS(numeric_cast_rt<std::uint8_t>(-1), boost::numeric::negative_overflow);
-  CHECK_THROWS_AS(numeric_cast_rt<std::int8_t>(std::numeric_limits<std::int32_t>::max()), boost::numeric::positive_overflow);
+  CHECK_THROWS_AS(
+    numeric_cast_rt<std::int8_t>(std::numeric_limits<std::int32_t>::max()),
+    boost::numeric::positive_overflow
+  );
 }
 
 TEST_CASE("numeric_cast macro", "[util]")

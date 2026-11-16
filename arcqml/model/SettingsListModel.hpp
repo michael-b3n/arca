@@ -107,7 +107,8 @@ public: // Typedefs
 
 public: // Structors
   explicit SettingsListModel(
-    std::shared_ptr<arcstd::setting::setting_store> settingStore, arcstd::util::non_owning_ptr<QObject> parent = nullptr
+    std::shared_ptr<arcstd::setting::setting_store> settingStore,
+    arcstd::util::non_owning_ptr<QObject> parent = nullptr
   );
   ~SettingsListModel() noexcept override;
 

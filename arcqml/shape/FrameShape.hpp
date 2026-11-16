@@ -11,8 +11,9 @@ namespace arcqml
 {
 
 ///
-/// QML item rendering the frame of a titled box, its top line open between gapStart and gapEnd for the title.
-/// The gap is left out, not painted over, so the frame reads on a translucent background.
+/// QML item rendering the frame of a titled box, its top line open between gapStart and gapEnd for
+/// the title. The gap is left out, not painted over, so the frame reads on a translucent
+/// background.
 ///
 class FrameShape : public QQuickPaintedItem
 {

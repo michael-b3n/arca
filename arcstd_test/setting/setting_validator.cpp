@@ -252,7 +252,8 @@ TEST_CASE("setting_validator_list_type_erased_wraps_a_validator", "[setting]")
 
   SECTION("of an enum, by the names of its values")
   {
-    const auto validator = std::make_shared<setting_validator_list<language>>(std::vector{language::german});
+    const auto validator =
+      std::make_shared<setting_validator_list<language>>(std::vector{language::german});
     const auto erased = setting_validator_list_type_erased<std::string>{validator};
     CHECK_FALSE(erased.empty());
     CHECK(erased.available() == names_type{"german"});
@@ -279,7 +280,8 @@ TEST_CASE("setting_validator_list_type_erased_wraps_a_validator", "[setting]")
 
   SECTION("of a vector")
   {
-    const auto validator = std::make_shared<setting_validator_list<names_type>>(names_type{"a", "b"});
+    const auto validator =
+      std::make_shared<setting_validator_list<names_type>>(names_type{"a", "b"});
     const auto erased = setting_validator_list_type_erased<names_type>{validator};
     CHECK(erased.available() == names_type{"a", "b"});
     CHECK(erased.contains(names_type{"b", "a"}));

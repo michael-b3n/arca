@@ -56,7 +56,8 @@ public: // Structors
   csv_reader(std::span<const std::byte> data, const params& p);
 
   ///
-  /// Construct a CSV reader for the specified file path with parameters describing the document layout.
+  /// Construct a CSV reader for the specified file path with parameters describing the document
+  /// layout.
   /// \throws util::exception if the file cannot be read or parsed
   ///
   csv_reader(const std::filesystem::path& csv_path, const params& p);
@@ -104,7 +105,8 @@ public: // Accessors
   /// Get the cell of the named column at the specified row.
   /// \return cell value if column and row exist, std::nullopt otherwise
   ///
-  [[nodiscard]] auto cell(std::string_view column, std::size_t row) const -> std::optional<std::string>;
+  [[nodiscard]] auto cell(std::string_view column, std::size_t row) const
+    -> std::optional<std::string>;
 
   ///
   /// Get all cells of the row at the specified index.

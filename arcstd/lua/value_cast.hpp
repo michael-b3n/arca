@@ -68,7 +68,8 @@ namespace detail
 /// \return the values of \p items, std::nullopt if one of them is none
 ///
 template<std::ranges::input_range R>
-[[nodiscard]] auto all_or_none(R&& items) -> std::optional<std::vector<typename std::ranges::range_value_t<R>::value_type>>;
+[[nodiscard]] auto all_or_none(R&& items)
+  -> std::optional<std::vector<typename std::ranges::range_value_t<R>::value_type>>;
 
 } // namespace detail
 
@@ -185,14 +186,16 @@ auto from_value(const value& v) -> std::optional<T>
 ///
 ///
 template<std::ranges::input_range R>
-auto detail::all_or_none(R&& items) -> std::optional<std::vector<typename std::ranges::range_value_t<R>::value_type>>
+auto detail::all_or_none(R&& items)
+  -> std::optional<std::vector<typename std::ranges::range_value_t<R>::value_type>>
 {
   const auto values = std::forward<R>(items) | std::ranges::to<std::vector>();
   if(!std::ranges::all_of(values, [](const auto& item) { return item.has_value(); }))
   {
     return std::nullopt;
   }
-  return values | std::views::transform([](const auto& item) { return *item; }) | std::ranges::to<std::vector>();
+  return values | std::views::transform([](const auto& item) { return *item; }) |
+         std::ranges::to<std::vector>();
 }
 
 ///
@@ -294,9 +297,11 @@ inline auto value_cast<std::filesystem::path>::to(const std::filesystem::path& v
 
 ///
 ///
-inline auto value_cast<std::filesystem::path>::from(const value& v) -> std::optional<std::filesystem::path>
+inline auto value_cast<std::filesystem::path>::from(const value& v)
+  -> std::optional<std::filesystem::path>
 {
-  return from_value<std::string>(v).transform([](const auto& s) { return std::filesystem::path{s}; });
+  return from_value<std::string>(v).transform([](const auto& s)
+                                              { return std::filesystem::path{s}; });
 }
 
 ///
@@ -326,7 +331,13 @@ auto value_cast<std::vector<T>>::to(const std::vector<T>& v) -> value
 {
   auto result = table{};
   std::ranges::for_each(
-    v, [&](const T& item) { result.entries.emplace_back(value{numeric_cast<integer>(result.entries.size() + 1)}, to_value(item)); }
+    v,
+    [&](const T& item)
+    {
+      result.entries.emplace_back(
+        value{numeric_cast<integer>(result.entries.size() + 1)}, to_value(item)
+      );
+    }
   );
   return value{std::move(result)};
 }
@@ -342,7 +353,9 @@ auto value_cast<std::vector<T>>::from(const value& v) -> std::optional<std::vect
   {
     return std::nullopt;
   }
-  return detail::all_or_none(held->sequence() | std::views::transform([](const value& item) { return from_value<T>(item); }));
+  return detail::all_or_none(
+    held->sequence() | std::views::transform([](const value& item) { return from_value<T>(item); })
+  );
 }
 
 ///
@@ -352,7 +365,9 @@ auto value_cast<std::map<K, T>>::to(const std::map<K, T>& v) -> value
 {
   auto result = table{};
   std::ranges::for_each(
-    v, [&](const auto& entry) { result.entries.emplace_back(to_value(entry.first), to_value(entry.second)); }
+    v,
+    [&](const auto& entry)
+    { result.entries.emplace_back(to_value(entry.first), to_value(entry.second)); }
   );
   return value{std::move(result)};
 }
@@ -367,16 +382,19 @@ auto value_cast<std::map<K, T>>::from(const value& v) -> std::optional<std::map<
   {
     return std::nullopt;
   }
-  const auto entries =
-    held->entries |
-    std::views::transform([](const table::entry& entry)
-                          { return std::pair{from_value<K>(entry.key), from_value<T>(entry.item)}; }) |
-    std::ranges::to<std::vector>();
+  const auto entries = held->entries |
+                       std::views::transform(
+                         [](const table::entry& entry)
+                         { return std::pair{from_value<K>(entry.key), from_value<T>(entry.item)}; }
+                       ) |
+                       std::ranges::to<std::vector>();
   if(!std::ranges::all_of(entries, [](const auto& entry) { return entry.first && entry.second; }))
   {
     return std::nullopt;
   }
-  return entries | std::views::transform([](const auto& entry) { return std::pair{*entry.first, *entry.second}; }) |
+  return entries |
+         std::views::transform([](const auto& entry)
+                               { return std::pair{*entry.first, *entry.second}; }) |
          std::ranges::to<std::map<K, T>>();
 }
 

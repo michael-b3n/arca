@@ -94,7 +94,8 @@ private: // Implementation
 };
 
 ///
-/// A table with the keys of the fields. Reading, nil is an empty table and a key of no field makes it none.
+/// A table with the keys of the fields. Reading, nil is an empty table and a key of no field makes
+/// it none.
 ///
 template<script_field... Fields>
 struct value_cast<script_table<Fields...>> final
@@ -176,7 +177,10 @@ auto value_cast<script_table<Fields...>>::to(const script_table_type& v) -> valu
   auto result = table{};
   [&]<std::size_t... I>(std::index_sequence<I...>)
   {
-    (result.entries.emplace_back(value{std::string{Fields::key}}, to_value(std::get<I>(v.values()))), ...);
+    (result.entries.emplace_back(
+       value{std::string{Fields::key}}, to_value(std::get<I>(v.values()))
+     ),
+     ...);
   }(std::index_sequence_for<Fields...>{});
   return value{std::move(result)};
 }
@@ -204,7 +208,9 @@ auto value_cast<script_table<Fields...>>::from(const value& v) -> std::optional<
   }
   auto result = script_table_type{};
   const auto assigned = [&]<std::size_t... I>(std::index_sequence<I...>)
-  { return (assign(std::get<I>(result.values()), held->field(Fields::key)) && ...); }(std::index_sequence_for<Fields...>{});
+  {
+    return (assign(std::get<I>(result.values()), held->field(Fields::key)) && ...);
+  }(std::index_sequence_for<Fields...>{});
   return assigned ? std::optional{std::move(result)} : std::nullopt;
 }
 

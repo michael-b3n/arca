@@ -140,7 +140,9 @@ constexpr auto const_variant_map<P...>::at(const T& key) const -> value_variant_
 {
   auto do_on_key_found = [&]<std::size_t I> -> std::optional<value_variant_type>
   {
-    if constexpr(std::is_same_v<typename std::tuple_element_t<I, tuple_type>::first_type, std::decay_t<T>>)
+    if constexpr(
+      std::is_same_v<typename std::tuple_element_t<I, tuple_type>::first_type, std::decay_t<T>>
+    )
     {
       if(key_variant_type(std::get<I>(elements_).first) == key_variant_type(key))
       {
@@ -170,7 +172,9 @@ constexpr auto const_variant_map<P...>::visit(const T& key, F f) const -> bool
 {
   auto do_on_key_found = [&]<std::size_t I> -> bool
   {
-    if constexpr(std::is_same_v<typename std::tuple_element_t<I, tuple_type>::first_type, std::decay_t<T>>)
+    if constexpr(
+      std::is_same_v<typename std::tuple_element_t<I, tuple_type>::first_type, std::decay_t<T>>
+    )
     {
       if(key_variant_type(std::get<I>(elements_).first) == key_variant_type(key))
       {
@@ -192,7 +196,12 @@ constexpr auto const_variant_map<P...>::visit_until(F f) const -> void
   requires(std::is_invocable_r_v<bool, F, key_variant_type, value_variant_type>)
 {
   auto visitor = [&]<std::size_t I>
-  { return f(key_variant_type(std::get<I>(elements_).first), value_variant_type(std::get<I>(elements_).second)); };
+  {
+    return f(
+      key_variant_type(std::get<I>(elements_).first),
+      value_variant_type(std::get<I>(elements_).second)
+    );
+  };
   [&]<std::size_t... I>(std::index_sequence<I...>)
   { (... && visitor.template operator()<I>()); }(std::make_index_sequence<size>{});
 }

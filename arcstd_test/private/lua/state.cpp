@@ -66,7 +66,9 @@ TEST_CASE("lua_state_register_function", "[lua]")
   CHECK(keep(s.register_function("a.b.twice", to_function([](int x) { return 2 * x; }))));
   CHECK(s->script("return root.interface.a.b.twice(21)").get<int>() == 42);
   // A wrong argument type is an error instead of a crash
-  CHECK_FALSE(s->safe_script("return root.interface.a.b.twice('x')", sol::script_pass_on_error).valid());
+  CHECK_FALSE(
+    s->safe_script("return root.interface.a.b.twice('x')", sol::script_pass_on_error).valid()
+  );
 }
 
 TEST_CASE("lua_state_register_function_converts_the_values", "[lua]")
@@ -76,7 +78,8 @@ TEST_CASE("lua_state_register_function_converts_the_values", "[lua]")
   auto keep = test_utils::registrations{};
   const auto check = [&](const std::string& code)
   {
-    const auto result = s->safe_script("local f = root.interface.f return " + code, sol::script_pass_on_error);
+    const auto result =
+      s->safe_script("local f = root.interface.f return " + code, sol::script_pass_on_error);
     return result.valid() && result.get<bool>();
   };
   auto noted = std::string{};
@@ -84,12 +87,19 @@ TEST_CASE("lua_state_register_function_converts_the_values", "[lua]")
   // Functions of C++ values only, each converted like the values of a script table
   REQUIRE(keep(s.register_function(
     "f.join",
-    to_function([](const std::string& text, const std::optional<std::int64_t> count, const std::vector<std::string>& list)
-                  { return std::format("{} {} {}", text, count.value_or(-1), list.size()); })
+    to_function([](
+                  const std::string& text,
+                  const std::optional<std::int64_t> count,
+                  const std::vector<std::string>& list
+                ) { return std::format("{} {} {}", text, count.value_or(-1), list.size()); })
   )));
-  REQUIRE(keep(s.register_function("f.note", to_function([&noted](std::string text) { noted = std::move(text); }))));
   REQUIRE(keep(s.register_function(
-    "f.find", to_function([](const bool found) { return found ? std::optional{std::string{"x"}} : std::nullopt; })
+    "f.note", to_function([&noted](std::string text) { noted = std::move(text); })
+  )));
+  REQUIRE(keep(s.register_function(
+    "f.find",
+    to_function([](const bool found)
+                { return found ? std::optional{std::string{"x"}} : std::nullopt; })
   )));
   REQUIRE(keep(s.register_function(
     "f.read",
@@ -115,7 +125,10 @@ TEST_CASE("lua_state_register_function_converts_the_values", "[lua]")
   CHECK(check("f.find(true) == 'x' and f.find(false) == nil"));
   // A value, or nil and the reason of the failure
   CHECK(check("#f.read(true) == 2 and select('#', f.read(true)) == 1"));
-  CHECK(check("select('#', f.read(false)) == 2 and f.read(false) == nil and select(2, f.read(false)) == 'unreadable'"));
+  CHECK(check(
+    "select('#', f.read(false)) == 2 and f.read(false) == nil and select(2, f.read(false)) == "
+    "'unreadable'"
+  ));
   // An argument of another type is an error for the script, which names it
   CHECK(check("not pcall(f.join, 1, 2, {})"));
   CHECK(check("not pcall(f.join, 'a', 2.5, {})"));
@@ -149,7 +162,10 @@ TEST_CASE("lua_state_register_rejects_a_path", "[lua]")
   CHECK_FALSE(keep(s.register_function("util", to_function([]() { return 2; }))));
   CHECK_FALSE(keep(s.register_function("util.split", to_function([]() { return 2; }))));
 
-  CHECK(s->script("return root.interface.a.b() == 1 and type(root.interface.util.split) == 'function'").get<bool>());
+  CHECK(
+    s->script("return root.interface.a.b() == 1 and type(root.interface.util.split) == 'function'")
+      .get<bool>()
+  );
 }
 
 TEST_CASE("lua_state_functions_go_with_the_state", "[lua]")
@@ -172,14 +188,16 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
 {
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
-  const auto runs = [&](const std::string& code) { return s.run_script("test.lua", code).has_value(); };
+  const auto runs = [&](const std::string& code)
+  { return s.run_script("test.lua", code).has_value(); };
   auto twice = s.register_function("a.b.twice", to_function([](int x) { return 2 * x; }));
   auto value = s.register_function("a.value", to_function([] { return 1; }));
   const auto other = s.register_function("other.value", to_function([] { return 2; }));
   REQUIRE((twice && value && other));
   // A script holding the function
   REQUIRE(runs("held = a.b.twice assert(held(2) == 4)"));
-  const auto holding = s.run_script("holding.lua", "local held = a.b.twice return function() return held(2) end");
+  const auto holding =
+    s.run_script("holding.lua", "local held = a.b.twice return function() return held(2) end");
   REQUIRE(holding);
 
   SECTION("its own function only")
@@ -209,7 +227,11 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
   {
     const auto tree = std::make_shared<setting::property_tree>();
     auto setting = make_setting<std::int32_t>(
-      tree, "numbers.number", 5, "ms", std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
+      tree,
+      "numbers.number",
+      5,
+      "ms",
+      std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
     );
     {
       const auto registered = s.register_functions("numbers.number", setting_functions(*setting));
@@ -224,7 +246,8 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
     auto all = lua::registration{};
     CHECK_FALSE(all);
     // Added one after the other, also one of nothing
-    all << std::move(twice) << std::move(value) << s.register_function("a.value", to_function([] { return 0; }))
+    all << std::move(twice) << std::move(value)
+        << s.register_function("a.value", to_function([] { return 0; }))
         << s.register_function("more.value", to_function([] { return 3; }));
     CHECK(all);
     // NOLINTNEXTLINE(bugprone-use-after-move) moved from, they hold nothing
@@ -301,12 +324,17 @@ TEST_CASE("lua_state_register_setting", "[lua]")
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
   auto keep = test_utils::registrations{};
-  const auto run = [&](const std::string& code) { return s->safe_script(code, sol::script_pass_on_error); };
+  const auto run = [&](const std::string& code)
+  { return s->safe_script(code, sol::script_pass_on_error); };
 
   SECTION("range validated")
   {
     auto setting = make_setting<std::int32_t>(
-      tree, "numbers.number", 1, "ms", std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
+      tree,
+      "numbers.number",
+      1,
+      "ms",
+      std::make_shared<setting::setting_validator_range<std::int32_t>>(0, 10)
     );
     REQUIRE(keep(s.register_functions("numbers.number", setting_functions(*setting))));
     CHECK(run("return root.interface.numbers.number.get()").get<std::int32_t>() == 1);
@@ -343,7 +371,8 @@ TEST_CASE("lua_state_register_setting", "[lua]")
   {
     auto setting = make_setting(tree, "list", std::vector<std::int32_t>{1, 2});
     REQUIRE(keep(s.register_functions("list", setting_functions(*setting))));
-    CHECK(run("local l = root.interface.list.get() return #l == 2 and l[1] == 1 and l[2] == 2").get<bool>());
+    CHECK(run("local l = root.interface.list.get() return #l == 2 and l[1] == 1 and l[2] == 2")
+            .get<bool>());
     CHECK(run("return root.interface.list.set({3, 4, 5})").get<bool>());
     CHECK(setting->value() == std::vector<std::int32_t>{3, 4, 5});
   }
@@ -386,8 +415,12 @@ TEST_CASE("lua_state_raises_exceptions_as_errors", "[lua]")
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
   auto keep = test_utils::registrations{};
-  REQUIRE(keep(s.register_function("throwing", to_function([]() -> int { throw util::exception{"thrown"}; }))));
-  CHECK(s.run_script("caught.lua", "local ok, message = pcall(throwing) assert(not ok and message:find('thrown'))"));
+  REQUIRE(keep(
+    s.register_function("throwing", to_function([]() -> int { throw util::exception{"thrown"}; }))
+  ));
+  CHECK(s.run_script(
+    "caught.lua", "local ok, message = pcall(throwing) assert(not ok and message:find('thrown'))"
+  ));
   CHECK_FALSE(s.run_script("uncaught.lua", "throwing()"));
 }
 
@@ -406,10 +439,13 @@ TEST_CASE("lua_state_stops_scripts", "[lua]")
     function closing() local x <close> = setmetatable({}, {__close = endless}) endless() end
     function value() return 1 end
   )");
-  REQUIRE(keep(s.register_function("endless", to_function([&]() { return s.call((*s)["endless"]).has_value(); }))));
+  REQUIRE(keep(s.register_function(
+    "endless", to_function([&]() { return s.call((*s)["endless"]).has_value(); })
+  )));
   CHECK(s.run_script("flag.lua", "assert(root == nil and _G == nil)"));
   // Each with a state of its own, a stop is for good
-  const auto function = GENERATE(as<std::string>{}, "endless", "calls", "catching", "coroutines", "nested", "closing");
+  const auto function =
+    GENERATE(as<std::string>{}, "endless", "calls", "catching", "coroutines", "nested", "closing");
   CAPTURE(function);
   // From another thread, the running code holds the lock
   const auto stopping = std::jthread{[&]
@@ -429,20 +465,31 @@ TEST_CASE("lua_state_protects_shared_tables", "[lua]")
   auto s = state_owner.lock();
   auto keep = test_utils::registrations{};
   REQUIRE(keep(s.register_function("a.f", to_function([]() { return 1; }))));
-  const auto runs = [&](const std::string& code) { return s.run_script("test.lua", code).has_value(); };
+  const auto runs = [&](const std::string& code)
+  { return s.run_script("test.lua", code).has_value(); };
 
   SECTION("scripts read them")
   {
     CHECK(runs("assert(a.f() == 1 and util.split('a,b', ',')[2] == 'b')"));
-    CHECK(runs("assert(#util.keys({1}) == 1 and ('abc'):upper() == 'ABC' and string.upper('a') == 'A')"));
+    CHECK(
+      runs("assert(#util.keys({1}) == 1 and ('abc'):upper() == 'ABC' and string.upper('a') == 'A')")
+    );
     // Like tables: pairs, ipairs and the length
     s->script("root.interface.list = {'x', 'y', nested = {1, 2, 3}}");
-    CHECK(runs("local n = 0 for k, v in pairs(list) do n = n + 1 end assert(n == 3 and #list == 2 and #list.nested == 3)"));
+    CHECK(runs(
+      "local n = 0 for k, v in pairs(list) do n = n + 1 end assert(n == 3 and #list == 2 and "
+      "#list.nested == 3)"
+    ));
     CHECK(runs("local t = '' for i, v in ipairs(list) do t = t .. i .. v end assert(t == '1x2y')"));
-    CHECK(runs("for k, v in pairs(list) do if k == 'nested' then assert(getmetatable(v) == 'read only') end end"));
+    CHECK(runs(
+      "for k, v in pairs(list) do if k == 'nested' then assert(getmetatable(v) == 'read only') end "
+      "end"
+    ));
     CHECK(runs("assert(util.contains(util.keys(util), 'split'))"));
     // What the app keeps for itself is out of reach
-    CHECK(runs("assert(root == nil and _G == nil and require == nil and print == nil and rawset == nil)"));
+    CHECK(runs(
+      "assert(root == nil and _G == nil and require == nil and print == nil and rawset == nil)"
+    ));
     // Globals of the script itself stay writable, also one named like a shared one
     CHECK(runs("x = 1 assert(x == 1)"));
     CHECK(runs("util = 1 assert(util == 1)"));
@@ -453,7 +500,8 @@ TEST_CASE("lua_state_protects_shared_tables", "[lua]")
 
   SECTION("scripts reach no metatable of them")
   {
-    // A registered function is a plain function, the views and strings hand out a text instead of their metatable
+    // A registered function is a plain function, the views and strings hand out a text instead of
+    // their metatable
     CHECK(runs("assert(type(a.f) == 'function' and getmetatable(a.f) == nil)"));
     // Also one with captures, as objects register them
     REQUIRE(keep(s.register_function("c.f", to_function([value = 2]() { return value; }))));
@@ -483,7 +531,9 @@ TEST_CASE("lua_state_protects_shared_tables", "[lua]")
     CHECK_FALSE(runs("setmetatable({}, {__gc = function() end})"));
     // Neither a placeholder, Lua would run a function set in its place later
     CHECK_FALSE(runs("setmetatable({}, {__gc = true})"));
-    CHECK(runs("assert(collectgarbage == nil and getmetatable(setmetatable({}, {__index = {}})) ~= nil)"));
+    CHECK(runs(
+      "assert(collectgarbage == nil and getmetatable(setmetatable({}, {__index = {}})) ~= nil)"
+    ));
     CHECK(runs("assert(getmetatable('') == 'read only' and getmetatable(a) == 'read only')"));
     // A loaded chunk gets globals of its own
     CHECK(runs("load('y = 1')() assert(y == nil)"));

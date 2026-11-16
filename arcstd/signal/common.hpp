@@ -65,8 +65,11 @@ struct signal_signature
 {
 private:
   using signature = detail::signal_signature_extractor<typename T::slot_type::signature_type>;
-  using signature_extended = detail::signal_signature_extractor<typename T::extended_slot_type::signature_type>;
-  static_assert(std::is_same_v<typename signature::return_type, typename signature_extended::return_type>);
+  using signature_extended =
+    detail::signal_signature_extractor<typename T::extended_slot_type::signature_type>;
+  static_assert(
+    std::is_same_v<typename signature::return_type, typename signature_extended::return_type>
+  );
 
 public:
   using return_type = typename signature::return_type;
@@ -76,7 +79,8 @@ public:
 
 ///
 /// Type trait to convert a signal type to a functional type (std::function or move_only_function).
-/// Provides type aliases for the corresponding functional types for both the regular and extended slot types of the signal.
+/// Provides type aliases for the corresponding functional types for both the regular and extended
+/// slot types of the signal.
 /// \tparam T signal type to convert to functional type
 /// \tparam F functional type to convert to (std::function or move_only_function)
 ///

@@ -11,8 +11,8 @@ namespace arcstd::setting
 {
 
 ///
-/// Thread safe property, the value of a node of a settings file. It reads the value from the node once and writes
-/// each change back, \see property_node.
+/// Thread safe property, the value of a node of a settings file. It reads the value from the node
+/// once and writes each change back, \see property_node.
 ///
 template<underlying_setting_type T>
 class property final
@@ -30,8 +30,8 @@ public: // Typedefs
 
 public: // Structors
   ///
-  /// Property of \p node with its value, \p default_value if the node holds none, or one of another type or naming
-  /// no value of the enum. The node holds the value from now on.
+  /// Property of \p node with its value, \p default_value if the node holds none, or one of another
+  /// type or naming no value of the enum. The node holds the value from now on.
   ///
   property(property_node node, value_type default_value);
   property(const property<value_type>& other);
@@ -76,7 +76,8 @@ template<underlying_setting_type T>
 property<T>::property(property_node node, value_type default_value)
   : node_{std::move(node)}
   , value_{node_.read(setting_type_erased_variant{std::in_place_type<erased_type>})
-             .and_then([](const auto& stored) { return try_from_type_erased_setting<T>(std::get<erased_type>(stored)); })
+             .and_then([](const auto& stored)
+                       { return try_from_type_erased_setting<T>(std::get<erased_type>(stored)); })
              .value_or(std::move(default_value))}
 {
   write();
@@ -175,7 +176,9 @@ auto property<T>::exchange(const value_type& new_value) -> value_type
 ///
 ///
 template<underlying_setting_type T>
-property<T>::property(const property<value_type>& other, [[maybe_unused]] const std::scoped_lock<std::mutex>& lock)
+property<T>::property(
+  const property<value_type>& other, [[maybe_unused]] const std::scoped_lock<std::mutex>& lock
+)
   : node_{other.node_}
   , value_{other.value_}
 {
@@ -184,7 +187,9 @@ property<T>::property(const property<value_type>& other, [[maybe_unused]] const 
 ///
 ///
 template<underlying_setting_type T>
-property<T>::property(property<value_type>&& other, [[maybe_unused]] const std::scoped_lock<std::mutex>& lock) noexcept
+property<T>::property(
+  property<value_type>&& other, [[maybe_unused]] const std::scoped_lock<std::mutex>& lock
+) noexcept
   : node_{std::move(other.node_)}
   , value_{std::move(other.value_)}
 {
@@ -197,7 +202,9 @@ auto property<T>::write() -> void
 {
   // The alternative is named, else e.g. a bool would be taken for a std::optional<bool>
   node_.write(
-    setting_type_erased_variant{std::in_place_type<erased_type>, create_setting_value_converter<T, erased_type>()(value_)}
+    setting_type_erased_variant{
+      std::in_place_type<erased_type>, create_setting_value_converter<T, erased_type>()(value_)
+    }
   );
 }
 

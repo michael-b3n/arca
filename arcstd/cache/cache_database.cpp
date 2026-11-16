@@ -20,10 +20,12 @@ namespace
 // How long a change waits for another process changing the file
 constexpr auto busy_timeout = std::chrono::seconds{5};
 
-// Write-ahead log, so many single changes are fast. A power failure may lose the last ones, the file stays intact.
-constexpr auto setup_sql = "PRAGMA journal_mode = WAL;"
-                           "PRAGMA synchronous = NORMAL;"
-                           "CREATE TABLE IF NOT EXISTS entries (key TEXT PRIMARY KEY, value TEXT NOT NULL) WITHOUT ROWID;";
+// Write-ahead log, so many single changes are fast. A power failure may lose the last ones, the
+// file stays intact.
+constexpr auto setup_sql =
+  "PRAGMA journal_mode = WAL;"
+  "PRAGMA synchronous = NORMAL;"
+  "CREATE TABLE IF NOT EXISTS entries (key TEXT PRIMARY KEY, value TEXT NOT NULL) WITHOUT ROWID;";
 constexpr auto get_sql = "SELECT value FROM entries WHERE key = ?1;";
 constexpr auto set_sql = "INSERT INTO entries (key, value) VALUES (?1, ?2) "
                          "ON CONFLICT (key) DO UPDATE SET value = excluded.value;";
@@ -37,11 +39,14 @@ constexpr auto rollback_sql = "ROLLBACK;";
 /// Bind \p text as parameter \p index of \p statement, it must live until the statement is reset.
 /// \return the status of SQLite
 ///
-[[nodiscard]] auto bind_text(const util::non_owning_ptr<sqlite3_stmt> statement, const int index, const std::string& text)
-  -> int
+[[nodiscard]] auto bind_text(
+  const util::non_owning_ptr<sqlite3_stmt> statement, const int index, const std::string& text
+) -> int
 {
   // With its size, so a text holds any character
-  return sqlite3_bind_text(statement, index, text.data(), numeric_cast<int>(text.size()), SQLITE_STATIC);
+  return sqlite3_bind_text(
+    statement, index, text.data(), numeric_cast<int>(text.size()), SQLITE_STATIC
+  );
 }
 
 ///
@@ -57,14 +62,18 @@ auto reset(const util::non_owning_ptr<sqlite3_stmt> statement) -> void
 
 ///
 ///
-auto cache_database::database_closer::operator()(const util::non_owning_ptr<sqlite3> database) const noexcept -> void
+auto cache_database::database_closer::operator()(
+  const util::non_owning_ptr<sqlite3> database
+) const noexcept -> void
 {
   sqlite3_close(database);
 }
 
 ///
 ///
-auto cache_database::statement_closer::operator()(const util::non_owning_ptr<sqlite3_stmt> statement) const noexcept -> void
+auto cache_database::statement_closer::operator()(
+  const util::non_owning_ptr<sqlite3_stmt> statement
+) const noexcept -> void
 {
   sqlite3_finalize(statement);
 }
@@ -93,7 +102,8 @@ auto cache_database::get(const std::string& key) const -> std::optional<std::str
   if(const auto status = sqlite3_step(get_.get()); status == SQLITE_ROW)
   {
     // The bytes as they were set, the size is only valid once they are read
-    const auto text = static_cast<util::non_owning_ptr<const char>>(sqlite3_column_blob(get_.get(), 0));
+    const auto text =
+      static_cast<util::non_owning_ptr<const char>>(sqlite3_column_blob(get_.get(), 0));
     const auto size = numeric_cast<std::size_t>(sqlite3_column_bytes(get_.get(), 0));
     value = text != nullptr ? std::string{text, size} : std::string{};
   }
@@ -125,8 +135,9 @@ auto cache_database::set_all(const std::map<std::string, std::string>& values) -
   {
     return;
   }
-  const auto written =
-    std::ranges::all_of(values, [this](const auto& entry) { return write(set_, entry.first, entry.second); });
+  const auto written = std::ranges::all_of(
+    values, [this](const auto& entry) { return write(set_, entry.first, entry.second); }
+  );
   std::ignore = execute(written ? commit_sql : rollback_sql, "commit");
 }
 
@@ -160,14 +171,25 @@ auto cache_database::open() const -> database_ptr
   auto database = database_ptr{opened};
   if(status != SQLITE_OK)
   {
-    LOG_ERROR("failed to open cache: file=\"{}\", error={}", file_.generic_string(), sqlite3_errstr(status));
+    LOG_ERROR(
+      "failed to open cache: file=\"{}\", error={}", file_.generic_string(), sqlite3_errstr(status)
+    );
     return nullptr;
   }
-  sqlite3_busy_timeout(database.get(), numeric_cast<int>(std::chrono::milliseconds{busy_timeout}.count()));
-  if(const auto setup = sqlite3_exec(database.get(), setup_sql, nullptr, nullptr, nullptr); setup != SQLITE_OK)
+  sqlite3_busy_timeout(
+    database.get(), numeric_cast<int>(std::chrono::milliseconds{busy_timeout}.count())
+  );
+  if(
+    const auto setup = sqlite3_exec(database.get(), setup_sql, nullptr, nullptr, nullptr);
+    setup != SQLITE_OK
+  )
   {
     // E.g. a file that is no database
-    LOG_ERROR("failed to set up cache: file=\"{}\", error={}", file_.generic_string(), sqlite3_errmsg(database.get()));
+    LOG_ERROR(
+      "failed to set up cache: file=\"{}\", error={}",
+      file_.generic_string(),
+      sqlite3_errmsg(database.get())
+    );
     return nullptr;
   }
   return database;
@@ -182,17 +204,23 @@ auto cache_database::prepare(const std::string_view sql) const -> statement_ptr
     return nullptr;
   }
   auto prepared = util::non_owning_ptr<sqlite3_stmt>{nullptr};
-  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage) the size is given, sqlite reads no further
-  const auto status = sqlite3_prepare_v2(database_.get(), sql.data(), numeric_cast<int>(sql.size()), &prepared, nullptr);
+  // NOLINTBEGIN(bugprone-suspicious-stringview-data-usage) the size is given, sqlite reads no further
+  const auto status = sqlite3_prepare_v2(
+    database_.get(), sql.data(), numeric_cast<int>(sql.size()), &prepared, nullptr
+  );
+  // NOLINTEND(bugprone-suspicious-stringview-data-usage)
   auto statement = statement_ptr{prepared};
   return succeeded(status, "prepare") ? std::move(statement) : nullptr;
 }
 
 ///
 ///
-auto cache_database::execute(const std::string_view sql, const std::string_view action) const -> bool
+auto cache_database::execute(const std::string_view sql, const std::string_view action) const
+  -> bool
 {
-  return succeeded(sqlite3_exec(database_.get(), std::string{sql}.c_str(), nullptr, nullptr, nullptr), action);
+  return succeeded(
+    sqlite3_exec(database_.get(), std::string{sql}.c_str(), nullptr, nullptr, nullptr), action
+  );
 }
 
 ///
@@ -216,7 +244,12 @@ auto cache_database::succeeded(const int status, const std::string_view action) 
   {
     return true;
   }
-  LOG_ERROR("cache failed: file=\"{}\", action={}, error={}", file_.generic_string(), action, sqlite3_errmsg(database_.get()));
+  LOG_ERROR(
+    "cache failed: file=\"{}\", action={}, error={}",
+    file_.generic_string(),
+    action,
+    sqlite3_errmsg(database_.get())
+  );
   return false;
 }
 

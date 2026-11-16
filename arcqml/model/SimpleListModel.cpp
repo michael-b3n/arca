@@ -34,7 +34,10 @@ int SimpleListModel::rowCount(const QModelIndex& parent) const
 ///
 QVariant SimpleListModel::data(const QModelIndex& index, const int role) const
 {
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return {};
   }
@@ -54,7 +57,10 @@ QHash<int, QByteArray> SimpleListModel::roleNames() const
 ///
 bool SimpleListModel::setData(const QModelIndex& index, const QVariant& value, const int role)
 {
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return false;
   }
@@ -89,15 +95,21 @@ int SimpleListModel::indexOfValue(const QVariant& value) const
   { return variant.isValid() && !variant.isNull() ? variant.toString() : QString{}; };
 
   const auto text = asText(value);
-  const auto found = std::ranges::find_if(entries_, [&](const auto& entry) { return asText(entry) == text; });
-  return found != std::ranges::cend(entries_) ? static_cast<int>(std::ranges::distance(std::cbegin(entries_), found)) : -1;
+  const auto found =
+    std::ranges::find_if(entries_, [&](const auto& entry) { return asText(entry) == text; });
+  return found != std::ranges::cend(entries_)
+           ? static_cast<int>(std::ranges::distance(std::cbegin(entries_), found))
+           : -1;
 }
 
 ///
 ///
 bool SimpleListModel::remove(const QModelIndex& index)
 {
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return false;
   }
@@ -182,7 +194,8 @@ bool SimpleListModel::replace(const QVariant& entries)
     if(entries_.size() > static_cast<std::size_t>(std::numeric_limits<int>::max()))
     {
       LOG_WARN("replace incomplete: entries count exceeds max int");
-      const auto begin = std::next(std::begin(entries_), static_cast<std::size_t>(std::numeric_limits<int>::max()));
+      const auto begin =
+        std::next(std::begin(entries_), static_cast<std::size_t>(std::numeric_limits<int>::max()));
       entries_.erase(begin, std::end(entries_));
     }
     endResetModel();

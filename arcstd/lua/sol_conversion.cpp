@@ -19,7 +19,8 @@ namespace
 static_assert(std::is_same_v<lua_Integer, integer>);
 static_assert(std::is_same_v<lua_Number, number>);
 
-// No C++ type a script value converts to is nested this deep, and a table containing itself ends here
+// No C++ type a script value converts to is nested this deep, and a table containing itself ends
+// here
 constexpr auto max_table_depth = std::size_t{100};
 
 ///
@@ -47,8 +48,10 @@ constexpr auto max_table_depth = std::size_t{100};
       return value{unsupported{}};
     }
     auto result = table{};
-    object.as<sol::table>().for_each([&](const sol::object& key, const sol::object& item)
-                                     { result.entries.emplace_back(from_sol(key, depth - 1), from_sol(item, depth - 1)); });
+    object.as<sol::table>().for_each(
+      [&](const sol::object& key, const sol::object& item)
+      { result.entries.emplace_back(from_sol(key, depth - 1), from_sol(item, depth - 1)); }
+    );
     return value{std::move(result)};
   }
   case sol::type::function:
@@ -76,9 +79,13 @@ auto to_sol(sol::state_view lua, const value& v) -> sol::object
       else if constexpr(std::is_same_v<T, table>)
       {
         const auto sequence = held.length();
-        auto result = lua.create_table(numeric_cast<int>(sequence), numeric_cast<int>(held.entries.size() - sequence));
+        auto result = lua.create_table(
+          numeric_cast<int>(sequence), numeric_cast<int>(held.entries.size() - sequence)
+        );
         std::ranges::for_each(
-          held.entries, [&](const table::entry& entry) { result[to_sol(lua, entry.key)] = to_sol(lua, entry.item); }
+          held.entries,
+          [&](const table::entry& entry)
+          { result[to_sol(lua, entry.key)] = to_sol(lua, entry.item); }
         );
         return result;
       }
@@ -107,10 +114,13 @@ auto to_sol(function function) -> sol_function
     const auto state = sol::state_view{static_cast<lua_State*>(lua)};
     const auto values =
       std::views::iota(std::ptrdiff_t{0}, static_cast<std::ptrdiff_t>(arguments.size())) |
-      std::views::transform([&](const std::ptrdiff_t index) { return from_sol(arguments[index].get<sol::object>()); }) |
+      std::views::transform([&](const std::ptrdiff_t index)
+                            { return from_sol(arguments[index].get<sol::object>()); }) |
       std::ranges::to<std::vector>();
     auto results = sol::variadic_results{};
-    std::ranges::for_each(function(values), [&](const value& result) { results.push_back(to_sol(state, result)); });
+    std::ranges::for_each(
+      function(values), [&](const value& result) { results.push_back(to_sol(state, result)); }
+    );
     return results;
   };
 }

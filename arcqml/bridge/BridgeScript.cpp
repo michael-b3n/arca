@@ -21,7 +21,8 @@ namespace arcqml
 ///
 ///
 BridgeScript::BridgeScript(
-  std::shared_ptr<arcstd::lua::lua_engine> luaEngine, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::lua::lua_engine> luaEngine,
+  const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QObject{parent}
   , luaEngine_{std::move(luaEngine)}
@@ -101,9 +102,10 @@ void BridgeScript::updateScripts()
 {
   const auto toEntry = [](const auto& script)
   {
-    const auto functions = script.second.functions |
-                           std::views::transform([](const auto& id) { return QString::fromStdString(id.string()); }) |
-                           std::ranges::to<QStringList>();
+    const auto functions =
+      script.second.functions |
+      std::views::transform([](const auto& id) { return QString::fromStdString(id.string()); }) |
+      std::ranges::to<QStringList>();
     auto entry = QVariantMap{};
     entry.insert(QStringLiteral("name"), QString::fromStdString(script.first));
     entry.insert(QStringLiteral("description"), QString::fromStdString(script.second.description));

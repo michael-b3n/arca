@@ -12,7 +12,8 @@ namespace detail
 /// \see https://en.cppreference.com/w/cpp/utility/variant/visit
 ///
 template<class... Ts>
-struct overloaded : Ts... // NOLINT(misc-multiple-inheritance) the overload set of its lambdas
+// NOLINTNEXTLINE(misc-multiple-inheritance) the overload set of its lambdas
+struct overloaded : Ts...
 {
   using Ts::operator()...;
 };
@@ -28,7 +29,10 @@ overloaded(Ts...) -> overloaded<Ts...>;
 ///
 [[nodiscard]] constexpr auto visit_lambdas(auto&& var, auto&&... lambdas) -> decltype(auto)
 {
-  return std::visit(detail::overloaded{std::forward<decltype(lambdas)>(lambdas)...}, std::forward<decltype(var)>(var));
+  return std::visit(
+    detail::overloaded{std::forward<decltype(lambdas)>(lambdas)...},
+    std::forward<decltype(var)>(var)
+  );
 }
 
 } // namespace arcstd::util

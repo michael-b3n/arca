@@ -14,7 +14,8 @@ namespace arcstd::lua
 {
 
 ///
-/// What sol calls when a script calls a function: it takes the arguments as sol has them and returns the results.
+/// What sol calls when a script calls a function: it takes the arguments as sol has them and
+/// returns the results.
 ///
 using sol_function = std::function<sol::variadic_results(sol::this_state, sol::variadic_args)>;
 
@@ -24,7 +25,8 @@ using sol_function = std::function<sol::variadic_results(sol::this_state, sol::v
 [[nodiscard]] auto to_sol(sol::state_view lua, const value& v) -> sol::object;
 
 ///
-/// \return a copy of \p object. A table nested deeper than any C++ type takes is unsupported, so is one containing itself.
+/// \return a copy of \p object. A table nested deeper than any C++ type takes is unsupported, so is
+/// one containing itself.
 ///
 [[nodiscard]] auto from_sol(const sol::object& object) -> value;
 

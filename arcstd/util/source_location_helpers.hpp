@@ -11,15 +11,17 @@ namespace arcstd::util
 /// The pretty function name is the function name without the namespace and without the parameters.
 /// \return Pretty function name as std::string_view
 ///
-[[nodiscard]] constexpr auto filter_function_name(const std::source_location& loc) -> std::string_view
+[[nodiscard]] constexpr auto filter_function_name(const std::source_location& loc)
+  -> std::string_view
 {
   const std::string_view func_name = loc.function_name();
   const auto last_braces_pos = func_name.find_first_of('(');
   const std::string_view func_name_without_braces =
     (last_braces_pos != std::string_view::npos) ? func_name.substr(0, last_braces_pos) : func_name;
   const auto colon_pos = func_name_without_braces.find_last_of(':');
-  const std::string_view pretty_func_name =
-    (colon_pos != std::string_view::npos) ? func_name_without_braces.substr(colon_pos + 1) : func_name_without_braces;
+  const std::string_view pretty_func_name = (colon_pos != std::string_view::npos)
+                                              ? func_name_without_braces.substr(colon_pos + 1)
+                                              : func_name_without_braces;
   return pretty_func_name;
 }
 
@@ -35,8 +37,9 @@ namespace arcstd::util
   const std::string_view file_name_with_ext =
     (last_slash_pos != std::string_view::npos) ? file_name.substr(last_slash_pos + 1) : file_name;
   const auto dot_pos = file_name_with_ext.find_last_of('.');
-  const std::string_view pretty_file_name =
-    (dot_pos != std::string_view::npos) ? file_name_with_ext.substr(0, dot_pos) : file_name_with_ext;
+  const std::string_view pretty_file_name = (dot_pos != std::string_view::npos)
+                                              ? file_name_with_ext.substr(0, dot_pos)
+                                              : file_name_with_ext;
   return pretty_file_name;
 }
 

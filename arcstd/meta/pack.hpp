@@ -94,7 +94,12 @@ struct combine_pack<P<Ts...>>
   using type = P<Ts...>;
 };
 
-template<template<typename...> typename P1, template<typename...> typename P2, typename... T1s, typename... T2s, typename... Ps>
+template<
+  template<typename...> typename P1,
+  template<typename...> typename P2,
+  typename... T1s,
+  typename... T2s,
+  typename... Ps>
 struct combine_pack<P1<T1s...>, P2<T2s...>, Ps...>
 {
   using type = typename combine_pack<P1<T1s..., T2s...>, Ps...>::type;
@@ -145,7 +150,10 @@ private:
     using first_type = P_<std::tuple_element_t<FI_, tuple_type>...>;
     using second_type = P_<std::tuple_element_t<SI_ + N, tuple_type>...>;
   };
-  using helper_type = split_pack_helper<P, std::make_index_sequence<N>, std::make_index_sequence<sizeof...(Args) - N>>;
+  using helper_type = split_pack_helper<
+    P,
+    std::make_index_sequence<N>,
+    std::make_index_sequence<sizeof...(Args) - N>>;
 
 public:
   using first_type = typename helper_type::first_type;
@@ -198,7 +206,8 @@ struct type_index<P<Args...>, T> final
 template<template<typename...> typename P, typename Arg, typename... Args, typename T>
 struct type_index<P<Arg, Args...>, T> final
 {
-  static constexpr std::size_t index = std::is_same_v<T, Arg> ? 0 : (1 + type_index<P<Args...>, T>::index);
+  static constexpr std::size_t index =
+    std::is_same_v<T, Arg> ? 0 : (1 + type_index<P<Args...>, T>::index);
 };
 
 ///

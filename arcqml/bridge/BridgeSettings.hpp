@@ -24,8 +24,8 @@ namespace arcqml
 {
 
 ///
-/// QML settings registry, creates the setting bindings of the QML layer. Owned by the application, it is created
-/// before the QML engine loads and outlives it.
+/// QML settings registry, creates the setting bindings of the QML layer. Owned by the application,
+/// it is created before the QML engine loads and outlives it.
 /// \see SettingBinding
 ///
 class BridgeSettings final : public QObject
@@ -53,7 +53,8 @@ public: // Static interface
 
 public: // Structors
   explicit BridgeSettings(
-    std::shared_ptr<arcstd::setting::setting_store> settingStore, arcstd::util::non_owning_ptr<QObject> parent = nullptr
+    std::shared_ptr<arcstd::setting::setting_store> settingStore,
+    arcstd::util::non_owning_ptr<QObject> parent = nullptr
   );
   ~BridgeSettings() noexcept override;
 
@@ -72,8 +73,8 @@ public: // Accessors
 
 public: // Modifiers
   ///
-  /// Access the binding of \p path, creating it and the setting on first access. All callers share one binding,
-  /// the default value of the first call wins.
+  /// Access the binding of \p path, creating it and the setting on first access. All callers share
+  /// one binding, the default value of the first call wins.
   /// \return setting binding owned by this registry, nullptr if none could be created
   ///
   Q_INVOKABLE SettingBinding* binding(const QString& path, const QVariant& defaultValue);
@@ -82,7 +83,9 @@ public: // Modifiers
   /// Access a binding like above, a new setting takes only the values of \p available.
   /// \return setting binding owned by this registry, nullptr if none could be created
   ///
-  Q_INVOKABLE SettingBinding* binding(const QString& path, const QVariant& defaultValue, const QVariantList& available);
+  Q_INVOKABLE SettingBinding* binding(
+    const QString& path, const QVariant& defaultValue, const QVariantList& available
+  );
 
   ///
   /// Access a binding like above, a new number setting takes values from \p minimum
@@ -90,15 +93,21 @@ public: // Modifiers
   /// \return setting binding owned by this registry, nullptr if none could be created
   ///
   Q_INVOKABLE SettingBinding* binding(
-    const QString& path, const QVariant& defaultValue, const QVariant& minimum, const QVariant& maximum
+    const QString& path,
+    const QVariant& defaultValue,
+    const QVariant& minimum,
+    const QVariant& maximum
   );
 
 private: // Implementation
   ///
-  /// \return the binding of \p path, otherwise the one \p create returns, nullptr if there is no path
+  /// \return the binding of \p path, otherwise the one \p create returns, nullptr if there is no
+  /// path
   ///
   [[nodiscard]] SettingBinding* bindingOf(
-    const QString& path, const QVariant& defaultValue, const std::function<std::unique_ptr<SettingBinding>()>& create
+    const QString& path,
+    const QVariant& defaultValue,
+    const std::function<std::unique_ptr<SettingBinding>()>& create
   );
 };
 

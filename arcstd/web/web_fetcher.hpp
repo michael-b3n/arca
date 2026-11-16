@@ -54,10 +54,13 @@ public: // Typedefs
 
 public: // Structors
   ///
-  /// Construct the fetcher with its settings in \p setting_store and its function for the scripts of \p lua_engine,
-  /// none without one.
+  /// Construct the fetcher with its settings in \p setting_store and its function for the scripts
+  /// of \p lua_engine, none without one.
   ///
-  web_fetcher(std::shared_ptr<setting::setting_store> setting_store, std::shared_ptr<lua::lua_engine> lua_engine);
+  web_fetcher(
+    std::shared_ptr<setting::setting_store> setting_store,
+    std::shared_ptr<lua::lua_engine> lua_engine
+  );
   ~web_fetcher() noexcept;
 
 public: // Accessors
@@ -69,7 +72,8 @@ public: // Accessors
 public: // Operations
   ///
   /// \return the web page at \p url, or why it failed: the name of the error.
-  /// Blocks until it is fetched. During the retry pause a failed url gets the same failure without a request.
+  /// Blocks until it is fetched. During the retry pause a failed url gets the same failure without
+  /// a request.
   ///
   [[nodiscard]] auto fetch(std::string_view url) const -> page_type;
 };

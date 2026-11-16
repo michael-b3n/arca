@@ -34,7 +34,8 @@ namespace detail
 {
 
 ///
-/// Result of a function that may fail: a script gets the value, or nil and the error, like io.open does it.
+/// Result of a function that may fail: a script gets the value, or nil and the error, like io.open
+/// does it.
 ///
 template<typename T>
 struct is_expected_result final : std::false_type
@@ -71,7 +72,8 @@ template<value_castable T>
 /// What a function for scripts takes: a value_castable type, by value or const reference.
 ///
 template<typename T>
-concept function_parameter = value_castable<std::remove_cvref_t<T>> && std::convertible_to<std::remove_cvref_t<T>, T>;
+concept function_parameter =
+  value_castable<std::remove_cvref_t<T>> && std::convertible_to<std::remove_cvref_t<T>, T>;
 
 ///
 /// \return the function a script calls in place of \p callable, \see to_function
@@ -80,7 +82,8 @@ template<typename R, typename... A>
   requires(function_result<R> && (function_parameter<A> && ...))
 [[nodiscard]] auto wrapped(std::function<R(A...)> callable) -> function
 {
-  return [callable = std::move(callable)](const std::span<const value> arguments) -> std::vector<value>
+  return
+    [callable = std::move(callable)](const std::span<const value> arguments) -> std::vector<value>
   {
     const auto call = [&]<std::size_t... I>(std::index_sequence<I...>) -> R
     { return callable(argument<std::remove_cvref_t<A>>(arguments, I)...); };
@@ -115,15 +118,17 @@ template<typename R, typename... A>
 } // namespace detail
 
 ///
-/// Callables to_function converts: one call signature, e.g. a lambda that is not generic, its parameters and its
-/// result value_castable.
+/// Callables to_function converts: one call signature, e.g. a lambda that is not generic, its
+/// parameters and its result value_castable.
 ///
 template<typename F>
-concept function_convertible = requires(F&& callable) { detail::wrapped(std::function{std::forward<F>(callable)}); };
+concept function_convertible =
+  requires(F&& callable) { detail::wrapped(std::function{std::forward<F>(callable)}); };
 
 ///
-/// \return \p callable as function for scripts. It takes and returns C++ values, \see value_cast. An argument
-/// of another type is an error for the script, one left out is nil, extra ones are ignored.
+/// \return \p callable as function for scripts. It takes and returns C++ values, \see value_cast.
+/// An argument of another type is an error for the script, one left out is nil, extra ones are
+/// ignored.
 ///
 template<function_convertible F>
 [[nodiscard]] auto to_function(F&& callable) -> function

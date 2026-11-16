@@ -26,19 +26,23 @@ TEST_CASE("for_each on non pack type", "[meta]")
 
 TEST_CASE("for_each on pack type", "[meta]")
 {
-  static_assert(std::is_same_v<for_each_t<for_each_test_pack<int>, wrapper>, for_each_test_pack<wrapper<int>>>);
   static_assert(
-    std::is_same_v<for_each_t<for_each_test_pack<int, double>, wrapper>, for_each_test_pack<wrapper<int>, wrapper<double>>>
+    std::is_same_v<for_each_t<for_each_test_pack<int>, wrapper>, for_each_test_pack<wrapper<int>>>
   );
+  static_assert(std::is_same_v<
+                for_each_t<for_each_test_pack<int, double>, wrapper>,
+                for_each_test_pack<wrapper<int>, wrapper<double>>>);
   static_assert(std::is_same_v<
                 for_each_t<for_each_test_pack<int, double, char>, wrapper>,
                 for_each_test_pack<wrapper<int>, wrapper<double>, wrapper<char>>>);
-  static_assert(std::is_same_v<for_each_t<std::tuple<int, double>, wrapper>, std::tuple<wrapper<int>, wrapper<double>>>);
+  static_assert(std::is_same_v<
+                for_each_t<std::tuple<int, double>, wrapper>,
+                std::tuple<wrapper<int>, wrapper<double>>>);
   static_assert(std::is_same_v<for_each_t<std::variant<int>, wrapper>, std::variant<wrapper<int>>>);
 
-  static_assert(
-    std::is_same_v<for_each_t<for_each_t<for_each_test_pack<int>, wrapper>, wrapper>, for_each_test_pack<wrapper<wrapper<int>>>>
-  );
+  static_assert(std::is_same_v<
+                for_each_t<for_each_t<for_each_test_pack<int>, wrapper>, wrapper>,
+                for_each_test_pack<wrapper<wrapper<int>>>>);
 }
 
 TEST_CASE("for_each with standard templates", "[meta]")

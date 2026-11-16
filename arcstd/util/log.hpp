@@ -38,7 +38,8 @@ enum class logger_level
 }
 
 ///
-/// Log message with debug level. A message that can not be written is dropped, logging never throws.
+/// Log message with debug level. A message that can not be written is dropped, logging never
+/// throws.
 ///
 ARCSTD_EXPORT auto log_debug(std::string_view msg) noexcept -> void;
 
@@ -64,8 +65,8 @@ ARCSTD_EXPORT auto log_error(std::string_view msg) noexcept -> void;
 struct ARCSTD_EXPORT logger final
 {
   ///
-  /// Init the logger, writing to the folder logs of \p data_folder, the folder of the data of the app.
-  /// The \p header is written at the top of every log file, rotated files included.
+  /// Init the logger, writing to the folder logs of \p data_folder, the folder of the data of the
+  /// app. The \p header is written at the top of every log file, rotated files included.
   ///
   explicit logger(const std::filesystem::path& data_folder, std::string header = {});
   ~logger() noexcept;
@@ -80,8 +81,8 @@ namespace detail
 {
 
 ///
-/// Log the message \p fmt formats of \p args with \p Level, the LOG_ macros call it. A message that can not be
-/// formatted is logged as format error, one that can not be written is dropped.
+/// Log the message \p fmt formats of \p args with \p Level, the LOG_ macros call it. A message that
+/// can not be formatted is logged as format error, one that can not be written is dropped.
 ///
 template<logger_level Level, typename... Args>
 auto log_formatted(const std::format_string<Args...> fmt, Args&&... args) noexcept -> void
@@ -113,7 +114,8 @@ auto log_formatted(const std::format_string<Args...> fmt, Args&&... args) noexce
       log_error(std::format("[INTERNAL_FMT_STR] format error: {}.", exception.what()));
     }
   }
-  catch(...) // NOLINT(bugprone-empty-catch) logging never throws, a message without memory is dropped
+  // NOLINTNEXTLINE(bugprone-empty-catch) logging never throws, a message without memory is dropped
+  catch(...)
   {
   }
 }

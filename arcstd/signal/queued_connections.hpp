@@ -61,7 +61,8 @@ public: // Modifiers
   auto connect_extended(T& sig, typename T::extended_slot_type slot) -> void;
 
   ///
-  /// Disconnect all slots and wait for the ones that are running. Nothing can be connected afterwards.
+  /// Disconnect all slots and wait for the ones that are running. Nothing can be connected
+  /// afterwards.
   /// \warning Must not be called by a slot connected through this object.
   ///
   auto disconnect() -> void;

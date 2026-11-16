@@ -44,19 +44,22 @@ class BridgeScript final : public QObject
 
 public: // Structors
   explicit BridgeScript(
-    std::shared_ptr<arcstd::lua::lua_engine> luaEngine, arcstd::util::non_owning_ptr<QObject> parent = nullptr
+    std::shared_ptr<arcstd::lua::lua_engine> luaEngine,
+    arcstd::util::non_owning_ptr<QObject> parent = nullptr
   );
   ~BridgeScript() noexcept override;
 
 public: // Modifiers
   ///
-  /// Load the user scripts anew, \see lua::lua_engine::load_scripts. A call made while they load is ignored.
+  /// Load the user scripts anew, \see lua::lua_engine::load_scripts. A call made while they load is
+  /// ignored.
   ///
   Q_INVOKABLE void loadScripts();
 
   ///
-  /// Copy the script \p files into the script folder and load the scripts anew, \see lua::lua_engine::import_scripts.
-  /// The files are expected as the URLs a file dialog reports. A call made while the scripts load is ignored.
+  /// Copy the script \p files into the script folder and load the scripts anew, \see
+  /// lua::lua_engine::import_scripts. The files are expected as the URLs a file dialog reports. A
+  /// call made while the scripts load is ignored.
   ///
   Q_INVOKABLE void importFiles(const QList<QUrl>& files);
 

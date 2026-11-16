@@ -40,8 +40,8 @@ namespace arcstd::lua
 class state_owner;
 
 ///
-/// Manifest of a function a script offers, defined by who calls it: the static id naming the function,
-/// e.g. "scripture.passage", its input and its output, usually a script_table.
+/// Manifest of a function a script offers, defined by who calls it: the static id naming the
+/// function, e.g. "scripture.passage", its input and its output, usually a script_table.
 ///
 template<typename M>
 concept script_manifest = requires {
@@ -77,9 +77,8 @@ struct lua_engine_signals final
 
 ///
 /// Lua engine, owns the Lua state and loads the bundled and user scripts \see load_scripts.
-/// An object registers its functions for scripts last in its constructor and keeps the registration as its last
-/// member, \see registration.
-/// Signal IDs to connect to:
+/// An object registers its functions for scripts last in its constructor and keeps the registration
+/// as its last member, \see registration. Signal IDs to connect to:
 /// - scripts_loaded: Emitted under the Lua lock once the scripts are loaded, also if none are.
 ///
 class ARCSTD_EXPORT lua_engine final : public signal::adapter<lua_engine_signals>
@@ -100,7 +99,7 @@ class ARCSTD_EXPORT lua_engine final : public signal::adapter<lua_engine_signals
   const std::unique_ptr<state_owner> state_owner_;
   mutable std::mutex mtx_;
   std::map<std::string, script_info> scripts_; // the loaded scripts by name
-  std::jthread loader_;                        // last, it joins before the members it uses are destroyed
+  std::jthread loader_; // last, it joins before the members it uses are destroyed
 
 public: // Typedefs
   using bundled_provider_type = std::remove_const_t<decltype(bundled_)>;
@@ -112,8 +111,8 @@ public: // Typedefs
 
 public: // Structors
   ///
-  /// Construct the engine with its settings in \p setting_store, \p bundled shall provide the compiled scripts
-  /// when called.
+  /// Construct the engine with its settings in \p setting_store, \p bundled shall provide the
+  /// compiled scripts when called.
   ///
   lua_engine(std::shared_ptr<setting::setting_store> setting_store, bundled_provider_type bundled);
   ~lua_engine() noexcept override;
@@ -130,45 +129,51 @@ public: // Accessors
   [[nodiscard]] auto lock() const -> lock_type;
 
   ///
-  /// \return the loaded scripts offering a function for each manifest \p M, all of them without \p M, by name
+  /// \return the loaded scripts offering a function for each manifest \p M, all of them without \p
+  /// M, by name
   ///
   template<script_manifest... M>
   [[nodiscard]] auto scripts() const -> scripts_type;
 
 public: // Modifiers
   ///
-  /// Load the bundled scripts and, if enabled, the user scripts outside of the calling thread, and emit
-  /// scripts_loaded. Called once the functions for scripts are registered, and again to load the scripts anew: a loading still
-  /// running ends after its script first.
+  /// Load the bundled scripts and, if enabled, the user scripts outside of the calling thread, and
+  /// emit scripts_loaded. Called once the functions for scripts are registered, and again to load
+  /// the scripts anew: a loading still running ends after its script first.
   ///
   auto load_scripts() -> void;
 
   ///
-  /// Copy the Lua script \p files into the script folder, replacing a file of the same name. They run once the
-  /// scripts are loaded anew, \see load_scripts.
+  /// Copy the Lua script \p files into the script folder, replacing a file of the same name. They
+  /// run once the scripts are loaded anew, \see load_scripts.
   /// \return number of files copied, the others are logged
   ///
-  [[nodiscard]] auto import_scripts(const std::vector<std::filesystem::path>& files) const -> std::size_t;
+  [[nodiscard]] auto import_scripts(const std::vector<std::filesystem::path>& files) const
+    -> std::size_t;
 
   ///
-  /// Register a function for scripts at \p p, e.g. "web.fetch", for as long as the registration is kept.
+  /// Register a function for scripts at \p p, e.g. "web.fetch", for as long as the registration is
+  /// kept.
   /// \p function takes and returns C++ values, \see to_function. What it reaches must live as long.
-  /// \return the registration to keep, one of nothing if \p p can not be registered, the reason is logged
+  /// \return the registration to keep, one of nothing if \p p can not be registered, the reason is
+  /// logged
   ///
   template<function_convertible F>
-  [[nodiscard]] auto register_function(const util::path& p, F&& function) const -> registration_type;
+  [[nodiscard]] auto register_function(const util::path& p, F&& function) const
+    -> registration_type;
 
   ///
-  /// Register \p setting for scripts at setting and its own path, for as long as the registration is
-  /// kept, \see setting_functions. \p setting must live as long.
-  /// \return the registration to keep, one of nothing if the path can not be registered, the reason is logged
+  /// Register \p setting for scripts at setting and its own path, for as long as the registration
+  /// is kept, \see setting_functions. \p setting must live as long.
+  /// \return the registration to keep, one of nothing if the path can not be registered, the reason
+  /// is logged
   ///
   template<setting::underlying_setting_type T>
   [[nodiscard]] auto register_setting(setting::setting<T>& setting) const -> registration_type;
 
   ///
-  /// Run the function of the manifest \p M of the script named \p script. Blocks until it returns, it may wait
-  /// e.g. for a web page.
+  /// Run the function of the manifest \p M of the script named \p script. Blocks until it returns,
+  /// it may wait e.g. for a web page.
   /// \return its output, or std::nullopt if it failed, is missing or its output does not fit \p M
   ///
   template<script_manifest M>
@@ -176,24 +181,28 @@ public: // Modifiers
     -> std::optional<typename M::output>;
 
   ///
-  /// Run \p code as a user script named \p name, in an environment of its own, \see load_scripts. Blocks until it
-  /// returns.
+  /// Run \p code as a user script named \p name, in an environment of its own, \see load_scripts.
+  /// Blocks until it returns.
   /// \return a copy of what it returns, nil if nothing, or std::nullopt if it failed
   ///
-  [[nodiscard]] auto run_script(std::string_view name, std::string_view code) const -> std::optional<value>;
+  [[nodiscard]] auto run_script(std::string_view name, std::string_view code) const
+    -> std::optional<value>;
 
   ///
-  /// Stop the scripts with force, no script runs from now on. Called before the app ends, so no object waits
-  /// for a script that never returns once it is destroyed, \see state_owner::shutdown
+  /// Stop the scripts with force, no script runs from now on. Called before the app ends, so no
+  /// object waits for a script that never returns once it is destroyed, \see state_owner::shutdown
   ///
   auto shutdown() const noexcept -> void;
 
 private: // Implementation
   [[nodiscard]] auto scripts(const std::vector<util::path>& ids) const -> scripts_type;
-  [[nodiscard]] auto register_function(const util::path& p, function function) const -> registration_type;
-  [[nodiscard]] auto register_functions(const util::path& p, function_table functions) const -> registration_type;
-  [[nodiscard]] auto call(const script_name_type& script, const util::path& id, const value& input) const
-    -> std::optional<value>;
+  [[nodiscard]] auto register_function(const util::path& p, function function) const
+    -> registration_type;
+  [[nodiscard]] auto register_functions(const util::path& p, function_table functions) const
+    -> registration_type;
+  [[nodiscard]] auto call(
+    const script_name_type& script, const util::path& id, const value& input
+  ) const -> std::optional<value>;
   auto load(const std::stop_token& stop_token) -> void;
   auto load_folder(const std::filesystem::path& folder, const std::stop_token& stop_token) -> void;
   auto load_script(std::string_view file, std::string_view code) -> void;
@@ -220,13 +229,16 @@ auto lua_engine::register_function(const util::path& p, F&& function) const -> r
 template<setting::underlying_setting_type T>
 auto lua_engine::register_setting(setting::setting<T>& setting) const -> registration_type
 {
-  return register_functions(util::path{setting_node} / util::path{setting.path}, setting_functions(setting));
+  return register_functions(
+    util::path{setting_node} / util::path{setting.path}, setting_functions(setting)
+  );
 }
 
 ///
 ///
 template<script_manifest M>
-auto lua_engine::run(const script_name_type& script, const typename M::input& input) const -> std::optional<typename M::output>
+auto lua_engine::run(const script_name_type& script, const typename M::input& input) const
+  -> std::optional<typename M::output>
 {
   const auto id = util::path{M::id};
   const auto result = call(script, id, to_value<typename M::input>(input));

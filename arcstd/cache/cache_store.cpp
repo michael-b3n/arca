@@ -11,7 +11,9 @@ namespace arcstd::cache
 
 ///
 ///
-cache_store::cache_store(const std::filesystem::path& data_folder, std::shared_ptr<lua::lua_engine> lua_engine)
+cache_store::cache_store(
+  const std::filesystem::path& data_folder, std::shared_ptr<lua::lua_engine> lua_engine
+)
   : lua_engine_{std::move(lua_engine)}
   , folder_{data_folder / folder_name}
 {
@@ -22,15 +24,17 @@ cache_store::cache_store(const std::filesystem::path& data_folder, std::shared_p
 
   registrations_
     ///
-    /// \lua Reads a text value from a cache. A cache keeps its values after the app closes. Each cache is the SQLite file
-    /// `cache/<name>.sqlite` in the local data folder, and other programs may read and change it. A cache that fails is
-    /// logged and holds nothing.
+    /// \lua Reads a text value from a cache. A cache keeps its values after the app closes. Each
+    /// cache is the SQLite file `cache/<name>.sqlite` in the local data folder, and other programs
+    /// may read and change it. A cache that fails is logged and holds nothing.
     /// \param name the cache, made of letters, digits and `_`. Each script uses its own cache.
     /// \param key the key of the value
     /// \return the value, or `nil` if there is none
     ///
     << lua_engine_->register_function(
-         "cache.get", [this](const std::string& name, const std::string& key) { return get(util::identifier{name}, key); }
+         "cache.get",
+         [this](const std::string& name, const std::string& key)
+         { return get(util::identifier{name}, key); }
        )
     ///
     /// \lua Writes a text value to a cache, \see `cache.get`.
@@ -40,8 +44,9 @@ cache_store::cache_store(const std::filesystem::path& data_folder, std::shared_p
     ///
     << lua_engine_->register_function(
          "cache.set",
-         [this](const std::string& name, const std::string& key, const std::optional<std::string>& value)
-         { set(util::identifier{name}, key, value); }
+         [this](
+           const std::string& name, const std::string& key, const std::optional<std::string>& value
+         ) { set(util::identifier{name}, key, value); }
        )
     ///
     /// \lua Writes many text values to a cache at once, all of them or none, \see `cache.get`.
@@ -57,7 +62,9 @@ cache_store::cache_store(const std::filesystem::path& data_folder, std::shared_p
     /// \lua Removes all values of a cache, \see `cache.get`.
     /// \param name the cache
     ///
-    << lua_engine_->register_function("cache.clear", [this](const std::string& name) { clear(util::identifier{name}); });
+    << lua_engine_->register_function(
+         "cache.clear", [this](const std::string& name) { clear(util::identifier{name}); }
+       );
 }
 
 ///
@@ -66,21 +73,26 @@ cache_store::~cache_store() noexcept = default;
 
 ///
 ///
-auto cache_store::get(const util::identifier& name, const std::string& key) -> std::optional<std::string>
+auto cache_store::get(const util::identifier& name, const std::string& key)
+  -> std::optional<std::string>
 {
   return cache(name).get(key);
 }
 
 ///
 ///
-auto cache_store::set(const util::identifier& name, const std::string& key, const std::optional<std::string>& value) -> void
+auto cache_store::set(
+  const util::identifier& name, const std::string& key, const std::optional<std::string>& value
+) -> void
 {
   cache(name).set(key, value);
 }
 
 ///
 ///
-auto cache_store::set_all(const util::identifier& name, const std::map<std::string, std::string>& values) -> void
+auto cache_store::set_all(
+  const util::identifier& name, const std::map<std::string, std::string>& values
+) -> void
 {
   cache(name).set_all(values);
 }

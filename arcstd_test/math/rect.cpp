@@ -102,9 +102,12 @@ TEST_CASE("rect", "[math]")
 
   GIVEN("constructor variations")
   {
-    [[maybe_unused]] constexpr auto e1 = rect<std::int64_t>(coordinates{std::int16_t{1}, 1}, std::uint32_t{4}, std::uint8_t{2});
-    [[maybe_unused]] constexpr auto e2 = rect<std::uint64_t>(coordinates{std::uint8_t{2}, 2u}, std::uint16_t{4}, 3u);
-    [[maybe_unused]] constexpr auto e3 = rect<double>(coordinates{std::uint8_t{2}, 2u}, std::uint16_t{4}, 3u);
+    [[maybe_unused]] constexpr auto e1 =
+      rect<std::int64_t>(coordinates{std::int16_t{1}, 1}, std::uint32_t{4}, std::uint8_t{2});
+    [[maybe_unused]] constexpr auto e2 =
+      rect<std::uint64_t>(coordinates{std::uint8_t{2}, 2u}, std::uint16_t{4}, 3u);
+    [[maybe_unused]] constexpr auto e3 =
+      rect<double>(coordinates{std::uint8_t{2}, 2u}, std::uint16_t{4}, 3u);
     [[maybe_unused]] constexpr auto e4 = rect<double>(coordinates{1.0f, 2.0}, 4.0f, 3.0);
   }
 }

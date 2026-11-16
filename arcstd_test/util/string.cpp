@@ -14,7 +14,9 @@ TEST_CASE("split", "[util]")
   static_assert(string::split("a,b,c,", ",") == std::vector<std::string>{"a", "b", "c", ""});
   static_assert(string::split(",a,b,c", ",") == std::vector<std::string>{"", "a", "b", "c"});
   static_assert(string::split("a|b|c", "|") == std::vector<std::string>{"a", "b", "c"});
-  static_assert(string::split("a|b|c|d|e", "|") == std::vector<std::string>{"a", "b", "c", "d", "e"});
+  static_assert(
+    string::split("a|b|c|d|e", "|") == std::vector<std::string>{"a", "b", "c", "d", "e"}
+  );
 }
 
 TEST_CASE("join", "[util]")
@@ -65,7 +67,9 @@ TEST_CASE("ends_with_formatted_uint", "[util]")
   static_assert(string::ends_with_formatted_uint("Multiple numbers (1) and (2)", " ({})") == 2);
   static_assert(string::ends_with_formatted_uint("Number at the end 123", " {}") == 123);
   static_assert(string::ends_with_formatted_uint("Empty format", "") == std::nullopt);
-  static_assert(string::ends_with_formatted_uint("Format without placeholder", " ()") == std::nullopt);
+  static_assert(
+    string::ends_with_formatted_uint("Format without placeholder", " ()") == std::nullopt
+  );
 }
 
 } // namespace arcstd::util

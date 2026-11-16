@@ -36,7 +36,9 @@ TEST_CASE("signal_signature extraction", "[signal]")
   using sig4 = signal_type<std::string && (const std::vector<int>&)>;
   using signature4 = signal_signature<sig4>;
   static_assert(std::is_same_v<typename signature4::return_type, std::string&&>);
-  static_assert(std::is_same_v<typename signature4::args_tuple, std::tuple<const std::vector<int>&>>);
+  static_assert(
+    std::is_same_v<typename signature4::args_tuple, std::tuple<const std::vector<int>&>>
+  );
 }
 
 TEST_CASE("to_functional", "[signal]")
@@ -45,13 +47,17 @@ TEST_CASE("to_functional", "[signal]")
   using func1 = to_functional<sig1, std::function>::type;
   using func1_extended = to_functional<sig1, std::function>::type_extended;
   static_assert(std::is_same_v<func1, std::function<void(int, float)>>);
-  static_assert(std::is_same_v<func1_extended, std::function<void(const connection_type&, int, float)>>);
+  static_assert(
+    std::is_same_v<func1_extended, std::function<void(const connection_type&, int, float)>>
+  );
 
   using sig2 = signal_type<int(double)>;
   using func2 = to_functional<sig2, std::move_only_function>::type;
   using func2_extended = to_functional<sig2, std::move_only_function>::type_extended;
   static_assert(std::is_same_v<func2, std::move_only_function<int(double)>>);
-  static_assert(std::is_same_v<func2_extended, std::move_only_function<int(const connection_type&, double)>>);
+  static_assert(
+    std::is_same_v<func2_extended, std::move_only_function<int(const connection_type&, double)>>
+  );
 }
 
 TEST_CASE("signal_type connect and emit", "[signal]")

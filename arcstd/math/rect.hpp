@@ -95,18 +95,26 @@ constexpr rect<ValueType>::rect(const coordinates_2d<T1> origin, const T2 width,
 template<arithmetic_type ValueType>
 template<meta::lossless_convertible<ValueType> T1, meta::lossless_convertible<ValueType> T2>
 constexpr rect<ValueType>::rect(const coordinates_2d<T1> first, const coordinates_2d<T2> second)
-  : horizontal_range_{[&]
-                      {
-                        const auto min_x = std::min(static_cast<value_type>(first.x()), static_cast<value_type>(second.x()));
-                        const auto max_x = std::max(static_cast<value_type>(first.x()), static_cast<value_type>(second.x()));
-                        return value_range<value_type>{min_x, max_x};
-                      }()}
-  , vertical_range_{[&]
-                    {
-                      const auto min_y = std::min(static_cast<value_type>(first.y()), static_cast<value_type>(second.y()));
-                      const auto max_y = std::max(static_cast<value_type>(first.y()), static_cast<value_type>(second.y()));
-                      return value_range<value_type>{min_y, max_y};
-                    }()}
+  : horizontal_range_{
+      [&]
+      {
+        const auto min_x =
+          std::min(static_cast<value_type>(first.x()), static_cast<value_type>(second.x()));
+        const auto max_x =
+          std::max(static_cast<value_type>(first.x()), static_cast<value_type>(second.x()));
+        return value_range<value_type>{min_x, max_x};
+      }()
+    }
+  , vertical_range_{
+      [&]
+      {
+        const auto min_y =
+          std::min(static_cast<value_type>(first.y()), static_cast<value_type>(second.y()));
+        const auto max_y =
+          std::max(static_cast<value_type>(first.y()), static_cast<value_type>(second.y()));
+        return value_range<value_type>{min_y, max_y};
+      }()
+    }
 {
 }
 
@@ -150,10 +158,13 @@ template<arithmetic_type ValueType>
 constexpr auto rect<ValueType>::center() const -> coordinates_type
 {
   const auto horizontal_size = math::size(horizontal_range_);
-  const auto horizontal_offset = static_cast<value_type>(horizontal_size / decltype(horizontal_size){2});
+  const auto horizontal_offset =
+    static_cast<value_type>(horizontal_size / decltype(horizontal_size){2});
   const auto vertical_size = math::size(vertical_range_);
   const auto vertical_offset = static_cast<value_type>(vertical_size / decltype(vertical_size){2});
-  return coordinates_type{horizontal_range_.begin + horizontal_offset, vertical_range_.begin + vertical_offset};
+  return coordinates_type{
+    horizontal_range_.begin + horizontal_offset, vertical_range_.begin + vertical_offset
+  };
 }
 
 ///
@@ -192,7 +203,8 @@ template<arithmetic_type T1, arithmetic_type T2>
 /// \return true if subrectangle is contained in rectangle, false otherwise
 ///
 template<arithmetic_type T1, arithmetic_type T2>
-[[nodiscard]] constexpr auto contains(const rect<T1>& rectangle, const rect<T2>& subrectangle) -> bool
+[[nodiscard]] constexpr auto contains(const rect<T1>& rectangle, const rect<T2>& subrectangle)
+  -> bool
   requires(similar_arithmetic_types<T1, T2> && meta::has_lossless_common_type<T1, T2>)
 {
   const auto x_contains = contains(rectangle.horizontal_range(), subrectangle.horizontal_range());
@@ -205,7 +217,9 @@ template<arithmetic_type T1, arithmetic_type T2>
 /// \return true if coordinates are contained in rectangle, false otherwise
 ///
 template<arithmetic_type T1, arithmetic_type T2>
-[[nodiscard]] constexpr auto contains(const rect<T1>& rectangle, const coordinates_2d<T2>& coordinates) -> bool
+[[nodiscard]] constexpr auto contains(
+  const rect<T1>& rectangle, const coordinates_2d<T2>& coordinates
+) -> bool
   requires(similar_arithmetic_types<T1, T2> && meta::has_lossless_common_type<T1, T2>)
 {
   const auto x_contains = contains(rectangle.horizontal_range(), coordinates.x());
@@ -220,7 +234,8 @@ template<arithmetic_type T1, arithmetic_type T2>
 /// \return rectangle that surrounds all given rectangles
 ///
 template<arithmetic_type... T>
-[[nodiscard]] constexpr auto surrounding_rect(const rect<T>&... rects) -> rect<meta::lossless_common_type_t<T...>>
+[[nodiscard]] constexpr auto surrounding_rect(const rect<T>&... rects)
+  -> rect<meta::lossless_common_type_t<T...>>
   requires(similar_arithmetic_types<T...> && meta::has_lossless_common_type<T...>)
 {
   static_assert(sizeof...(rects) > 0);
@@ -267,6 +282,8 @@ struct std::formatter<arcstd::math::rect<ValueType>> : std::formatter<std::strin
 {
   auto format(const arcstd::math::rect<ValueType>& e, std::format_context& ctx) const
   {
-    return formatter<std::string>::format(std::format("[{} {}x{}]", e.origin(), e.horizontal_range(), e.vertical_range()), ctx);
+    return formatter<std::string>::format(
+      std::format("[{} {}x{}]", e.origin(), e.horizontal_range(), e.vertical_range()), ctx
+    );
   }
 };

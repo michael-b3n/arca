@@ -50,11 +50,15 @@ property_tree::property_tree(const std::filesystem::path& tree_file_path)
                     std::views::filter([](const auto& tree) { return static_cast<bool>(tree); });
   if(util::contains(view, [&](const auto& t) { return t->tree_file_path_ == tree_file_path; }))
   {
-    throw util::exception(std::format("property_tree already existing: file={}", tree_file_path.generic_string()));
+    throw util::exception(
+      std::format("property_tree already existing: file={}", tree_file_path.generic_string())
+    );
   }
   if(tree_file_path.extension() != std::string_view(".xml"))
   {
-    throw util::exception(std::format("invalid file extension: file={}", tree_file_path.generic_string()));
+    throw util::exception(
+      std::format("invalid file extension: file={}", tree_file_path.generic_string())
+    );
   }
 
   static constexpr auto create_new_file = [](const auto& path)
@@ -74,11 +78,17 @@ property_tree::property_tree(const std::filesystem::path& tree_file_path)
   try
   {
     // Whitespace between elements would be kept as text and indented again on every write.
-    boost::property_tree::read_xml(tree_file_path_.generic_string(), tree_, boost::property_tree::xml_parser::trim_whitespace);
+    boost::property_tree::read_xml(
+      tree_file_path_.generic_string(), tree_, boost::property_tree::xml_parser::trim_whitespace
+    );
   }
   catch(const boost::property_tree::xml_parser_error& e)
   {
-    LOG_ERROR("failed to read property file: file={}, exception={}", tree_file_path_.generic_string(), e.what());
+    LOG_ERROR(
+      "failed to read property file: file={}, exception={}",
+      tree_file_path_.generic_string(),
+      e.what()
+    );
     std::filesystem::remove(tree_file_path);
     create_new_file(tree_file_path);
   }
@@ -100,7 +110,11 @@ property_tree::~property_tree() noexcept
   }
   catch(...)
   {
-    LOG_ERROR("failed to write property file: file={:g}, exception={}", tree_file_path_, util::exception_report());
+    LOG_ERROR(
+      "failed to write property file: file={:g}, exception={}",
+      tree_file_path_,
+      util::exception_report()
+    );
   }
 }
 

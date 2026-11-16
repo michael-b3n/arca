@@ -63,17 +63,22 @@ public: // Modifiers
   /// Connect a slot to the signal specified by the projection, the slot is queued by \p connections
   /// instead of being called by the emitting thread. The connection ends with \p connections.
   ///
-  auto connect_queued(auto sig_projection, auto&& slot, connector_kind auto& connections) const -> void;
+  auto connect_queued(auto sig_projection, auto&& slot, connector_kind auto& connections) const
+    -> void;
 
   ///
-  /// Connect an extended slot to the signal specified by the projection, the slot is queued by \p connections
-  /// instead of being called by the emitting thread. The connection ends with \p connections.
+  /// Connect an extended slot to the signal specified by the projection, the slot is queued by \p
+  /// connections instead of being called by the emitting thread. The connection ends with \p
+  /// connections.
   ///
-  auto connect_queued_extended(auto sig_projection, auto&& slot, connector_kind auto& connections) const -> void;
+  auto connect_queued_extended(
+    auto sig_projection, auto&& slot, connector_kind auto& connections
+  ) const -> void;
 
 protected: // Accessors
   ///
-  /// Emit the signal specified by the projection, passing the provided arguments to the connected slots.
+  /// Emit the signal specified by the projection, passing the provided arguments to the connected
+  /// slots.
   /// \return result of the signal call, if any
   ///
   auto notify(auto sig_projection, auto&&... args) -> auto;
@@ -98,7 +103,9 @@ auto adapter<T>::connect_extended(auto sig_projection, auto&& slot) const -> con
 ///
 ///
 template<std::default_initializable T>
-auto adapter<T>::connect_queued(auto sig_projection, auto&& slot, connector_kind auto& connections) const -> void
+auto adapter<T>::connect_queued(
+  auto sig_projection, auto&& slot, connector_kind auto& connections
+) const -> void
 {
   connections.connect(std::invoke(sig_projection, sigs_), std::forward<decltype(slot)>(slot));
 }
@@ -106,9 +113,13 @@ auto adapter<T>::connect_queued(auto sig_projection, auto&& slot, connector_kind
 ///
 ///
 template<std::default_initializable T>
-auto adapter<T>::connect_queued_extended(auto sig_projection, auto&& slot, connector_kind auto& connections) const -> void
+auto adapter<T>::connect_queued_extended(
+  auto sig_projection, auto&& slot, connector_kind auto& connections
+) const -> void
 {
-  connections.connect_extended(std::invoke(sig_projection, sigs_), std::forward<decltype(slot)>(slot));
+  connections.connect_extended(
+    std::invoke(sig_projection, sigs_), std::forward<decltype(slot)>(slot)
+  );
 }
 
 ///

@@ -102,8 +102,14 @@ TEST_CASE("enum next and prev", "[util]")
 TEST_CASE("enum prev throws on underflow", "[util]")
 {
   // The underlying type of enum_test_offset_type cannot hold a value below its minimum.
-  CHECK_THROWS_AS(prev(static_cast<enum_test_offset_type>(std::numeric_limits<std::int8_t>::lowest())), util::exception);
-  CHECK_THROWS_AS(next(static_cast<enum_test_offset_type>(std::numeric_limits<std::int8_t>::max())), util::exception);
+  CHECK_THROWS_AS(
+    prev(static_cast<enum_test_offset_type>(std::numeric_limits<std::int8_t>::lowest())),
+    util::exception
+  );
+  CHECK_THROWS_AS(
+    next(static_cast<enum_test_offset_type>(std::numeric_limits<std::int8_t>::max())),
+    util::exception
+  );
 }
 
 TEST_CASE("enum valid", "[util]")

@@ -23,7 +23,8 @@ namespace
 {
 
 ///
-/// Check if the setting of \p path is internal: state the application manages itself, e.g. a window position.
+/// Check if the setting of \p path is internal: state the application manages itself, e.g. a window
+/// position.
 /// \return true if the setting is internal
 ///
 auto isInternalSetting(const std::string_view path) -> bool
@@ -39,7 +40,8 @@ auto isInternalSetting(const std::string_view path) -> bool
 auto toCategories(const std::string& path) -> QStringList
 {
   return arcstd::util::path{path}.sections() |
-         std::views::transform([](const auto& segment) { return QString::fromStdString(segment); }) |
+         std::views::transform([](const auto& segment)
+                               { return QString::fromStdString(segment); }) |
          std::ranges::to<QStringList>();
 }
 
@@ -89,7 +91,8 @@ auto getValidatorType(const auto& setting) -> SettingsListModel::ValidatorType
   using value_type = std::remove_pointer_t<std::remove_cvref_t<decltype(setting)>>::value_type;
   return arcstd::util::visit_lambdas(
     setting->validator,
-    []([[maybe_unused]] const ValidatorUnboundSptrType&) { return SettingsListModel::ValidatorType::UnboundValidatorType; },
+    []([[maybe_unused]] const ValidatorUnboundSptrType&)
+    { return SettingsListModel::ValidatorType::UnboundValidatorType; },
     []([[maybe_unused]] const ValidatorRangeSptrType<value_type>&)
     { return SettingsListModel::ValidatorType::RangeValidatorType; },
     []([[maybe_unused]] const ValidatorListSptrType<value_type>&)
@@ -102,16 +105,22 @@ auto getValidatorType(const auto& setting) -> SettingsListModel::ValidatorType
 ///
 ///
 SettingsListModel::SettingsListModel(
-  std::shared_ptr<arcstd::setting::setting_store> settingStore, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::setting::setting_store> settingStore,
+  const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QAbstractListModel{parent}
   , settingStore_{std::move(settingStore)}
 {
   const auto settings = settingStore_->type_erased_settings();
   std::ranges::for_each(
-    settings | std::views::filter([](const auto& settingData) { return !isInternalSetting(settingData.path); }),
+    settings | std::views::filter([](const auto& settingData)
+                                  { return !isInternalSetting(settingData.path); }),
     [&](const auto& settingData)
-    { std::visit([&](const auto setting) { addSetting(settingData.path, setting); }, settingData.setting); }
+    {
+      std::visit(
+        [&](const auto setting) { addSetting(settingData.path, setting); }, settingData.setting
+      );
+    }
   );
 
   // Settings may also be created after this model was constructed, e.g. by the QML layer.
@@ -145,7 +154,10 @@ int SettingsListModel::rowCount(const QModelIndex& parent) const
 ///
 QVariant SettingsListModel::data(const QModelIndex& index, const int role) const
 {
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return {};
   }
@@ -188,7 +200,10 @@ bool SettingsListModel::setData(const QModelIndex& index, const QVariant& value,
   {
     return false; // all other roles are immutable and cannot be set
   }
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return false;
   }
@@ -198,8 +213,8 @@ bool SettingsListModel::setData(const QModelIndex& index, const QVariant& value,
     const auto isValueSet = setQmlValue(entry.setting, value);
     if(!isValueSet)
     {
-      // Not set, so the UI shows the value of the setting again. A setting that changed anyway, e.g. to a
-      // validated value, reports it itself and the signal is emitted twice.
+      // Not set, so the UI shows the value of the setting again. A setting that changed anyway,
+      // e.g. to a validated value, reports it itself and the signal is emitted twice.
       emit dataChanged(index, index, {role});
     }
     LOG_DEBUG("write setting: path=\"{}\", row={}", entry.path, index.row());
@@ -231,7 +246,10 @@ void SettingsListModel::disconnect()
 ///
 void SettingsListModel::appendSetting(const std::string& path)
 {
-  if(isInternalSetting(path) || arcstd::util::contains(entries_, [&path](const auto& entry) { return entry.path == path; }))
+  if(
+    isInternalSetting(path) ||
+    arcstd::util::contains(entries_, [&path](const auto& entry) { return entry.path == path; })
+  )
   {
     return;
   }
@@ -257,7 +275,8 @@ void SettingsListModel::appendSetting(const std::string& path)
 void SettingsListModel::addSetting(const std::string& path, const auto& setting)
 {
   addEntry(path, setting);
-  const auto rowIndex = arcstd::math::arithmetic::subtract(entries_.size(), decltype(entries_.size()){1}).value();
+  const auto rowIndex =
+    arcstd::math::arithmetic::subtract(entries_.size(), decltype(entries_.size()){1}).value();
   setting->signal_adapter.connect_queued(
     &arcstd::setting::setting_store::setting_signals_type::value_changed,
     [this, path, rowIndex]
@@ -266,7 +285,11 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
       QMetaObject::invokeMethod(
         this,
         [this, rowIndex]
-        { emit dataChanged(index(static_cast<int>(rowIndex)), index(static_cast<int>(rowIndex)), {Role::ValueRole}); },
+        {
+          emit dataChanged(
+            index(static_cast<int>(rowIndex)), index(static_cast<int>(rowIndex)), {Role::ValueRole}
+          );
+        },
         Qt::QueuedConnection
       );
     },
@@ -289,7 +312,9 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
             [this, rowIndex]
             {
               emit dataChanged(
-                index(static_cast<int>(rowIndex)), index(static_cast<int>(rowIndex)), {Role::ListValidatorDataRole}
+                index(static_cast<int>(rowIndex)),
+                index(static_cast<int>(rowIndex)),
+                {Role::ListValidatorDataRole}
               );
             },
             Qt::QueuedConnection

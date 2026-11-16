@@ -31,16 +31,17 @@ template<typename T>
   auto converted = tryNormalizeQVariant(value);
   if(!converted.convert(tryNormalizeQVariant(defaultValue).metaType()))
   {
-    throw arcstd::util::exception{
-      std::format(R"(validator value does not match the default value: value="{}")", value.toString().toStdString())
-    };
+    throw arcstd::util::exception{std::format(
+      R"(validator value does not match the default value: value="{}")",
+      value.toString().toStdString()
+    )};
   }
   const auto settingValue = toDefaultSettingValue(converted);
   if(!settingValue)
   {
-    throw arcstd::util::exception{
-      std::format(R"(validator value of no setting type: value="{}")", value.toString().toStdString())
-    };
+    throw arcstd::util::exception{std::format(
+      R"(validator value of no setting type: value="{}")", value.toString().toStdString()
+    )};
   }
   return std::get<T>(*settingValue);
 }
@@ -49,7 +50,9 @@ template<typename T>
 
 ///
 ///
-SettingBinding::SettingBinding(QString path, QVariant defaultValue, const arcstd::util::non_owning_ptr<QObject> parent)
+SettingBinding::SettingBinding(
+  QString path, QVariant defaultValue, const arcstd::util::non_owning_ptr<QObject> parent
+)
   : SettingBinding{std::move(path), std::move(defaultValue), Validator{}, parent}
 {
 }
@@ -57,16 +60,25 @@ SettingBinding::SettingBinding(QString path, QVariant defaultValue, const arcstd
 ///
 ///
 SettingBinding::SettingBinding(
-  QString path, QVariant defaultValue, QVariantList available, const arcstd::util::non_owning_ptr<QObject> parent
+  QString path,
+  QVariant defaultValue,
+  QVariantList available,
+  const arcstd::util::non_owning_ptr<QObject> parent
 )
-  : SettingBinding{std::move(path), std::move(defaultValue), Validator{std::move(available)}, parent}
+  : SettingBinding{
+      std::move(path), std::move(defaultValue), Validator{std::move(available)}, parent
+    }
 {
 }
 
 ///
 ///
 SettingBinding::SettingBinding(
-  QString path, QVariant defaultValue, QVariant minimum, QVariant maximum, const arcstd::util::non_owning_ptr<QObject> parent
+  QString path,
+  QVariant defaultValue,
+  QVariant minimum,
+  QVariant maximum,
+  const arcstd::util::non_owning_ptr<QObject> parent
 )
   : SettingBinding{
       std::move(path),
@@ -139,7 +151,10 @@ void SettingBinding::setValue(const QVariant& value)
 ///
 ///
 SettingBinding::SettingBinding(
-  QString path, QVariant defaultValue, Validator validator, const arcstd::util::non_owning_ptr<QObject> parent
+  QString path,
+  QVariant defaultValue,
+  Validator validator,
+  const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QObject{parent}
   , path_{std::move(path)}
@@ -162,14 +177,18 @@ void SettingBinding::bind()
   const auto* const registry = BridgeSettings::instance();
   if(registry == nullptr)
   {
-    LOG_ERROR("bind setting failed: settings registry does not exist: path=\"{}\"", path_.toStdString());
+    LOG_ERROR(
+      "bind setting failed: settings registry does not exist: path=\"{}\"", path_.toStdString()
+    );
     return;
   }
   const auto& settingStore = registry->settingStore();
   const auto defaultSettingValue = toDefaultSettingValue(defaultValue_);
   if(!defaultSettingValue)
   {
-    LOG_ERROR("bind setting failed: unsupported default value type: path=\"{}\"", path_.toStdString());
+    LOG_ERROR(
+      "bind setting failed: unsupported default value type: path=\"{}\"", path_.toStdString()
+    );
     return;
   }
 
@@ -193,7 +212,8 @@ void SettingBinding::bind()
     {
       setting->signal_adapter.connect_queued(
         &arcstd::setting::setting_store::setting_signals_type::value_changed,
-        [this] { QMetaObject::invokeMethod(this, [this] { emit valueChanged(); }, Qt::QueuedConnection); },
+        [this]
+        { QMetaObject::invokeMethod(this, [this] { emit valueChanged(); }, Qt::QueuedConnection); },
         connections_
       );
     },
@@ -210,15 +230,19 @@ auto SettingBinding::settingValidator() const -> arcstd::setting::setting_store:
   using list_type = arcstd::setting::setting_store::validator_list_type<T>;
   using range_type = arcstd::setting::setting_store::validator_range_type<T>;
   using return_type = arcstd::setting::setting_store::validator_type<T>;
-  const auto toValue = [this](const QVariant& value) { return toValidatorValue<T>(value, defaultValue_); };
+  const auto toValue = [this](const QVariant& value)
+  { return toValidatorValue<T>(value, defaultValue_); };
   return arcstd::util::visit_lambdas(
     validator_,
-    [](std::monostate) -> return_type { return std::make_shared<arcstd::setting::setting_store::validator_unbound_type>(); },
+    [](std::monostate) -> return_type
+    { return std::make_shared<arcstd::setting::setting_store::validator_unbound_type>(); },
     [&](const QVariantList& available) -> return_type
     {
       if constexpr(list_type::is_plain_type)
       {
-        return std::make_shared<list_type>(available | std::views::transform(toValue) | std::ranges::to<std::vector>());
+        return std::make_shared<list_type>(
+          available | std::views::transform(toValue) | std::ranges::to<std::vector>()
+        );
       }
       else
       {
@@ -227,7 +251,9 @@ auto SettingBinding::settingValidator() const -> arcstd::setting::setting_store:
     },
     [&](const ValueRange& range) -> return_type
     {
-      if constexpr(range_type::is_plain_type && arcstd::setting::setting_validator_range_value_type<T>)
+      if constexpr(
+        range_type::is_plain_type && arcstd::setting::setting_validator_range_value_type<T>
+      )
       {
         return std::make_shared<range_type>(toValue(range.minimum), toValue(range.maximum));
       }

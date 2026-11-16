@@ -11,8 +11,11 @@ namespace arcstd::util
 /// Check if an element is contained in a container.
 /// \return true if `element` is found in container, false if not
 ///
-[[nodiscard]] constexpr auto contains(const std::ranges::range auto& container, const auto& element) -> bool
-  requires(std::equality_comparable_with<std::ranges::range_value_t<decltype(container)>, decltype(element)>)
+[[nodiscard]] constexpr auto contains(const std::ranges::range auto& container, const auto& element)
+  -> bool
+  requires(std::equality_comparable_with<
+           std::ranges::range_value_t<decltype(container)>,
+           decltype(element)>)
 {
   return std::ranges::find(container, element) != std::ranges::cend(container);
 }
@@ -21,7 +24,8 @@ namespace arcstd::util
 /// Check if an element is inside a container or not.
 /// \return bool true if element is found in container, false otherwise
 ///
-[[nodiscard]] constexpr auto contains(const std::ranges::range auto& container, const auto& pred) -> bool
+[[nodiscard]] constexpr auto contains(const std::ranges::range auto& container, const auto& pred)
+  -> bool
   requires(
     !std::ranges::view<std::remove_cvref_t<decltype(container)>> &&
     std::predicate<decltype(pred), std::ranges::range_value_t<decltype(container)>>

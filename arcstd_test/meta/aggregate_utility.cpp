@@ -20,7 +20,9 @@ TEST_CASE("aggregate_utility", "[meta]")
 {
   static_assert(data_member_count<test_aggregate<int&>>() == 3);
   static_assert(std::is_same_v<to_tuple_t<test_aggregate<>>, std::tuple<int, int, int>>);
-  static_assert(std::is_same_v<to_tuple_t<test_aggregate<int&, int&&, const int&>>, std::tuple<int, int, int>>);
+  static_assert(
+    std::is_same_v<to_tuple_t<test_aggregate<int&, int&&, const int&>>, std::tuple<int, int, int>>
+  );
 
   using test_aggregate_t = test_aggregate<int, double, test_aggregate<int, double, int>>;
   constexpr auto aggregate = test_aggregate_t{

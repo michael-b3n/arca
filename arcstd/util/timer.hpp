@@ -39,7 +39,9 @@ class ARCSTD_EXPORT scoped_timer_logger final
   const timer timer_;
 
 public: // Structors
-  explicit scoped_timer_logger(std::source_location source_location = std::source_location::current());
+  explicit scoped_timer_logger(
+    std::source_location source_location = std::source_location::current()
+  );
   ~scoped_timer_logger();
 
   scoped_timer_logger(const scoped_timer_logger&) = delete;
@@ -53,5 +55,6 @@ public: // Structors
 ///
 /// Scoped timer logging macro.
 ///
-#define SCOPED_TIMER_LOG()                                                                                                     \
-  [[maybe_unused]] const auto BOOST_PP_CAT(__scoped_timer_logger_instance, __LINE__) = ::arcstd::util::scoped_timer_logger();
+#define SCOPED_TIMER_LOG()                                                                         \
+  [[maybe_unused]] const auto BOOST_PP_CAT(__scoped_timer_logger_instance, __LINE__) =             \
+    ::arcstd::util::scoped_timer_logger();

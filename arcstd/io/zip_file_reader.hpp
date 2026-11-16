@@ -139,7 +139,8 @@ public: // Accessors
   /// Get entry by name.
   /// \return Entry if found, null entry otherwise
   ///
-  [[nodiscard]] auto entry(const std::string& name, query_flags_type flags = {}) const -> std::optional<zip_entry>;
+  [[nodiscard]] auto entry(const std::string& name, query_flags_type flags = {}) const
+    -> std::optional<zip_entry>;
 
   ///
   /// Read an entry's content into memory.
@@ -158,13 +159,15 @@ private: // Implementation
   /// Checks if archive contains entry with name.
   /// \return true if entry is found, false otherwise
   ///
-  [[nodiscard]] auto index_of_entry(const std::string& name, query_flags_type flag = {}) const -> std::optional<std::size_t>;
+  [[nodiscard]] auto index_of_entry(const std::string& name, query_flags_type flag = {}) const
+    -> std::optional<std::size_t>;
 
   ///
   /// Get entry by index.
   /// \return Entry if found, std::nullopt otherwise
   ///
-  [[nodiscard]] auto entry_by_index(std::size_t index, std::uint32_t flag) const -> std::optional<zip_entry>;
+  [[nodiscard]] auto entry_by_index(std::size_t index, std::uint32_t flag) const
+    -> std::optional<zip_entry>;
 
   ///
   /// Create a zip_entry from libzip stat structure.

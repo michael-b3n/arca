@@ -65,16 +65,20 @@ constexpr auto to_spdlog_level(const logger_level level) -> spdlog::level::level
 /// Delete the oldest session log files in \p log_directory, such that at most \p max_count remain.
 /// \return number of deleted files
 ///
-inline auto prune_log_files(const std::filesystem::path& log_directory, const std::size_t max_count) -> std::size_t
+inline auto prune_log_files(const std::filesystem::path& log_directory, const std::size_t max_count)
+  -> std::size_t
 {
   auto ec = std::error_code{};
   const auto is_session_log = [&](const auto& entry)
   {
-    return entry.is_regular_file(ec) && entry.path().extension() == ".log" && entry.path().filename() != latest_log_file_name;
+    return entry.is_regular_file(ec) && entry.path().extension() == ".log" &&
+           entry.path().filename() != latest_log_file_name;
   };
-  auto files = std::filesystem::directory_iterator{log_directory, ec} | std::views::filter(is_session_log) |
-               std::views::transform([&](const auto& entry) { return std::pair{entry.last_write_time(ec), entry.path()}; }) |
-               std::ranges::to<std::vector>();
+  auto files =
+    std::filesystem::directory_iterator{log_directory, ec} | std::views::filter(is_session_log) |
+    std::views::transform([&](const auto& entry)
+                          { return std::pair{entry.last_write_time(ec), entry.path()}; }) |
+    std::ranges::to<std::vector>();
   if(files.size() <= max_count)
   {
     return 0;
@@ -83,7 +87,8 @@ inline auto prune_log_files(const std::filesystem::path& log_directory, const st
   std::ranges::sort(files, std::ranges::greater{}, &decltype(files)::value_type::first);
   // A file that cannot be deleted is retried on the next startup.
   return static_cast<std::size_t>(std::ranges::count_if(
-    files | std::views::drop(max_count), [&](const auto& file) { return std::filesystem::remove(file.second, ec); }
+    files | std::views::drop(max_count),
+    [&](const auto& file) { return std::filesystem::remove(file.second, ec); }
   ));
 }
 
@@ -114,23 +119,28 @@ inline auto init_log(const std::filesystem::path& data_folder, std::string heade
     std::ignore = std::fflush(file);
   };
 
-  const auto file_sink =
-    std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file_str, max_file_size, max_rotated_files, false, handlers);
+  const auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+    log_file_str, max_file_size, max_rotated_files, false, handlers
+  );
   file_sink->set_pattern(std::string{log_pattern});
 
   // Mirrors the session file: truncated where it rotates, cleared of the previous session on open.
   const auto latest_file = log_directory / latest_log_file_name;
-  const auto latest_sink =
-    std::make_shared<spdlog::sinks::rotating_file_sink_mt>(to_string(latest_file.u8string()), max_file_size, 0, true, handlers);
+  const auto latest_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+    to_string(latest_file.u8string()), max_file_size, 0, true, handlers
+  );
   latest_sink->set_pattern(std::string{log_pattern});
 
   const auto sinks = std::vector<spdlog::sink_ptr>{file_sink, latest_sink};
-  const auto logger = std::make_shared<spdlog::logger>(std::string{logger_name}, sinks.begin(), sinks.end());
+  const auto logger =
+    std::make_shared<spdlog::logger>(std::string{logger_name}, sinks.begin(), sinks.end());
   logger->set_level(to_spdlog_level(global_log_level()));
   logger->flush_on(spdlog::level::info);
   spdlog::register_logger(logger);
 
-  log_debug(std::format("Init logger: file={}, deleted_old_files={}.", log_file_str, deleted_files));
+  log_debug(
+    std::format("Init logger: file={}, deleted_old_files={}.", log_file_str, deleted_files)
+  );
 }
 
 ///
@@ -144,7 +154,8 @@ inline auto get_logger() -> std::shared_ptr<spdlog::logger>
 ///
 /// Log \p msg with \p level, drop it if it can not be written.
 ///
-inline auto log_message(const spdlog::level::level_enum level, const std::string_view msg) noexcept -> void
+inline auto log_message(const spdlog::level::level_enum level, const std::string_view msg) noexcept
+  -> void
 {
   try
   {
@@ -154,7 +165,8 @@ inline auto log_message(const spdlog::level::level_enum level, const std::string
       logger->log(level, msg);
     }
   }
-  catch(...) // NOLINT(bugprone-empty-catch) logging never throws, a message that can not be written is dropped
+  // NOLINTNEXTLINE(bugprone-empty-catch) logging never throws, a message not written is dropped
+  catch(...)
   {
   }
 }

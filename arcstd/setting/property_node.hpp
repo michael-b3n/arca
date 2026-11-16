@@ -29,9 +29,11 @@ public: // Structors
 
 public: // Accessors
   ///
-  /// \return the value of the node, of the type \p type holds, std::nullopt if it holds none of that type
+  /// \return the value of the node, of the type \p type holds, std::nullopt if it holds none of
+  /// that type
   ///
-  [[nodiscard]] auto read(const setting_type_erased_variant& type) const -> std::optional<setting_type_erased_variant>;
+  [[nodiscard]] auto read(const setting_type_erased_variant& type) const
+    -> std::optional<setting_type_erased_variant>;
 
 public: // Modifiers
   ///

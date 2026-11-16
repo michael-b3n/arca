@@ -51,7 +51,8 @@ TEST_CASE("cache_store_keeps_values_of_scripts", "[cache]")
 
 TEST_CASE("cache_store_takes_its_functions_back_on_destruction", "[cache]")
 {
-  const auto folder = test_utils::temp_folder{"cache_store_takes_its_functions_back_on_destruction"};
+  const auto folder =
+    test_utils::temp_folder{"cache_store_takes_its_functions_back_on_destruction"};
   const auto settings = test_utils::make_script_settings(folder.path());
   const auto script = std::make_shared<lua::lua_engine>(settings, test_utils::no_bundled);
   {

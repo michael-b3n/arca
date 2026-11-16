@@ -79,15 +79,18 @@ struct echo_manifest final
 };
 
 ///
-/// \return Lua of the script \p name offering the function of report_manifest, it tells the value \p expression
-/// had while loading
+/// \return Lua of the script \p name offering the function of report_manifest, it tells the value
+/// \p expression had while loading
 ///
 [[nodiscard]] auto report(const std::string& name, const std::string& expression) -> std::string
 {
   // The node of the name as the bundled scripts have it, e.g. "bundled"
   auto node = name;
   std::ranges::transform(
-    node, node.begin(), [](const unsigned char c) { return std::isalnum(c) != 0 ? static_cast<char>(std::tolower(c)) : '_'; }
+    node,
+    node.begin(),
+    [](const unsigned char c)
+    { return std::isalnum(c) != 0 ? static_cast<char>(std::tolower(c)) : '_'; }
   );
   return std::format(
     "local value = tostring({}) return {{name = '{}', description = '', node = '{}', "
@@ -109,7 +112,9 @@ struct echo_manifest final
            [&](const lua_engine::script_name_type& script)
            {
              const auto output = engine.run<report_manifest>(script, {});
-             return std::format("{} ({})", output ? output->get<"value">() : std::string{"?"}, script);
+             return std::format(
+               "{} ({})", output ? output->get<"value">() : std::string{"?"}, script
+             );
            }
          ) |
          std::ranges::to<std::vector>();
@@ -121,7 +126,9 @@ struct echo_manifest final
 [[nodiscard]] auto bundled() -> std::span<const embedded_script>
 {
   static constexpr auto scripts = std::array{
-    embedded_script{.name = "bundled.lua", .code = "return {name = 'Bundled', description = '', node = 'bundled'}"}
+    embedded_script{
+                    .name = "bundled.lua", .code = "return {name = 'Bundled', description = '', node = 'bundled'}"
+    }
   };
   return scripts;
 }
@@ -135,8 +142,8 @@ struct echo_manifest final
 }
 
 ///
-/// \return the names of the scripts the app ships, the ones loaded without the scripts of the user. \p folder is
-/// the one of the test.
+/// \return the names of the scripts the app ships, the ones loaded without the scripts of the user.
+/// \p folder is the one of the test.
 ///
 [[nodiscard]] auto bundled_names(const test_utils::temp_folder& folder) -> std::vector<std::string>
 {
@@ -148,11 +155,13 @@ struct echo_manifest final
 ///
 /// \return the names of the scripts of \p engine without the bundled ones
 ///
-[[nodiscard]] auto user_names(const lua_engine& engine, const test_utils::temp_folder& folder) -> std::vector<std::string>
+[[nodiscard]] auto user_names(const lua_engine& engine, const test_utils::temp_folder& folder)
+  -> std::vector<std::string>
 {
   const auto bundled = bundled_names(folder);
   return script_names(engine.scripts()) |
-         std::views::filter([&](const auto& name) { return !std::ranges::contains(bundled, name); }) |
+         std::views::filter([&](const auto& name)
+                            { return !std::ranges::contains(bundled, name); }) |
          std::ranges::to<std::vector>();
 }
 
@@ -201,7 +210,11 @@ TEST_CASE("lua_engine_sets_up_the_state", "[lua]")
   const auto folder = test_utils::temp_folder{"lua_engine_sets_up_the_state"};
   auto engine = lua_engine{test_utils::make_script_settings(folder.path()), bundled};
   // What a script sees
-  CHECK(test_utils::script_value<bool>(engine, "return type(util) == 'table' and root == nil and io == nil") == true);
+  CHECK(
+    test_utils::script_value<bool>(
+      engine, "return type(util) == 'table' and root == nil and io == nil"
+    ) == true
+  );
   // Disabled, so loaded without a scripts folder
   test_utils::load_scripts(engine);
   CHECK_FALSE(std::filesystem::exists(folder.path() / "scripts"));
@@ -210,7 +223,8 @@ TEST_CASE("lua_engine_sets_up_the_state", "[lua]")
 TEST_CASE("lua_engine_registers_an_object", "[lua]")
 {
   const auto folder = test_utils::temp_folder{"lua_engine_registers_an_object"};
-  const auto script = std::make_shared<lua_engine>(test_utils::make_script_settings(folder.path()), bundled);
+  const auto script =
+    std::make_shared<lua_engine>(test_utils::make_script_settings(folder.path()), bundled);
   const auto object = std::make_shared<registering_object>(script);
   REQUIRE(object->registered);
   object->value = 7;
@@ -219,8 +233,10 @@ TEST_CASE("lua_engine_registers_an_object", "[lua]")
 
 TEST_CASE("lua_engine_drops_the_functions_of_a_destroyed_object", "[lua]")
 {
-  const auto folder = test_utils::temp_folder{"lua_engine_drops_the_functions_of_a_destroyed_object"};
-  const auto script = std::make_shared<lua_engine>(test_utils::make_script_settings(folder.path()), bundled);
+  const auto folder =
+    test_utils::temp_folder{"lua_engine_drops_the_functions_of_a_destroyed_object"};
+  const auto script =
+    std::make_shared<lua_engine>(test_utils::make_script_settings(folder.path()), bundled);
   const auto other = registering_object{script, "other"};
   {
     const auto object = registering_object{script};
@@ -235,7 +251,8 @@ TEST_CASE("lua_engine_drops_the_functions_of_a_destroyed_object", "[lua]")
 TEST_CASE("lua_engine_rejects_a_taken_name", "[lua]")
 {
   const auto folder = test_utils::temp_folder{"lua_engine_rejects_a_taken_name"};
-  const auto script = std::make_shared<lua_engine>(test_utils::make_script_settings(folder.path()), bundled);
+  const auto script =
+    std::make_shared<lua_engine>(test_utils::make_script_settings(folder.path()), bundled);
   const auto first = registering_object{script, "shared"};
   const auto second = registering_object{script, "shared"};
   CHECK(first.registered);
@@ -314,9 +331,11 @@ TEST_CASE("lua_engine_ends_loading_once_destroyed", "[lua]")
   test_utils::write_file(scripts / "a.lua", "while true do end");
   test_utils::write_file(scripts / "b.lua", "return {}");
 
-  auto engine = std::make_unique<lua_engine>(test_utils::make_script_settings(folder.path(), true), bundled);
+  auto engine =
+    std::make_unique<lua_engine>(test_utils::make_script_settings(folder.path(), true), bundled);
   auto loaded = std::atomic<bool>{false};
-  const auto connection = engine->connect(&lua_engine_signals::scripts_loaded, [&] { loaded = true; });
+  const auto connection =
+    engine->connect(&lua_engine_signals::scripts_loaded, [&] { loaded = true; });
   engine->load_scripts();
   std::this_thread::sleep_for(std::chrono::milliseconds{100});
   REQUIRE_FALSE(loaded);
@@ -338,7 +357,8 @@ TEST_CASE("lua_engine_loads_no_bytecode", "[lua]")
     test_utils::write_file(scripts / "a.lua", *dumped);
   }
   test_utils::write_file(
-    scripts / "b.lua", report("b", "load(string.dump(function() end)) == nil and dofile == nil and loadfile == nil")
+    scripts / "b.lua",
+    report("b", "load(string.dump(function() end)) == nil and dofile == nil and loadfile == nil")
   );
 
   auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
@@ -390,12 +410,14 @@ TEST_CASE("lua_engine_offers_the_scripts_of_manifests", "[lua]")
   std::filesystem::create_directories(scripts);
   test_utils::write_file(
     scripts / "both.lua",
-    "return {name = 'Both', description = '', node = 'both', ['test.a'] = function() end, ['test.b'] = function() end}"
+    "return {name = 'Both', description = '', node = 'both', ['test.a'] = function() end, "
+    "['test.b'] = function() end}"
   );
   // Only functions named after a manifest count
   test_utils::write_file(
     scripts / "one.lua",
-    "return {name = 'One', description = '', node = 'one', ['test.a'] = function() end, ['test.b'] = 1, function() end}"
+    "return {name = 'One', description = '', node = 'one', ['test.a'] = function() end, ['test.b'] "
+    "= 1, function() end}"
   );
   // A script returning no table offers nothing
   test_utils::write_file(scripts / "none.lua", "return 1");
@@ -415,32 +437,58 @@ TEST_CASE("lua_engine_knows_a_script_by_its_name", "[lua]")
   const auto scripts = folder.path() / "scripts";
   std::filesystem::create_directories(scripts);
   const auto script = [](const std::string& fields, const std::string& value)
-  { return "return {" + fields + " ['test.report'] = function() return {value = '" + value + "'} end}"; };
+  {
+    return "return {" + fields + " ['test.report'] = function() return {value = '" + value +
+           "'} end}";
+  };
   // The name of the file plays no role, the name may be any text
-  test_utils::write_file(scripts / "1.lua", script("name = 'Zeta', description = 'The first', node = 'zeta',", "first"));
-  test_utils::write_file(scripts / "2.lua", script("name = 'Alpha page.com', description = '', node = 'alpha',", "ran"));
+  test_utils::write_file(
+    scripts / "1.lua", script("name = 'Zeta', description = 'The first', node = 'zeta',", "first")
+  );
+  test_utils::write_file(
+    scripts / "2.lua", script("name = 'Alpha page.com', description = '', node = 'alpha',", "ran")
+  );
   // Scripts of the same name are one script: a function it has is kept, another one is added
   test_utils::write_file(
     scripts / "3.lua",
-    "return {name = 'Zeta', description = 'The second', node = 'zeta', ['test.report'] = function() return {value = 'second'} "
+    "return {name = 'Zeta', description = 'The second', node = 'zeta', ['test.report'] = "
+    "function() return {value = 'second'} "
     "end, "
     "['test.a'] = function() end}"
   );
   // No name
-  test_utils::write_file(scripts / "5.lua", script("name = 5, description = '', node = 'five',", "ran"));
+  test_utils::write_file(
+    scripts / "5.lua", script("name = 5, description = '', node = 'five',", "ran")
+  );
   test_utils::write_file(scripts / "6.lua", script("description = '', node = 'six',", "ran"));
-  test_utils::write_file(scripts / "8.lua", script("name = '', description = '', node = 'eight',", "ran"));
+  test_utils::write_file(
+    scripts / "8.lua", script("name = '', description = '', node = 'eight',", "ran")
+  );
   // No description, an empty one is one
   test_utils::write_file(scripts / "g.lua", script("name = 'Silent', node = 'silent',", "ran"));
-  test_utils::write_file(scripts / "h.lua", script("name = 'Numbered', description = 5, node = 'numbered',", "ran"));
+  test_utils::write_file(
+    scripts / "h.lua", script("name = 'Numbered', description = 5, node = 'numbered',", "ran")
+  );
   // No node, no Lua name as node, the node of another script and another node of the same script
   test_utils::write_file(scripts / "9.lua", script("name = 'No node',", "ran"));
-  test_utils::write_file(scripts / "a.lua", script("name = 'Dotted', description = '', node = 'a.b',", "ran"));
-  test_utils::write_file(scripts / "d.lua", script("name = 'Keyword', description = '', node = 'end',", "ran"));
-  test_utils::write_file(scripts / "e.lua", script("name = 'Digit', description = '', node = '1st',", "ran"));
-  test_utils::write_file(scripts / "f.lua", script("name = 'Dash', description = '', node = 'a-b',", "ran"));
-  test_utils::write_file(scripts / "b.lua", script("name = 'Other', description = '', node = 'zeta',", "ran"));
-  test_utils::write_file(scripts / "c.lua", script("name = 'Zeta', description = '', node = 'other',", "ran"));
+  test_utils::write_file(
+    scripts / "a.lua", script("name = 'Dotted', description = '', node = 'a.b',", "ran")
+  );
+  test_utils::write_file(
+    scripts / "d.lua", script("name = 'Keyword', description = '', node = 'end',", "ran")
+  );
+  test_utils::write_file(
+    scripts / "e.lua", script("name = 'Digit', description = '', node = '1st',", "ran")
+  );
+  test_utils::write_file(
+    scripts / "f.lua", script("name = 'Dash', description = '', node = 'a-b',", "ran")
+  );
+  test_utils::write_file(
+    scripts / "b.lua", script("name = 'Other', description = '', node = 'zeta',", "ran")
+  );
+  test_utils::write_file(
+    scripts / "c.lua", script("name = 'Zeta', description = '', node = 'other',", "ran")
+  );
 
   auto engine = lua_engine{test_utils::make_script_settings(folder.path(), true), bundled};
   test_utils::load_scripts(engine);
@@ -490,7 +538,8 @@ TEST_CASE("lua_engine_runs_a_function", "[lua]")
           {{"x", 1}}
     };
   };
-  const auto run = [&](const std::string& text) { return engine.run<echo_manifest>("Echo", input(text)); };
+  const auto run = [&](const std::string& text)
+  { return engine.run<echo_manifest>("Echo", input(text)); };
 
   CHECK(
     run("john3") == echo_table{

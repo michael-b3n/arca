@@ -42,7 +42,8 @@ struct scope::impl final
 auto launch(std::move_only_function<void()> work, scope& scope) -> void
 {
   ex::spawn(
-    ex::schedule(ex::get_parallel_scheduler()) | ex::then(std::move(work)) | ex::upon_error(&log_launch_error),
+    ex::schedule(ex::get_parallel_scheduler()) | ex::then(std::move(work)) |
+      ex::upon_error(&log_launch_error),
     scope.impl_->scope.get_token()
   );
 }

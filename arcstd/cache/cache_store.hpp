@@ -35,27 +35,33 @@ class ARCSTD_EXPORT cache_store final
 
 public: // Structors
   ///
-  /// Construct the store of the caches in the folder "cache" of \p data_folder, with its functions for the scripts
-  /// of \p lua_engine, none without one.
+  /// Construct the store of the caches in the folder "cache" of \p data_folder, with its functions
+  /// for the scripts of \p lua_engine, none without one.
   ///
-  cache_store(const std::filesystem::path& data_folder, std::shared_ptr<lua::lua_engine> lua_engine);
+  cache_store(
+    const std::filesystem::path& data_folder, std::shared_ptr<lua::lua_engine> lua_engine
+  );
   ~cache_store() noexcept;
 
 public: // Modifiers
   ///
   /// \return the value of \p key in the cache \p name, std::nullopt if it is not cached
   ///
-  [[nodiscard]] auto get(const util::identifier& name, const std::string& key) -> std::optional<std::string>;
+  [[nodiscard]] auto get(const util::identifier& name, const std::string& key)
+    -> std::optional<std::string>;
 
   ///
   /// Cache \p value for \p key in the cache \p name, std::nullopt removes it.
   ///
-  auto set(const util::identifier& name, const std::string& key, const std::optional<std::string>& value) -> void;
+  auto set(
+    const util::identifier& name, const std::string& key, const std::optional<std::string>& value
+  ) -> void;
 
   ///
   /// Cache each of \p values for its key in the cache \p name, all of them or none.
   ///
-  auto set_all(const util::identifier& name, const std::map<std::string, std::string>& values) -> void;
+  auto set_all(const util::identifier& name, const std::map<std::string, std::string>& values)
+    -> void;
 
   ///
   /// Remove all values of the cache \p name.

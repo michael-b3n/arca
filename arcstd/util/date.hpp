@@ -15,7 +15,10 @@ namespace arcstd::util
 {
   const auto time_point = std::chrono::system_clock::now();
   static const auto* const cet = std::chrono::locate_zone("Etc/GMT-1");
-  return std::format("{:%F_%H-%M-%S}", std::chrono::zoned_time{cet, std::chrono::floor<std::chrono::milliseconds>(time_point)});
+  return std::format(
+    "{:%F_%H-%M-%S}",
+    std::chrono::zoned_time{cet, std::chrono::floor<std::chrono::milliseconds>(time_point)}
+  );
 }
 
 } // namespace arcstd::util

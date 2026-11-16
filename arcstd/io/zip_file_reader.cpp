@@ -70,7 +70,9 @@ auto convert_encryption_method(std::uint16_t libzip_method) -> zip_file_reader::
 
 ///
 ///
-zip_file_reader::zip_file_reader(const std::filesystem::path& zip_path, const std::string_view password)
+zip_file_reader::zip_file_reader(
+  const std::filesystem::path& zip_path, const std::string_view password
+)
   : password_{password}
   , zip_handle_{nullptr}
 {
@@ -111,12 +113,15 @@ zip_file_reader::zip_file_reader(const std::filesystem::path& zip_path, const st
 
 ///
 ///
-zip_file_reader::zip_file_reader(const std::span<const std::byte> data, const std::string_view password)
+zip_file_reader::zip_file_reader(
+  const std::span<const std::byte> data, const std::string_view password
+)
   : password_{password}
   , zip_handle_{nullptr}
 {
   zip_error_t error;
-  auto* source = zip_source_buffer_create(data.data(), static_cast<zip_uint64_t>(data.size()), 0, &error);
+  auto* source =
+    zip_source_buffer_create(data.data(), static_cast<zip_uint64_t>(data.size()), 0, &error);
   if(source == nullptr)
   {
     const auto* const msg = zip_error_strerror(&error);
@@ -224,7 +229,8 @@ auto zip_file_reader::entry(const std::size_t index) const -> std::optional<zip_
 
 ///
 ///
-auto zip_file_reader::entry(const std::string& name, const query_flags_type flags) const -> std::optional<zip_entry>
+auto zip_file_reader::entry(const std::string& name, const query_flags_type flags) const
+  -> std::optional<zip_entry>
 {
   const auto index_optional = index_of_entry(name, flags);
   if(index_optional)
@@ -243,7 +249,10 @@ auto zip_file_reader::read_entry(const zip_entry& entry) const -> std::vector<st
     return {};
   }
 
-  if(auto* const file = zip_fopen_index(zip_handle_, static_cast<zip_uint64_t>(entry.index.value()), unchanged_flag))
+  if(
+    auto* const file =
+      zip_fopen_index(zip_handle_, static_cast<zip_uint64_t>(entry.index.value()), unchanged_flag)
+  )
   {
     const auto size = entry.size.value();
     std::vector<std::byte> buffer(size);
@@ -252,7 +261,11 @@ auto zip_file_reader::read_entry(const zip_entry& entry) const -> std::vector<st
       const auto bytes_read = zip_fread(file, buffer.data(), size);
       if(bytes_read < 0 || std::cmp_not_equal(bytes_read, size))
       {
-        LOG_WARN("file reading failed or incomplete: index={}, name=\"{}\"", *entry.index, entry.name.value_or("unknown"));
+        LOG_WARN(
+          "file reading failed or incomplete: index={}, name=\"{}\"",
+          *entry.index,
+          entry.name.value_or("unknown")
+        );
       }
     }
     zip_fclose(file);
@@ -280,7 +293,8 @@ auto zip_file_reader::read_entry_as_string(const zip_entry& entry) const -> std:
 
 ///
 ///
-auto zip_file_reader::index_of_entry(const std::string& name, const query_flags_type flags) const -> std::optional<std::size_t>
+auto zip_file_reader::index_of_entry(const std::string& name, const query_flags_type flags) const
+  -> std::optional<std::size_t>
 {
   if(!is_open())
   {
@@ -302,7 +316,8 @@ auto zip_file_reader::index_of_entry(const std::string& name, const query_flags_
 
 ///
 ///
-auto zip_file_reader::entry_by_index(const std::size_t index, const std::uint32_t flags) const -> std::optional<zip_entry>
+auto zip_file_reader::entry_by_index(const std::size_t index, const std::uint32_t flags) const
+  -> std::optional<zip_entry>
 {
   auto result = std::optional<zip_entry>{};
   if(!is_open() || index >= entry_count())
@@ -334,7 +349,8 @@ auto zip_file_reader::create_entry(const zip_stat_t& stat) const -> zip_entry
       if(is_open())
       {
         zip_uint32_t length = 0;
-        const auto* const c = zip_file_get_comment(zip_handle_, stat.index, &length, unchanged_flag);
+        const auto* const c =
+          zip_file_get_comment(zip_handle_, stat.index, &length, unchanged_flag);
         if(c && length >= 0)
         {
           return {c, static_cast<std::size_t>(length)};
@@ -342,7 +358,9 @@ auto zip_file_reader::create_entry(const zip_stat_t& stat) const -> zip_entry
         else
         {
           const auto* const name = valid(ZIP_STAT_NAME) && stat.name ? stat.name : "unknown";
-          LOG_ERROR("failed to get comment for zip entry: name=\"{}\", error=\"{}\"", name, error_message());
+          LOG_ERROR(
+            "failed to get comment for zip entry: name=\"{}\", error=\"{}\"", name, error_message()
+          );
         }
       }
       return {};

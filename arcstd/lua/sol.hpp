@@ -4,9 +4,11 @@
   #error "private header of arcstd"
 #endif
 
-// sol2 reads its configuration while being included, every translation unit has to see the same one.
+// sol2 reads its configuration while being included, every translation unit has to see the same
+// one.
 #ifdef SOL_HPP
-  #error "sol2 was included without its configuration, include arcstd/lua/sol.hpp instead of <sol/sol.hpp>"
+  #error                                                                                           \
+    "sol2 was included without its configuration, include arcstd/lua/sol.hpp instead of <sol/sol.hpp>"
 #endif
 
 // Scripts are user input, a wrong type raises an error instead of crashing.

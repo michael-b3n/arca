@@ -18,8 +18,9 @@ struct setting_signals final
 {
   /// Value changed signal: will be emitted when the setting value changes.
   signal::signal_type<void()> value_changed;
-  /// Validator changed signal: will be emitted when the setting validator changes. A change of the setting validator
-  /// can change the value of the setting. In the case the signal `value_changed` will be emitted first.
+  /// Validator changed signal: will be emitted when the setting validator changes. A change of the
+  /// setting validator can change the value of the setting. In the case the signal `value_changed`
+  /// will be emitted first.
   signal::signal_type<void()> validator_changed;
 };
 
@@ -42,7 +43,12 @@ public: // Variables
   const setting_validator<value_type> validator;
 
 public: // Structors
-  setting(std::string path, property<value_type> value, std::string postfix, setting_validator<value_type> validator);
+  setting(
+    std::string path,
+    property<value_type> value,
+    std::string postfix,
+    setting_validator<value_type> validator
+  );
 
 public: // Accessors
   ///
@@ -65,7 +71,10 @@ private: // Implementation
 ///
 template<underlying_setting_type T>
 setting<T>::setting(
-  std::string path_, property<value_type> value, std::string postfix_, setting_validator<value_type> validator_
+  std::string path_,
+  property<value_type> value,
+  std::string postfix_,
+  setting_validator<value_type> validator_
 )
   : value_{std::move(value)}
   , path{std::move(path_)}

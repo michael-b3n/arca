@@ -106,11 +106,13 @@ TEST_CASE("const_map rejects duplicated keys", "[util]")
 
   using bimap_type = const_map<int, std::string_view, 2, true>;
   CHECK_THROWS_AS(
-    bimap_type(std::pair<int, std::string_view>{0, "a"}, std::pair<int, std::string_view>{0, "b"}), util::exception
+    bimap_type(std::pair<int, std::string_view>{0, "a"}, std::pair<int, std::string_view>{0, "b"}),
+    util::exception
   );
   // A bidirectional map also rejects duplicated values.
   CHECK_THROWS_AS(
-    bimap_type(std::pair<int, std::string_view>{0, "a"}, std::pair<int, std::string_view>{1, "a"}), util::exception
+    bimap_type(std::pair<int, std::string_view>{0, "a"}, std::pair<int, std::string_view>{1, "a"}),
+    util::exception
   );
   // The same value is fine in a unidirectional map.
   CHECK_NOTHROW(const_map<int, int, 2, false>(std::pair{0, 1}, std::pair{1, 1}));

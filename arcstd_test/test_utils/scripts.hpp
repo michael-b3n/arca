@@ -18,11 +18,12 @@ namespace arcstd::test_utils
 {
 
 ///
-/// Settings in \p data_folder with the script settings written before a engine reads them. The user scripts
-/// are the folder "scripts" in it.
+/// Settings in \p data_folder with the script settings written before a engine reads them. The user
+/// scripts are the folder "scripts" in it.
 ///
-[[nodiscard]] inline auto make_script_settings(const std::filesystem::path& data_folder, const bool enabled = false)
-  -> std::shared_ptr<setting::setting_store>
+[[nodiscard]] inline auto make_script_settings(
+  const std::filesystem::path& data_folder, const bool enabled = false
+) -> std::shared_ptr<setting::setting_store>
 {
   {
     const auto writer = std::make_shared<setting::setting_store>(data_folder);
@@ -39,18 +40,22 @@ inline auto load_scripts(lua::lua_engine& engine) -> void
 {
   const auto loaded = std::make_shared<std::promise<void>>();
   const auto done = loaded->get_future();
-  const auto connection = engine.connect(&lua::lua_engine_signals::scripts_loaded, [loaded] { loaded->set_value(); });
+  const auto connection =
+    engine.connect(&lua::lua_engine_signals::scripts_loaded, [loaded] { loaded->set_value(); });
   engine.load_scripts();
   REQUIRE(done.wait_for(std::chrono::seconds{10}) == std::future_status::ready);
 }
 
 ///
-/// \return what \p code returns as T, run as a user script of \p engine, std::nullopt if it failed or returns no T
+/// \return what \p code returns as T, run as a user script of \p engine, std::nullopt if it failed
+/// or returns no T
 ///
 template<lua::value_castable T>
-[[nodiscard]] auto script_value(const lua::lua_engine& engine, const std::string& code) -> std::optional<T>
+[[nodiscard]] auto script_value(const lua::lua_engine& engine, const std::string& code)
+  -> std::optional<T>
 {
-  return engine.run_script("test.lua", code).and_then([](const lua::value& value) { return from_value<T>(value); });
+  return engine.run_script("test.lua", code)
+    .and_then([](const lua::value& value) { return lua::from_value<T>(value); });
 }
 
 ///

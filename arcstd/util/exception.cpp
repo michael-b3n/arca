@@ -34,7 +34,9 @@ auto exception_report() -> std::string
 
 ///
 ///
-exception::exception(const std::string& error, const std::source_location& loc, std::stacktrace stacktrace)
+exception::exception(
+  const std::string& error, const std::source_location& loc, std::stacktrace stacktrace
+)
   : std::runtime_error{error}
   , location_{loc}
   , stacktrace_{std::move(stacktrace)}

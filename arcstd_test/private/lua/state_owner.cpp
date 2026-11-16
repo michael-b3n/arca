@@ -18,7 +18,9 @@ TEST_CASE("lua_state_owner_setup", "[lua]")
   const auto s = owner.lock();
   CHECK(s->script("return type(root) == 'table'").get<bool>());
   CHECK(s->script("return string.upper('abc')").get<std::string>() == "ABC");
-  CHECK(s->script("return io == nil and os == nil and debug == nil and package == nil").get<bool>());
+  CHECK(
+    s->script("return io == nil and os == nil and debug == nil and package == nil").get<bool>()
+  );
 }
 
 TEST_CASE("lua_state_keeps_the_state_alive", "[lua]")
@@ -43,9 +45,10 @@ TEST_CASE("lua_state_owner_logs", "[lua]")
   const auto owner = state_owner{};
   auto s = owner.lock();
   // Scripts have no console, their texts go to the log of the app
-  CHECK(
-    s.run_script("log.lua", "util.log_debug('text', 1, nil, {}) util.log_info('text') util.log_warning() util.log_error(1)")
-  );
+  CHECK(s.run_script(
+    "log.lua",
+    "util.log_debug('text', 1, nil, {}) util.log_info('text') util.log_warning() util.log_error(1)"
+  ));
 }
 
 TEST_CASE("lua_state_owner_copies_share_the_state", "[lua]")
@@ -90,7 +93,9 @@ TEST_CASE("lua_state_owner_is_locked_again_from_a_script", "[lua]")
     auto s = owner.lock();
     s->set("value", 7);
     // A copy kept by the state itself would keep it alive forever
-    CHECK(keep(s.register_function("read_value", to_function([&owner]() { return owner.lock()->get<int>("value"); }))));
+    CHECK(keep(s.register_function(
+      "read_value", to_function([&owner]() { return owner.lock()->get<int>("value"); })
+    )));
   }
   CHECK(owner.lock()->script("return root.interface.read_value() * 2").get<int>() == 14);
 }

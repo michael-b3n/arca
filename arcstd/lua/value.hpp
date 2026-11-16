@@ -100,7 +100,8 @@ inline auto table::length() const -> std::size_t
   const auto index = [](const entry& e) { return std::get_if<integer>(&e.key); };
   auto indices = entries | std::views::transform(index) |
                  std::views::filter([](const integer* const i) { return i != nullptr && *i > 0; }) |
-                 std::views::transform([](const integer* const i) { return *i; }) | std::ranges::to<std::vector>();
+                 std::views::transform([](const integer* const i) { return *i; }) |
+                 std::ranges::to<std::vector>();
   std::ranges::sort(indices);
   const auto end = std::ranges::mismatch(indices, std::views::iota(integer{1})).in1;
   return static_cast<std::size_t>(std::ranges::distance(indices.begin(), end));

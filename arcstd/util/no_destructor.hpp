@@ -7,8 +7,8 @@ namespace arcstd::util
 {
 
 ///
-/// Holds a T that is never destroyed, for a static that must outlive the statics destroyed at the end of the
-/// process. It needs no heap, unlike a static pointer made with new.
+/// Holds a T that is never destroyed, for a static that must outlive the statics destroyed at the
+/// end of the process. It needs no heap, unlike a static pointer made with new.
 ///
 template<typename T>
 class no_destructor final
@@ -50,7 +50,8 @@ no_destructor<T>::no_destructor(Args&&... args)
 /// Leaves the held T as it is, that is the purpose.
 ///
 template<typename T>
-no_destructor<T>::~no_destructor() noexcept // NOLINT(modernize-use-equals-default) a default one would destroy it
+// NOLINTNEXTLINE(modernize-use-equals-default) a default one would destroy it
+no_destructor<T>::~no_destructor() noexcept
 {
 }
 
@@ -59,7 +60,8 @@ no_destructor<T>::~no_destructor() noexcept // NOLINT(modernize-use-equals-defau
 template<typename T>
 auto no_destructor<T>::operator*() -> T&
 {
-  return value; // NOLINT(cppcoreguidelines-pro-type-union-access) the one member, constructed
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access) the one member, constructed
+  return value;
 }
 
 ///
@@ -67,7 +69,8 @@ auto no_destructor<T>::operator*() -> T&
 template<typename T>
 auto no_destructor<T>::operator->() -> T*
 {
-  return std::addressof(value); // NOLINT(cppcoreguidelines-pro-type-union-access) the one member, constructed
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access) the one member, constructed
+  return std::addressof(value);
 }
 
 } // namespace arcstd::util

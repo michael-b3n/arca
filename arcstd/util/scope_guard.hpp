@@ -41,9 +41,10 @@ private: // Implementation
 };
 
 ///
-/// Shared scope guard class. This class allows multiple scope_guard instances to share the same underlying
-/// callable, ensuring that the callable is only executed once when all guards are destroyed or reset.
-/// This is useful for cases where multiple components need to share the same cleanup logic.
+/// Shared scope guard class. This class allows multiple scope_guard instances to share the same
+/// underlying callable, ensuring that the callable is only executed once when all guards are
+/// destroyed or reset. This is useful for cases where multiple components need to share the same
+/// cleanup logic.
 ///
 class ARCSTD_EXPORT shared_scope_guard final
 {
@@ -54,8 +55,9 @@ class ARCSTD_EXPORT shared_scope_guard final
 public: // Typedefs
   ///
   /// A helper class to create a bound scope exit action instance.
-  /// Multiple calls to the create function will return a guard that is bound to the same underlying instance,
-  /// ensuring that the on_destruction callback is only called once when all guards are destroyed or reset.
+  /// Multiple calls to the create function will return a guard that is bound to the same underlying
+  /// instance, ensuring that the on_destruction callback is only called once when all guards are
+  /// destroyed or reset.
   ///
   class ARCSTD_EXPORT creator final
   {
@@ -71,7 +73,8 @@ public: // Typedefs
     /// \return A scope_guard instance bound to the same underlying
     /// instance as other guards created by this function
     ///
-    [[nodiscard]] auto create(scope_guard::on_destruction_type&& on_destruction) -> shared_scope_guard;
+    [[nodiscard]] auto create(scope_guard::on_destruction_type&& on_destruction)
+      -> shared_scope_guard;
   };
 
 public: // Structors

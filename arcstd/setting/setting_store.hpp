@@ -70,7 +70,8 @@ class ARCSTD_EXPORT setting_store final : public signal::adapter<setting_store_s
   // Typedefs
   template<underlying_setting_type_erased_type T>
   using setting_type_erased_uptr_type = std::unique_ptr<setting_type_erased<T>>;
-  using setting_type_erased_uptr_variant_type = meta::for_each_t<setting_type_erased_variant, setting_type_erased_uptr_type>;
+  using setting_type_erased_uptr_variant_type =
+    meta::for_each_t<setting_type_erased_variant, setting_type_erased_uptr_type>;
 
   struct setting_uptr_data final
   {
@@ -124,11 +125,13 @@ public: // Static interface
   ///
   /// \return the path of the settings file in \p data_folder
   ///
-  [[nodiscard]] static auto settings_file_path(const std::filesystem::path& data_folder) -> std::filesystem::path;
+  [[nodiscard]] static auto settings_file_path(const std::filesystem::path& data_folder)
+    -> std::filesystem::path;
 
 public: // Structors
   ///
-  /// Construct the settings, stored in the settings file of \p data_folder, the folder of the data of the app.
+  /// Construct the settings, stored in the settings file of \p data_folder, the folder of the data
+  /// of the app.
   ///
   explicit setting_store(std::filesystem::path data_folder);
 
@@ -153,8 +156,8 @@ public: // Accessors
 
 public: // Modifiers
   ///
-  /// Create an unbound setting owned by this store, of a type known at runtime only, e.g. declared by the
-  /// frontend, or access the existing one of \p path.
+  /// Create an unbound setting owned by this store, of a type known at runtime only, e.g. declared
+  /// by the frontend, or access the existing one of \p path.
   /// \throws util::exception if a setting of \p path exists with a different value type
   /// \return the created or existing setting
   ///
@@ -167,12 +170,14 @@ public: // Modifiers
   ) -> setting_type_erased_non_owning_ptr_variant_type;
 
   ///
-  /// Create or access a setting with no postfix, naming only the validator. \see type_erased_setting
+  /// Create or access a setting with no postfix, naming only the validator. \see
+  /// type_erased_setting
   /// \return the newly created or the already existing setting
   ///
   template<underlying_setting_type_erased_type T>
-  [[nodiscard]] auto type_erased_setting(const std::string& path, T default_value, validator_type<T> validator)
-    -> setting_type_erased_non_owning_ptr_variant_type;
+  [[nodiscard]] auto type_erased_setting(
+    const std::string& path, T default_value, validator_type<T> validator
+  ) -> setting_type_erased_non_owning_ptr_variant_type;
 
   ///
   /// Create a new setting. The setting will be owned by this store and has static lifetime.
@@ -192,17 +197,20 @@ public: // Modifiers
   /// \return non owning pointer to the newly created setting
   ///
   template<underlying_setting_type T>
-  [[nodiscard]] auto create_setting(const std::string& path, T default_value, validator_type<T> validator)
-    -> setting_non_owning_ptr_type<T>;
+  [[nodiscard]] auto create_setting(
+    const std::string& path, T default_value, validator_type<T> validator
+  ) -> setting_non_owning_ptr_type<T>;
 
 private: // Implementation
   ///
-  /// Create the setting of \p path with the value of the property tree, \p default_value if the tree has none.
+  /// Create the setting of \p path with the value of the property tree, \p default_value if the
+  /// tree has none.
   /// \return the entry owning the setting, and the setting
   ///
   template<underlying_setting_type T>
-  [[nodiscard]] auto make_setting(const std::string& path, T default_value, std::string postfix, validator_type<T> validator)
-    -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>;
+  [[nodiscard]] auto make_setting(
+    const std::string& path, T default_value, std::string postfix, validator_type<T> validator
+  ) -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>;
 };
 
 ///
@@ -213,15 +221,20 @@ auto setting_store::type_erased_setting(
 ) -> setting_type_erased_non_owning_ptr_variant_type
 {
   auto lock = std::unique_lock{mtx_};
-  auto it = std::ranges::find_if(settings_, [&path](const auto& data) { return data.path == path; });
+  auto it =
+    std::ranges::find_if(settings_, [&path](const auto& data) { return data.path == path; });
   const auto setting_exists = it != std::ranges::cend(settings_);
   if(!setting_exists)
   {
-    settings_.emplace_back(make_setting(path, std::move(default_value), std::move(postfix), std::move(validator)).first);
+    settings_.emplace_back(
+      make_setting(path, std::move(default_value), std::move(postfix), std::move(validator)).first
+    );
     it = std::prev(settings_.end());
   }
-  const auto setting_ptr =
-    std::visit([](const auto& e) -> setting_type_erased_non_owning_ptr_variant_type { return e.get(); }, it->setting);
+  const auto setting_ptr = std::visit(
+    [](const auto& e) -> setting_type_erased_non_owning_ptr_variant_type { return e.get(); },
+    it->setting
+  );
   lock.unlock();
 
   // If the setting already exists, check if the value type is the same as the requested type.
@@ -230,14 +243,17 @@ auto setting_store::type_erased_setting(
     const auto is_same_value_type = std::visit(
       [](const auto setting)
       {
-        using value_type = std::remove_pointer_t<std::remove_cvref_t<decltype(setting)>>::value_type;
+        using value_type =
+          std::remove_pointer_t<std::remove_cvref_t<decltype(setting)>>::value_type;
         return std::is_same_v<value_type, std::remove_cvref_t<T>>;
       },
       setting_ptr
     );
     if(!is_same_value_type)
     {
-      throw util::exception{std::format("setting exists with different value type: path=\"{}\"", path)};
+      throw util::exception{
+        std::format("setting exists with different value type: path=\"{}\"", path)
+      };
     }
   }
   else
@@ -250,8 +266,9 @@ auto setting_store::type_erased_setting(
 ///
 ///
 template<underlying_setting_type_erased_type T>
-auto setting_store::type_erased_setting(const std::string& path, T default_value, validator_type<T> validator)
-  -> setting_type_erased_non_owning_ptr_variant_type
+auto setting_store::type_erased_setting(
+  const std::string& path, T default_value, validator_type<T> validator
+) -> setting_type_erased_non_owning_ptr_variant_type
 {
   return type_erased_setting<T>(path, std::move(default_value), {}, std::move(validator));
 }
@@ -259,13 +276,16 @@ auto setting_store::type_erased_setting(const std::string& path, T default_value
 ///
 ///
 template<underlying_setting_type T>
-auto setting_store::create_setting(const std::string& path, T default_value, std::string postfix, validator_type<T> validator)
-  -> setting_non_owning_ptr_type<T>
+auto setting_store::create_setting(
+  const std::string& path, T default_value, std::string postfix, validator_type<T> validator
+) -> setting_non_owning_ptr_type<T>
 {
-  auto [entry, setting] = make_setting(path, std::move(default_value), std::move(postfix), std::move(validator));
+  auto [entry, setting] =
+    make_setting(path, std::move(default_value), std::move(postfix), std::move(validator));
   {
     const auto lock = std::scoped_lock{mtx_};
-    const auto contains_path = util::contains(settings_, [&path](const auto& data) { return data.path == path; });
+    const auto contains_path =
+      util::contains(settings_, [&path](const auto& data) { return data.path == path; });
     if(contains_path)
     {
       throw util::exception(std::format("setting already created: path=\"{}\"", path));
@@ -279,8 +299,9 @@ auto setting_store::create_setting(const std::string& path, T default_value, std
 ///
 ///
 template<underlying_setting_type T>
-auto setting_store::create_setting(const std::string& path, T default_value, validator_type<T> validator)
-  -> setting_non_owning_ptr_type<T>
+auto setting_store::create_setting(
+  const std::string& path, T default_value, validator_type<T> validator
+) -> setting_non_owning_ptr_type<T>
 {
   return create_setting<T>(path, std::move(default_value), {}, std::move(validator));
 }
@@ -288,8 +309,9 @@ auto setting_store::create_setting(const std::string& path, T default_value, val
 ///
 ///
 template<underlying_setting_type T>
-auto setting_store::make_setting(const std::string& path, T default_value, std::string postfix, validator_type<T> validator)
-  -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>
+auto setting_store::make_setting(
+  const std::string& path, T default_value, std::string postfix, validator_type<T> validator
+) -> std::pair<setting_uptr_data, setting_non_owning_ptr_type<T>>
 {
   using type_erased_type = setting_type_erased<setting_type_erased_type_from<T>>;
   const auto created = std::make_shared<setting<T>>(

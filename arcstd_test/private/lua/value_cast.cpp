@@ -74,7 +74,10 @@ TEST_CASE("lua_value_cast_throws_for_an_integer_lua_can_not_hold", "[lua]")
   CHECK_THROWS(to_value<std::uint64_t>(largest + 1));
   CHECK_THROWS(to_value<std::uint64_t>(limits::max()));
   CHECK_THROWS(to_value<std::vector<std::uint64_t>>({1, limits::max()}));
-  CHECK(round_trip(lua, std::numeric_limits<std::int64_t>::min()) == std::numeric_limits<std::int64_t>::min());
+  CHECK(
+    round_trip(lua, std::numeric_limits<std::int64_t>::min()) ==
+    std::numeric_limits<std::int64_t>::min()
+  );
 }
 
 TEST_CASE("lua_value_cast_converts_containers", "[lua]")
@@ -96,7 +99,9 @@ TEST_CASE("lua_value_cast_converts_containers", "[lua]")
   CHECK_FALSE(from_script<list>(lua, "{[2] = 2}"));
   // A table containing itself ends, as no list
   CHECK_FALSE(from_script<list>(lua, "(function() local t = {} t[1] = t return t end)()"));
-  CHECK_FALSE(from_script<std::vector<list>>(lua, "(function() local t = {} t[1] = t return t end)()"));
+  CHECK_FALSE(
+    from_script<std::vector<list>>(lua, "(function() local t = {} t[1] = t return t end)()")
+  );
 
   using map = std::map<std::string, std::vector<std::string>>;
   CHECK(
@@ -114,8 +119,8 @@ TEST_CASE("lua_value_cast_converts_containers", "[lua]")
   using numbers = std::map<std::int64_t, std::string>;
   CHECK(
     from_script<numbers>(lua, "{[2] = 'b', [10] = 'j'}") == numbers{
-                                                       { 2, "b"},
-                                                       {10, "j"}
+                                                              { 2, "b"},
+                                                              {10, "j"}
   }
   );
   CHECK(
@@ -129,8 +134,8 @@ TEST_CASE("lua_value_cast_converts_containers", "[lua]")
   using flags = std::map<bool, std::int64_t>;
   CHECK(
     from_script<flags>(lua, "{[true] = 1, [false] = 0}") == flags{
-                                                       { true, 1},
-                                                       {false, 0}
+                                                              { true, 1},
+                                                              {false, 0}
   }
   );
   CHECK_FALSE(from_script<flags>(lua, "{x = 1}"));
@@ -142,32 +147,28 @@ TEST_CASE("lua_value_cast_reads_a_table_by_its_keys", "[lua]")
   using numbers = std::map<std::int64_t, std::string>;
   using list = std::vector<std::string>;
   CHECK(
-    from_value<list>(
-      to_value<numbers>({
-        {2, "b"},
-        {1, "a"}
-  })
-    ) == list{"a", "b"}
+    from_value<list>(to_value<numbers>({
+      {2, "b"},
+      {1, "a"}
+  })) == list{"a", "b"}
   );
   CHECK_FALSE(
-    from_value<list>(
-      to_value<numbers>({
-        {1, "a"},
-        {3, "c"}
-  })
-    )
+    from_value<list>(to_value<numbers>({
+      {1, "a"},
+      {3, "c"}
+  }))
   );
   CHECK(
     to_value<numbers>({
-                              {2, "b"},
-                              {3, "c"}
+                        {2, "b"},
+                        {3, "c"}
   })
       .index() == value{table{}}.index()
   );
   CHECK(
     std::get<table>(to_value<numbers>({
-                            {2, "b"},
-                            {3, "c"}
+                      {2, "b"},
+                      {3, "c"}
   }))
       .length() == 0
   );
@@ -206,10 +207,15 @@ TEST_CASE("lua_value_cast_takes_plain_value_types_only", "[lua]")
 TEST_CASE("lua_value_cast_converts_script_tables", "[lua]")
 {
   auto lua = sol::state{};
-  using table =
-    script_table<field<"name", std::string>, field<"count", std::int64_t>, field<"note", std::optional<std::string>>>;
+  using table = script_table<
+    field<"name", std::string>,
+    field<"count", std::int64_t>,
+    field<"note", std::optional<std::string>>>;
   CHECK(round_trip(lua, table{"a", 1, std::nullopt}) == table{"a", 1, std::nullopt});
-  CHECK(from_script<table>(lua, "{name = 'a', count = 2, note = 'n'}") == table{"a", 2, std::string{"n"}});
+  CHECK(
+    from_script<table>(lua, "{name = 'a', count = 2, note = 'n'}") ==
+    table{"a", 2, std::string{"n"}}
+  );
   // nil is an empty table, which lacks the values that are no optional
   CHECK(from_script<script_table<field<"note", std::optional<std::string>>>>(lua, "nil"));
   CHECK_FALSE(from_script<table>(lua, "nil"));

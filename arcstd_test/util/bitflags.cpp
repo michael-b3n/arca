@@ -124,7 +124,8 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
     {
       auto f = flags{flag_a, flag_c};
       f.flip();
-      return !f.test(flag_a) && f.test(flag_b) && !f.test(flag_c) && f.test(flag_d) && f.test(flag_e);
+      return !f.test(flag_a) && f.test(flag_b) && !f.test(flag_c) && f.test(flag_d) &&
+             f.test(flag_e);
     };
     static_assert(test_flip_all());
   }

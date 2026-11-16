@@ -105,7 +105,9 @@ TEST_CASE("adapter connect_extended returns connection", "[signal]")
   auto a = test_adapter{};
   auto called = false;
 
-  const auto con = a.connect_extended(&test_signals::on_notify, [&called](const connection_type&) { called = true; });
+  const auto con = a.connect_extended(
+    &test_signals::on_notify, [&called](const connection_type&) { called = true; }
+  );
 
   a.fire_notify();
   CHECK(called);
@@ -123,7 +125,8 @@ TEST_CASE("adapter independent signals do not interfere", "[signal]")
   auto value_received = 0;
 
   const auto con1 = a.connect(&test_signals::on_notify, [&notify_count] { ++notify_count; });
-  const auto con2 = a.connect(&test_signals::on_value_changed, [&value_received](int v) { value_received = v; });
+  const auto con2 =
+    a.connect(&test_signals::on_value_changed, [&value_received](int v) { value_received = v; });
 
   a.fire_notify();
   CHECK(notify_count == 1);
