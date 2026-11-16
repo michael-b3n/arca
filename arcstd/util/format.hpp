@@ -10,7 +10,7 @@ namespace arcstd::util
 {
 
 ///
-///
+/// Utility class for formatting and converting values to strings.
 ///
 struct format final
 {

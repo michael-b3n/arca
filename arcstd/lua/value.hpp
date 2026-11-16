@@ -16,14 +16,16 @@ namespace arcstd::lua
 struct value;
 
 ///
-/// Lua nil: no value, e.g. an argument left out or the value of a key a table does not have.
+/// Lua nil: no value, e.g. an argument left out or
+/// the value of a key a table does not have.
 ///
 struct nil final
 {};
 
 ///
-/// A Lua value C++ gets no copy of: a function, a userdata, a thread, or a table nested too deep or containing itself.
-/// It is no nil, so it is not taken for a value left out. Handed back to Lua, it is nil.
+/// A Lua value C++ gets no copy of: a function, a userdata, a thread, or a
+/// table nested too deep or containing itself. It is no nil, so it is not
+/// taken for a value left out. Handed back to Lua, it is nil.
 ///
 struct unsupported final
 {};
@@ -72,8 +74,9 @@ struct table final
 };
 
 ///
-/// Copy of a Lua value, what a script hands to C++ and gets from it, \see value_conversion. Nil by default.
-/// It holds no reference into the Lua state, so it may outlive it.
+/// Copy of a Lua value, what a script hands to C++ and gets from it,
+/// \see value_conversion. Nil by default. It holds no reference into
+/// the Lua state, so it may outlive it.
 ///
 struct value final : std::variant<nil, bool, integer, number, std::string, table, unsupported>
 {

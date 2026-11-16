@@ -17,9 +17,9 @@ namespace arcstd::cache
 class cache_database;
 
 ///
-/// Cache store, keeps text values of the scripts beyond the run of the app, in a database file per cache name.
-/// Registered for scripts as cache.get(name, key) and cache.set(name, key, value), a script names its own cache,
-/// e.g. after itself.
+/// Cache store, keeps text values of the scripts beyond the run of the app, in a database file per
+/// cache name. Registered for scripts as cache.get(name, key) and cache.set(name, key, value),
+/// a script names its own cache, e.g. after itself.
 ///
 class ARCSTD_EXPORT cache_store final
 {

@@ -10,8 +10,8 @@ namespace arcstd::util
 {
 
 ///
-/// Name of the characters below only and not empty, e.g. the name of a cache. So it reads the same as a key, in a
-/// path and in a file name, whoever chose it. Other characters are replaced.
+/// Name of the characters below only and not empty, e.g. the name of a cache. So it reads the
+/// same as a key, in a path and in a file name, whoever chose it. Other characters are replaced.
 ///
 class ARCSTD_EXPORT identifier final
 {

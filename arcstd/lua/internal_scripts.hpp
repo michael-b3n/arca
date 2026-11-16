@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef ARCSTD_INTERNAL
-  #error "private header of arcstd, a project includes the public ones only"
+  #error "private header of arcstd"
 #endif
 
 #include "arcstd/lua/embedded_script.hpp"
