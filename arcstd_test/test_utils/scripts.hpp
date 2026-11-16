@@ -20,17 +20,16 @@ namespace arcstd::test_utils
 ///
 /// Settings in \p data_folder with the script settings written before a engine reads them. The user scripts
 /// are the folder "scripts" in it.
-/// An absolute folder name replaces the local data folder, so the tests leave it alone.
 ///
 [[nodiscard]] inline auto make_script_settings(const std::filesystem::path& data_folder, const bool enabled = false)
   -> std::shared_ptr<setting::setting_store>
 {
   {
-    const auto writer = std::make_shared<setting::setting_store>(data_folder.string());
+    const auto writer = std::make_shared<setting::setting_store>(data_folder);
     const auto settings = lua::lua_engine_settings{writer};
     std::ignore = settings.enabled->value(enabled);
   }
-  return std::make_shared<setting::setting_store>(data_folder.string());
+  return std::make_shared<setting::setting_store>(data_folder);
 }
 
 ///

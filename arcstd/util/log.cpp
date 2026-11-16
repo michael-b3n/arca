@@ -1,5 +1,4 @@
 #include "arcstd/util/log.hpp"
-#include "arcstd/system/filesystem.hpp"
 #include "arcstd/util/date.hpp"
 
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -91,7 +90,7 @@ inline auto prune_log_files(const std::filesystem::path& log_directory, const st
 ///
 /// Setup logger.
 ///
-inline auto init_log(const std::optional<std::string_view> folder_name, std::string header) -> void
+inline auto init_log(const std::filesystem::path& data_folder, std::string header) -> void
 {
   static constexpr auto log_dir = std::string_view("logs");
   static constexpr auto log_pattern = std::string_view("[%Y-%m-%d %H:%M:%S] [%L] [%t] %v");
@@ -100,7 +99,7 @@ inline auto init_log(const std::optional<std::string_view> folder_name, std::str
   static constexpr auto max_rotated_files = std::size_t{2};
   static constexpr auto max_log_files = std::size_t{20};
 
-  const auto log_directory = system::filesystem::local_data_folder(folder_name) / log_dir;
+  const auto log_directory = data_folder / log_dir;
   std::filesystem::create_directories(log_directory);
   const auto deleted_files = prune_log_files(log_directory, max_log_files - 1);
 
@@ -190,9 +189,9 @@ auto log_error(std::string_view msg) -> void
 
 ///
 ///
-logger::logger(const std::optional<std::string_view> folder_name, std::string header)
+logger::logger(const std::filesystem::path& data_folder, std::string header)
 {
-  init_log(folder_name, std::move(header));
+  init_log(data_folder, std::move(header));
 }
 
 ///

@@ -3,8 +3,8 @@
 #include "arcstd/export.hpp"
 #include "arcstd/util/source_location_helpers.hpp"
 
+#include <filesystem>
 #include <format>
-#include <optional>
 #include <source_location>
 #include <string>
 #include <string_view>
@@ -63,10 +63,10 @@ ARCSTD_EXPORT auto log_error(std::string_view msg) -> void;
 struct ARCSTD_EXPORT logger final
 {
   ///
-  /// Init the logger, writing to the local data folder \p folder_name, see system::filesystem::local_data_folder.
+  /// Init the logger, writing to the folder logs of \p data_folder, the folder of the data of the app.
   /// The \p header is written at the top of every log file, rotated files included.
   ///
-  explicit logger(std::optional<std::string_view> folder_name = std::nullopt, std::string header = {});
+  explicit logger(const std::filesystem::path& data_folder, std::string header = {});
   ~logger() noexcept;
 };
 

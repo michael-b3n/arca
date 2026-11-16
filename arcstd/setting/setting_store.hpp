@@ -122,22 +122,19 @@ public: // Constants
 
 public: // Static interface
   ///
-  /// Get the settings file path inside the local data folder \p folder_name, see system::filesystem::local_data_folder.
-  /// \return settings file path
+  /// \return the path of the settings file in \p data_folder
   ///
-  [[nodiscard]] static auto settings_file_path(std::optional<std::string_view> folder_name = std::nullopt)
-    -> std::filesystem::path;
+  [[nodiscard]] static auto settings_file_path(const std::filesystem::path& data_folder) -> std::filesystem::path;
 
 public: // Structors
   ///
-  /// Construct the settings, stored in the local data folder \p folder_name.
+  /// Construct the settings, stored in the settings file of \p data_folder, the folder of the data of the app.
   ///
-  explicit setting_store(std::optional<std::string_view> folder_name = std::nullopt);
+  explicit setting_store(std::filesystem::path data_folder);
 
 public: // Accessors
   ///
-  /// Get the local data folder the settings are stored in, see system::filesystem::local_data_folder.
-  /// \return local data folder
+  /// \return the folder of the data of the app, the settings are stored in
   ///
   [[nodiscard]] auto data_folder() const -> const std::filesystem::path&;
 

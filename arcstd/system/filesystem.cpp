@@ -1,9 +1,7 @@
 #include "arcstd/system/filesystem.hpp"
-#include "arcstd/util/exception.hpp"
 
 #include <boost/dll.hpp>
 
-#include <cstdlib>
 #include <filesystem>
 
 namespace arcstd::system
@@ -21,20 +19,6 @@ auto filesystem::executable_location() -> std::filesystem::path
 auto filesystem::executable_folder() -> std::filesystem::path
 {
   return boost::dll::program_location().parent_path().string();
-}
-
-///
-///
-auto filesystem::local_data_folder(const std::optional<std::string_view> folder_name) -> std::filesystem::path
-{
-  // NOLINTNEXTLINE(concurrency-mt-unsafe) nothing in the app changes the environment
-  const auto* const appdata = std::getenv("LOCALAPPDATA");
-  if(appdata == nullptr)
-  {
-    throw util::exception("local appdata not found");
-  }
-  const auto folder = folder_name.has_value() ? std::filesystem::path{*folder_name} : executable_location().stem();
-  return std::filesystem::path(appdata) / folder;
 }
 
 } // namespace arcstd::system

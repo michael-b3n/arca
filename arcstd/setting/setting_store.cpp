@@ -1,8 +1,8 @@
 #include "arcstd/setting/setting_store.hpp"
 #include "arcstd/setting/property_tree.hpp"
-#include "arcstd/system/filesystem.hpp"
 
 #include <algorithm>
+#include <utility>
 #include <ranges>
 
 namespace arcstd::setting
@@ -10,15 +10,15 @@ namespace arcstd::setting
 
 ///
 ///
-auto setting_store::settings_file_path(const std::optional<std::string_view> folder_name) -> std::filesystem::path
+auto setting_store::settings_file_path(const std::filesystem::path& data_folder) -> std::filesystem::path
 {
-  return system::filesystem::local_data_folder(folder_name) / settings_file_name;
+  return data_folder / settings_file_name;
 }
 
 ///
 ///
-setting_store::setting_store(const std::optional<std::string_view> folder_name)
-  : data_folder_{system::filesystem::local_data_folder(folder_name)}
+setting_store::setting_store(std::filesystem::path data_folder)
+  : data_folder_{std::move(data_folder)}
   , tree_{property_tree::create(data_folder_ / settings_file_name)}
 {
 }

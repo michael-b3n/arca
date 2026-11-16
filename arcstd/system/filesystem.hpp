@@ -3,8 +3,6 @@
 #include "arcstd/export.hpp"
 
 #include <filesystem>
-#include <optional>
-#include <string_view>
 
 namespace arcstd::system
 {
@@ -25,13 +23,6 @@ struct ARCSTD_EXPORT filesystem final
   /// \return path to executable folder
   ///
   [[nodiscard]] static auto executable_folder() -> std::filesystem::path;
-
-  ///
-  /// Get path to the local data folder \p folder_name, named after the executable if not set.
-  /// \return path to local data
-  ///
-  [[nodiscard]] static auto local_data_folder(std::optional<std::string_view> folder_name = std::nullopt)
-    -> std::filesystem::path;
 };
 
 } // namespace arcstd::system
