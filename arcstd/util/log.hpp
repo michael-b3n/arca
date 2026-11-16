@@ -8,6 +8,7 @@
 #include <source_location>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace arcstd::util
 {
@@ -37,24 +38,24 @@ enum class logger_level
 }
 
 ///
-/// Log message with debug level.
+/// Log message with debug level. A message that can not be written is dropped, logging never throws.
 ///
-ARCSTD_EXPORT auto log_debug(std::string_view msg) -> void;
+ARCSTD_EXPORT auto log_debug(std::string_view msg) noexcept -> void;
 
 ///
 /// Log message with info level.
 ///
-ARCSTD_EXPORT auto log_info(std::string_view msg) -> void;
+ARCSTD_EXPORT auto log_info(std::string_view msg) noexcept -> void;
 
 ///
 /// Log message with warning level.
 ///
-ARCSTD_EXPORT auto log_warn(std::string_view msg) -> void;
+ARCSTD_EXPORT auto log_warn(std::string_view msg) noexcept -> void;
 
 ///
 /// Log message with error level.
 ///
-ARCSTD_EXPORT auto log_error(std::string_view msg) -> void;
+ARCSTD_EXPORT auto log_error(std::string_view msg) noexcept -> void;
 
 ///
 /// Init logger and shutdown logger with RAII.
@@ -68,7 +69,56 @@ struct ARCSTD_EXPORT logger final
   ///
   explicit logger(const std::filesystem::path& data_folder, std::string header = {});
   ~logger() noexcept;
+
+  logger(const logger&) = delete;
+  logger(logger&&) = delete;
+  auto operator=(const logger&) -> logger& = delete;
+  auto operator=(logger&&) -> logger& = delete;
 };
+
+namespace detail
+{
+
+///
+/// Log the message \p fmt formats of \p args with \p Level, the LOG_ macros call it. A message that can not be
+/// formatted is logged as format error, one that can not be written is dropped.
+///
+template<logger_level Level, typename... Args>
+auto log_formatted(const std::format_string<Args...> fmt, Args&&... args) noexcept -> void
+{
+  try
+  {
+    try
+    {
+      const auto message = std::format(fmt, std::forward<Args>(args)...);
+      if constexpr(Level == logger_level::debug)
+      {
+        log_debug(message);
+      }
+      else if constexpr(Level == logger_level::info)
+      {
+        log_info(message);
+      }
+      else if constexpr(Level == logger_level::warning)
+      {
+        log_warn(message);
+      }
+      else if constexpr(Level == logger_level::error)
+      {
+        log_error(message);
+      }
+    }
+    catch(const std::format_error& exception)
+    {
+      log_error(std::format("[INTERNAL_FMT_STR] format error: {}.", exception.what()));
+    }
+  }
+  catch(...) // NOLINT(bugprone-empty-catch) logging never throws, a message without memory is dropped
+  {
+  }
+}
+
+} // namespace detail
 
 } // namespace arcstd::util
 
@@ -76,26 +126,15 @@ struct ARCSTD_EXPORT logger final
 /// Internal std formatted string helper macro.
 ///
 // clang-format off
-#define INT_LOG_INTERNAL_FMT_STR(LEVEL, FMT_STR, ...)                                                                                                                                                                   \
-  {                                                                                                                                                                                                                     \
-    if(LEVEL >= ::arcstd::util::global_log_level())                                                                                                                                                                     \
-    {                                                                                                                                                                                                                   \
-      static constexpr std::source_location __log_source_location = std::source_location::current();                                                                                                                    \
-      static constexpr auto __log_folder_name  = ::arcstd::util::filter_folder_name(__log_source_location);                                                                                                             \
-      static constexpr auto __log_file_name  = ::arcstd::util::filter_file_name(__log_source_location);                                                                                                                 \
-      try                                                                                                                                                                                                               \
-      {                                                                                                                                                                                                                 \
-        const auto log_string = std::format("[{}::{}] " FMT_STR, __log_folder_name, __log_file_name __VA_OPT__(,) __VA_ARGS__);                                                                                         \
-        if      constexpr(LEVEL == ::arcstd::util::logger_level::debug)   { ::arcstd::util::log_debug(log_string); }                                                                                                    \
-        else if constexpr(LEVEL == ::arcstd::util::logger_level::info)    { ::arcstd::util::log_info(log_string);  }                                                                                                    \
-        else if constexpr(LEVEL == ::arcstd::util::logger_level::warning) { ::arcstd::util::log_warn(log_string);  }                                                                                                    \
-        else if constexpr(LEVEL == ::arcstd::util::logger_level::error)   { ::arcstd::util::log_error(log_string); }                                                                                                    \
-      }                                                                                                                                                                                                                 \
-      catch(std::format_error& exception)                                                                                                                                                                               \
-      {                                                                                                                                                                                                                 \
-        ::arcstd::util::log_error(std::format("[INTERNAL_FMT_STR] format error: {}.", exception.what()));                                                                                                               \
-      }                                                                                                                                                                                                                 \
-    }                                                                                                                                                                                                                   \
+#define INT_LOG_INTERNAL_FMT_STR(LEVEL, FMT_STR, ...)                                                                                                                                                                  \
+  {                                                                                                                                                                                                                    \
+    if(LEVEL >= ::arcstd::util::global_log_level())                                                                                                                                                                    \
+    {                                                                                                                                                                                                                  \
+      static constexpr std::source_location __log_source_location = std::source_location::current();                                                                                                                   \
+      static constexpr auto __log_folder_name  = ::arcstd::util::filter_folder_name(__log_source_location);                                                                                                            \
+      static constexpr auto __log_file_name  = ::arcstd::util::filter_file_name(__log_source_location);                                                                                                                \
+      ::arcstd::util::detail::log_formatted<LEVEL>("[{}::{}] " FMT_STR, __log_folder_name, __log_file_name __VA_OPT__(,) __VA_ARGS__);                                                                                 \
+    }                                                                                                                                                                                                                  \
   }
 // clang-format on
 

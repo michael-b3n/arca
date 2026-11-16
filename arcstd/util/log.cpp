@@ -141,50 +141,52 @@ inline auto get_logger() -> std::shared_ptr<spdlog::logger>
   return spdlog::get(std::string{logger_name});
 }
 
+///
+/// Log \p msg with \p level, drop it if it can not be written.
+///
+inline auto log_message(const spdlog::level::level_enum level, const std::string_view msg) noexcept -> void
+{
+  try
+  {
+    const auto lock = lock_logger();
+    if(const auto logger = get_logger())
+    {
+      logger->log(level, msg);
+    }
+  }
+  catch(...) // NOLINT(bugprone-empty-catch) logging never throws, a message that can not be written is dropped
+  {
+  }
+}
+
 } // namespace
 
 ///
 ///
-auto log_debug(std::string_view msg) -> void
+auto log_debug(const std::string_view msg) noexcept -> void
 {
-  const auto lock = lock_logger();
-  if(const auto logger = get_logger())
-  {
-    logger->debug(msg);
-  }
+  log_message(spdlog::level::debug, msg);
 }
 
 ///
 ///
-auto log_info(std::string_view msg) -> void
+auto log_info(const std::string_view msg) noexcept -> void
 {
-  const auto lock = lock_logger();
-  if(const auto logger = get_logger())
-  {
-    logger->info(msg);
-  }
+  log_message(spdlog::level::info, msg);
 }
 
 ///
 ///
-auto log_warn(std::string_view msg) -> void
+auto log_warn(const std::string_view msg) noexcept -> void
 {
-  const auto lock = lock_logger();
-  if(const auto logger = get_logger())
-  {
-    logger->warn(msg);
-  }
+  log_message(spdlog::level::warn, msg);
 }
 
 ///
 ///
-auto log_error(std::string_view msg) -> void
+auto log_error(const std::string_view msg) noexcept -> void
 {
-  const auto lock = lock_logger();
-  if(const auto logger = get_logger())
-  {
-    logger->error(msg);
-  }
+  log_message(spdlog::level::err, msg);
 }
 
 ///

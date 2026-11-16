@@ -88,9 +88,9 @@ property_tree::property_tree(const std::filesystem::path& tree_file_path)
 ///
 property_tree::~property_tree() noexcept
 {
-  const auto lock = std::scoped_lock{mtx_};
   try
   {
+    const auto lock = std::scoped_lock{mtx_};
     boost::property_tree::write_xml(
       tree_file_path_.generic_string(),
       tree_,
@@ -98,9 +98,9 @@ property_tree::~property_tree() noexcept
       boost::property_tree::xml_writer_make_settings<std::string>(' ', 2)
     );
   }
-  catch(const boost::property_tree::xml_parser_error& e)
+  catch(...)
   {
-    LOG_ERROR("failed to write property file: file={}, exception={}", tree_file_path_.generic_string(), e.what());
+    LOG_ERROR("failed to write property file: file={:g}, exception={}", tree_file_path_, util::exception_report());
   }
 }
 
