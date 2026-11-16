@@ -1,7 +1,7 @@
 #include "arcstd/lua/lua_engine.hpp"
 #include "arcstd/lua/names.hpp"
-#include "arcstd/lua/object_cast.hpp"
 #include "arcstd/lua/sol.hpp"
+#include "arcstd/lua/sol_conversion.hpp"
 #include "arcstd/lua/state.hpp"
 #include "arcstd/lua/state_owner.hpp"
 #include "arcstd/util/exception.hpp"
@@ -81,7 +81,7 @@ struct offered_script final
   }
   auto table = returned.as<sol::table>();
   const auto text = [&](const std::string_view key)
-  { return value_cast<std::string>::from(to_value(table.get<sol::object>(key))); };
+  { return from_value<std::string>(from_sol(table.get<sol::object>(key))); };
   const auto name = text(names::script_name);
   const auto description = text(names::script_description);
   const auto node = text(names::script_node);
@@ -123,7 +123,7 @@ struct offered_script final
   table.for_each(
     [&](const sol::object& key, const sol::object& value)
     {
-      const auto entry = value_cast<std::string>::from(to_value(key));
+      const auto entry = from_value<std::string>(from_sol(key));
       if(!entry || *entry == names::script_name || *entry == names::script_description || *entry == names::script_node)
       {
         return;
@@ -239,7 +239,7 @@ auto lua_engine::import_scripts(const std::vector<std::filesystem::path>& files)
 auto lua_engine::run_script(const std::string_view name, const std::string_view code) const -> std::optional<value>
 {
   auto state = state_owner_->lock();
-  return state.run_script(name, code).transform([](const sol::object& returned) { return to_value(returned); });
+  return state.run_script(name, code).transform([](const sol::object& returned) { return from_sol(returned); });
 }
 
 ///
@@ -285,8 +285,8 @@ auto lua_engine::call(const script_name_type& script, const util::path& id, cons
   {
     return std::nullopt;
   }
-  return state.call(*function, to_object(state->lua_state(), input))
-    .transform([](const sol::object& result) { return to_value(result); });
+  return state.call(*function, to_sol(state->lua_state(), input))
+    .transform([](const sol::object& result) { return from_sol(result); });
 }
 
 ///

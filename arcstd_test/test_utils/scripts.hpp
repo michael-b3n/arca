@@ -47,10 +47,10 @@ inline auto load_scripts(lua::lua_engine& engine) -> void
 ///
 /// \return what \p code returns as T, run as a user script of \p engine, std::nullopt if it failed or returns no T
 ///
-template<lua::value_castable T>
+template<lua::value_convertible T>
 [[nodiscard]] auto script_value(const lua::lua_engine& engine, const std::string& code) -> std::optional<T>
 {
-  return engine.run_script("test.lua", code).and_then([](const lua::value& value) { return lua::value_cast<T>::from(value); });
+  return engine.run_script("test.lua", code).and_then([](const lua::value& value) { return lua::from_value<T>(value); });
 }
 
 ///

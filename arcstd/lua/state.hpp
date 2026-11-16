@@ -4,7 +4,7 @@
   #error "private header of arcstd, a project includes the public ones only"
 #endif
 
-#include "arcstd/lua/function_cast.hpp"
+#include "arcstd/lua/function.hpp"
 #include "arcstd/lua/registration.hpp"
 #include "arcstd/lua/sol.hpp"
 #include "arcstd/util/path.hpp"

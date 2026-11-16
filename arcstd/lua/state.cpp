@@ -1,5 +1,5 @@
 #include "arcstd/lua/state.hpp"
-#include "arcstd/lua/object_cast.hpp"
+#include "arcstd/lua/sol_conversion.hpp"
 #include "arcstd/util/exception.hpp"
 #include "arcstd/util/log.hpp"
 
@@ -67,7 +67,7 @@ auto state::register_function(const util::path& p, function function) -> registr
     return {};
   }
   auto registered = std::make_shared<const std::monostate>();
-  parent->set_function(p.sections().back(), to_object_function(guarded(std::move(function), registered)));
+  parent->set_function(p.sections().back(), to_sol(guarded(std::move(function), registered)));
   return registration{data_, p, std::move(registered)};
 }
 
@@ -84,7 +84,7 @@ auto state::register_functions(const util::path& p, function_table functions) ->
   auto node = parent->create_named(p.sections().back());
   std::ranges::for_each(
     functions,
-    [&](auto& entry) { node.set_function(entry.first, to_object_function(guarded(std::move(entry.second), registered))); }
+    [&](auto& entry) { node.set_function(entry.first, to_sol(guarded(std::move(entry.second), registered))); }
   );
   return registration{data_, p, std::move(registered)};
 }

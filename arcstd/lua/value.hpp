@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <ranges>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -15,67 +16,132 @@ namespace arcstd::lua
 struct value;
 
 ///
-/// Lua nil.
+/// Lua nil: no value, e.g. an argument left out or the value of a key a table does not have.
 ///
-struct value_nil final
-{
-  // Operators
-  auto operator==(const value_nil&) const -> bool = default;
-};
+struct nil final
+{};
 
 ///
-/// A Lua value C++ takes no copy of: a function, a userdata or a thread, or a table nested too deep.
+/// A Lua value C++ gets no copy of: a function, a userdata, a thread, or a table nested too deep or containing itself.
+/// It is no nil, so it is not taken for a value left out. Handed back to Lua, it is nil.
 ///
-struct value_opaque final
-{
-  // Operators
-  auto operator==(const value_opaque&) const -> bool = default;
-};
+struct unsupported final
+{};
 
 ///
-/// Lua table, its entries by key.
+/// A Lua integer.
 ///
-struct value_table final
+using integer = std::int64_t;
+
+///
+/// A Lua number that is no integer.
+///
+using number = double;
+
+///
+/// Copy of a Lua table, its entries in no order.
+///
+struct table final
 {
+  // Typedefs
+  struct entry;
+
   // Variables
-  std::vector<std::pair<value, value>> entries;
+  std::vector<entry> entries;
 
   // Accessors
   ///
-  /// \return the length of the sequence of the table: how many of the keys 1, 2, 3, ... it has in a row
+  /// \return how many of the keys 1, 2, 3, ... the table has in a row, the length # gives in Lua
   ///
   [[nodiscard]] auto length() const -> std::size_t;
+
+  ///
+  /// \return true if the table is a list: its keys are 1 to its length and no others
+  ///
+  [[nodiscard]] auto is_sequence() const -> bool;
+
+  ///
+  /// \return the values of the keys 1 to the length, in that order
+  ///
+  [[nodiscard]] auto sequence() const -> std::vector<value>;
+
+  ///
+  /// \return the value of the key \p name, nil if the table has none
+  ///
+  [[nodiscard]] auto field(std::string_view name) const -> value;
 };
 
 ///
-/// Copy of a Lua value, what a script hands to C++ and gets from it, \see value_cast. Nil by default.
-/// It holds no reference into the Lua state and may outlive it.
+/// Copy of a Lua value, what a script hands to C++ and gets from it, \see value_conversion. Nil by default.
+/// It holds no reference into the Lua state, so it may outlive it.
 ///
-struct value final : std::variant<value_nil, bool, std::int64_t, double, std::string, value_table, value_opaque>
+struct value final : std::variant<nil, bool, integer, number, std::string, table, unsupported>
 {
-  // Typedefs
-  using integer_type = std::int64_t;
-  using number_type = double;
-
   // Structors
   using variant::variant;
 };
 
 ///
+/// Entry of a table, its key and the value it holds.
 ///
-inline auto value_table::length() const -> std::size_t
+struct table::entry final
 {
-  const auto is_index = [](const value& key)
-  {
-    const auto index = std::get_if<value::integer_type>(&key);
-    return index && *index > 0;
-  };
-  auto indices = entries | std::views::keys | std::views::filter(is_index) |
-                 std::views::transform([](const value& key) { return std::get<value::integer_type>(key); }) |
-                 std::ranges::to<std::vector>();
+  value key;
+  value item;
+};
+
+///
+///
+inline auto table::length() const -> std::size_t
+{
+  const auto index = [](const entry& e) { return std::get_if<integer>(&e.key); };
+  auto indices = entries | std::views::transform(index) |
+                 std::views::filter([](const integer* const i) { return i != nullptr && *i > 0; }) |
+                 std::views::transform([](const integer* const i) { return *i; }) | std::ranges::to<std::vector>();
   std::ranges::sort(indices);
-  const auto end = std::ranges::mismatch(indices, std::views::iota(value::integer_type{1})).in1;
+  const auto end = std::ranges::mismatch(indices, std::views::iota(integer{1})).in1;
   return static_cast<std::size_t>(std::ranges::distance(indices.begin(), end));
+}
+
+///
+///
+inline auto table::is_sequence() const -> bool
+{
+  return entries.size() == length();
+}
+
+///
+///
+inline auto table::sequence() const -> std::vector<value>
+{
+  auto result = std::vector<value>(length());
+  std::ranges::for_each(
+    entries,
+    [&](const entry& e)
+    {
+      const auto index = std::get_if<integer>(&e.key);
+      if(index && *index >= 1 && std::cmp_less_equal(*index, result.size()))
+      {
+        result[static_cast<std::size_t>(*index - 1)] = e.item;
+      }
+    }
+  );
+  return result;
+}
+
+///
+///
+inline auto table::field(const std::string_view name) const -> value
+{
+  const auto it = std::ranges::find_if(
+    entries,
+    [&](const entry& e)
+    {
+      const auto key = std::get_if<std::string>(&e.key);
+      return key && *key == name;
+    }
+  );
+  return it != entries.end() ? it->item : value{};
 }
 
 } // namespace arcstd::lua

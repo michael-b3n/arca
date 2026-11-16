@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arcstd/lua/function_cast.hpp"
+#include "arcstd/lua/function.hpp"
 #include "arcstd/setting/setting.hpp"
 #include "arcstd/setting/setting_common.hpp"
 
@@ -8,7 +8,7 @@ namespace arcstd::lua
 {
 
 ///
-/// The functions \p setting offers to scripts: get(), set(value) and postfix(), \see function_cast. \p setting must
+/// The functions \p setting offers to scripts: get(), set(value) and postfix(), \see to_function. \p setting must
 /// live as long as they are registered.
 /// \return the functions by name
 ///
@@ -24,7 +24,7 @@ template<setting::underlying_setting_type T>
   ///
   functions.emplace(
     "get",
-    function_cast(
+    to_function(
       [&setting] -> erased_type { return setting::create_setting_value_converter<T, erased_type>()(setting.value()); }
     )
   );
@@ -36,7 +36,7 @@ template<setting::underlying_setting_type T>
   ///
   functions.emplace(
     "set",
-    function_cast(
+    to_function(
       [&setting](const erased_type& value) -> bool
       { return setting.value(setting::create_setting_value_converter<erased_type, T>()(value)); }
     )
@@ -45,7 +45,7 @@ template<setting::underlying_setting_type T>
   /// \lua <setting>.postfix()
   /// \return the text shown after the value, e.g. its unit, or an empty text
   ///
-  functions.emplace("postfix", function_cast([&setting] { return setting.postfix; }));
+  functions.emplace("postfix", to_function([&setting] { return setting.postfix; }));
   return functions;
 }
 

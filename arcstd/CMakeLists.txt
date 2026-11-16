@@ -17,7 +17,7 @@ set(ARCSTD_PRIVATE_INC_FILES
   execution/execution.hpp
   lua/internal_scripts.hpp
   lua/names.hpp
-  lua/object_cast.hpp
+  lua/sol_conversion.hpp
   lua/sol.hpp
   lua/state.hpp
   lua/state_owner.hpp

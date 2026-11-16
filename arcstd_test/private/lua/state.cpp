@@ -1,6 +1,6 @@
 #include "test_utils/registrations.hpp"
 
-#include <arcstd/lua/function_cast.hpp>
+#include <arcstd/lua/function.hpp>
 #include <arcstd/lua/setting_functions.hpp>
 #include <arcstd/lua/state.hpp>
 #include <arcstd/lua/state_owner.hpp>
@@ -63,7 +63,7 @@ TEST_CASE("lua_state_register_function", "[lua]")
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
   auto keep = test_utils::registrations{};
-  CHECK(keep(s.register_function("a.b.twice", function_cast([](int x) { return 2 * x; }))));
+  CHECK(keep(s.register_function("a.b.twice", to_function([](int x) { return 2 * x; }))));
   CHECK(s->script("return root.interface.a.b.twice(21)").get<int>() == 42);
   // A wrong argument type is an error instead of a crash
   CHECK_FALSE(s->safe_script("return root.interface.a.b.twice('x')", sol::script_pass_on_error).valid());
@@ -84,16 +84,16 @@ TEST_CASE("lua_state_register_function_converts_the_values", "[lua]")
   // Functions of C++ values only, each converted like the values of a script table
   REQUIRE(keep(s.register_function(
     "f.join",
-    function_cast([](const std::string& text, const std::optional<std::int64_t> count, const std::vector<std::string>& list)
+    to_function([](const std::string& text, const std::optional<std::int64_t> count, const std::vector<std::string>& list)
                   { return std::format("{} {} {}", text, count.value_or(-1), list.size()); })
   )));
-  REQUIRE(keep(s.register_function("f.note", function_cast([&noted](std::string text) { noted = std::move(text); }))));
+  REQUIRE(keep(s.register_function("f.note", to_function([&noted](std::string text) { noted = std::move(text); }))));
   REQUIRE(keep(s.register_function(
-    "f.find", function_cast([](const bool found) { return found ? std::optional{std::string{"x"}} : std::nullopt; })
+    "f.find", to_function([](const bool found) { return found ? std::optional{std::string{"x"}} : std::nullopt; })
   )));
   REQUIRE(keep(s.register_function(
     "f.read",
-    function_cast(
+    to_function(
       [](const bool readable) -> std::expected<std::vector<std::int64_t>, std::string>
       {
         if(!readable)
@@ -123,14 +123,14 @@ TEST_CASE("lua_state_register_function_converts_the_values", "[lua]")
   CHECK(check("select(2, pcall(f.join, 'a', 'b', {})):find('argument 2') ~= nil"));
   CHECK(noted == "text");
 
-  // Only callables of one signature and of values value_cast converts
-  STATIC_REQUIRE(function_castable<int (*)(const std::string&)>);
-  STATIC_REQUIRE_FALSE(function_castable<int (*)(const char*)>);
-  STATIC_REQUIRE_FALSE(function_castable<void (*)(std::string&)>);
-  STATIC_REQUIRE_FALSE(function_castable<std::string_view (*)()>);
-  STATIC_REQUIRE_FALSE(function_castable<int>);
+  // Only callables of one signature and of value_convertible types
+  STATIC_REQUIRE(function_convertible<int (*)(const std::string&)>);
+  STATIC_REQUIRE_FALSE(function_convertible<int (*)(const char*)>);
+  STATIC_REQUIRE_FALSE(function_convertible<void (*)(std::string&)>);
+  STATIC_REQUIRE_FALSE(function_convertible<std::string_view (*)()>);
+  STATIC_REQUIRE_FALSE(function_convertible<int>);
   const auto generic = [](const auto& value) { return value; };
-  STATIC_REQUIRE_FALSE(function_castable<decltype(generic)>);
+  STATIC_REQUIRE_FALSE(function_convertible<decltype(generic)>);
 }
 
 TEST_CASE("lua_state_register_rejects_a_path", "[lua]")
@@ -138,16 +138,16 @@ TEST_CASE("lua_state_register_rejects_a_path", "[lua]")
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
   auto keep = test_utils::registrations{};
-  REQUIRE(keep(s.register_function("a.b", function_cast([]() { return 1; }))));
+  REQUIRE(keep(s.register_function("a.b", to_function([]() { return 1; }))));
 
-  CHECK_FALSE(keep(s.register_function("", function_cast([]() { return 2; }))));
+  CHECK_FALSE(keep(s.register_function("", to_function([]() { return 2; }))));
   // Taken, inside or above a registration
-  CHECK_FALSE(keep(s.register_function("a.b", function_cast([]() { return 2; }))));
-  CHECK_FALSE(keep(s.register_function("a.b.c", function_cast([]() { return 2; }))));
-  CHECK_FALSE(keep(s.register_function("a", function_cast([]() { return 2; }))));
+  CHECK_FALSE(keep(s.register_function("a.b", to_function([]() { return 2; }))));
+  CHECK_FALSE(keep(s.register_function("a.b.c", to_function([]() { return 2; }))));
+  CHECK_FALSE(keep(s.register_function("a", to_function([]() { return 2; }))));
   // Taken by the helpers
-  CHECK_FALSE(keep(s.register_function("util", function_cast([]() { return 2; }))));
-  CHECK_FALSE(keep(s.register_function("util.split", function_cast([]() { return 2; }))));
+  CHECK_FALSE(keep(s.register_function("util", to_function([]() { return 2; }))));
+  CHECK_FALSE(keep(s.register_function("util.split", to_function([]() { return 2; }))));
 
   CHECK(s->script("return root.interface.a.b() == 1 and type(root.interface.util.split) == 'function'").get<bool>());
 }
@@ -159,7 +159,7 @@ TEST_CASE("lua_state_functions_go_with_the_state", "[lua]")
     const auto state_owner = lua::state_owner{};
     auto s = state_owner.lock();
     auto keep = test_utils::registrations{};
-    REQUIRE(keep(s.register_function("a.f", function_cast([captured]() { return *captured; }))));
+    REQUIRE(keep(s.register_function("a.f", to_function([captured]() { return *captured; }))));
     // As on shutdown, before the objects behind the functions are destroyed
     state_owner.shutdown();
     CHECK_FALSE(s.run_script("call.lua", "return a.f()"));
@@ -173,9 +173,9 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
   const auto runs = [&](const std::string& code) { return s.run_script("test.lua", code).has_value(); };
-  auto twice = s.register_function("a.b.twice", function_cast([](int x) { return 2 * x; }));
-  auto value = s.register_function("a.value", function_cast([] { return 1; }));
-  const auto other = s.register_function("other.value", function_cast([] { return 2; }));
+  auto twice = s.register_function("a.b.twice", to_function([](int x) { return 2 * x; }));
+  auto value = s.register_function("a.value", to_function([] { return 1; }));
+  const auto other = s.register_function("other.value", to_function([] { return 2; }));
   REQUIRE((twice && value && other));
   // A script holding the function
   REQUIRE(runs("held = a.b.twice assert(held(2) == 4)"));
@@ -192,7 +192,7 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
     CHECK_FALSE(s.call(holding->as<sol::protected_function>()));
     CHECK(runs("assert(not pcall(a.value, 1, 2) or true)"));
     // The path is free again
-    const auto again = s.register_function("a.b.twice", function_cast([](int x) { return 3 * x; }));
+    const auto again = s.register_function("a.b.twice", to_function([](int x) { return 3 * x; }));
     REQUIRE(again);
     CHECK(runs("assert(a.b.twice(2) == 6)"));
     CHECK_FALSE(s.call(holding->as<sol::protected_function>()));
@@ -224,8 +224,8 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
     auto all = lua::registration{};
     CHECK_FALSE(all);
     // Added one after the other, also one of nothing
-    all << std::move(twice) << std::move(value) << s.register_function("a.value", function_cast([] { return 0; }))
-        << s.register_function("more.value", function_cast([] { return 3; }));
+    all << std::move(twice) << std::move(value) << s.register_function("a.value", to_function([] { return 0; }))
+        << s.register_function("more.value", to_function([] { return 3; }));
     CHECK(all);
     // NOLINTNEXTLINE(bugprone-use-after-move) moved from, they hold nothing
     CHECK_FALSE((twice || value));
@@ -248,7 +248,7 @@ TEST_CASE("lua_state_takes_a_registration_back", "[lua]")
     auto late = lua::registration{};
     {
       const auto owner = lua::state_owner{};
-      late = owner.lock().register_function("f", function_cast([] { return 1; }));
+      late = owner.lock().register_function("f", to_function([] { return 1; }));
       REQUIRE(late);
     }
     late = {};
@@ -263,7 +263,7 @@ TEST_CASE("lua_state_registration_waits_for_the_running_script", "[lua]")
   auto proceed = std::promise<void>{};
   const auto wait = state_owner.lock().register_function(
     "f.wait",
-    function_cast(
+    to_function(
       [&]
       {
         started.set_value();
@@ -271,7 +271,7 @@ TEST_CASE("lua_state_registration_waits_for_the_running_script", "[lua]")
       }
     )
   );
-  auto value = state_owner.lock().register_function("f.value", function_cast([] { return 5; }));
+  auto value = state_owner.lock().register_function("f.value", to_function([] { return 5; }));
   REQUIRE((wait && value));
 
   // The script is inside f.wait, with f.value still to call
@@ -386,7 +386,7 @@ TEST_CASE("lua_state_raises_exceptions_as_errors", "[lua]")
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
   auto keep = test_utils::registrations{};
-  REQUIRE(keep(s.register_function("throwing", function_cast([]() -> int { throw util::exception{"thrown"}; }))));
+  REQUIRE(keep(s.register_function("throwing", to_function([]() -> int { throw util::exception{"thrown"}; }))));
   CHECK(s.run_script("caught.lua", "local ok, message = pcall(throwing) assert(not ok and message:find('thrown'))"));
   CHECK_FALSE(s.run_script("uncaught.lua", "throwing()"));
 }
@@ -406,7 +406,7 @@ TEST_CASE("lua_state_stops_scripts", "[lua]")
     function closing() local x <close> = setmetatable({}, {__close = endless}) endless() end
     function value() return 1 end
   )");
-  REQUIRE(keep(s.register_function("endless", function_cast([&]() { return s.call((*s)["endless"]).has_value(); }))));
+  REQUIRE(keep(s.register_function("endless", to_function([&]() { return s.call((*s)["endless"]).has_value(); }))));
   CHECK(s.run_script("flag.lua", "assert(root == nil and _G == nil)"));
   // Each with a state of its own, a stop is for good
   const auto function = GENERATE(as<std::string>{}, "endless", "calls", "catching", "coroutines", "nested", "closing");
@@ -428,7 +428,7 @@ TEST_CASE("lua_state_protects_shared_tables", "[lua]")
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
   auto keep = test_utils::registrations{};
-  REQUIRE(keep(s.register_function("a.f", function_cast([]() { return 1; }))));
+  REQUIRE(keep(s.register_function("a.f", to_function([]() { return 1; }))));
   const auto runs = [&](const std::string& code) { return s.run_script("test.lua", code).has_value(); };
 
   SECTION("scripts read them")
@@ -456,7 +456,7 @@ TEST_CASE("lua_state_protects_shared_tables", "[lua]")
     // A registered function is a plain function, the views and strings hand out a text instead of their metatable
     CHECK(runs("assert(type(a.f) == 'function' and getmetatable(a.f) == nil)"));
     // Also one with captures, as objects register them
-    REQUIRE(keep(s.register_function("c.f", function_cast([value = 2]() { return value; }))));
+    REQUIRE(keep(s.register_function("c.f", to_function([value = 2]() { return value; }))));
     CHECK(runs("assert(type(c.f) == 'function' and getmetatable(c.f) == nil and c.f() == 2)"));
     CHECK(runs("assert(getmetatable(a) == 'read only' and getmetatable(util) == 'read only')"));
     CHECK(runs("assert(getmetatable(string) == 'read only' and getmetatable('') == 'read only')"));
@@ -495,7 +495,7 @@ TEST_CASE("lua_state_protects_shared_tables", "[lua]")
   }
 
   // The app still changes them
-  REQUIRE(keep(s.register_function("b.f", function_cast([]() { return 2; }))));
+  REQUIRE(keep(s.register_function("b.f", to_function([]() { return 2; }))));
   CHECK(s->script("return root.interface.b.f()").get<int>() == 2);
 }
 

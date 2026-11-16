@@ -2,12 +2,12 @@
 
 #include "arcstd/export.hpp"
 #include "arcstd/lua/embedded_script.hpp"
-#include "arcstd/lua/function_cast.hpp"
+#include "arcstd/lua/function.hpp"
 #include "arcstd/lua/registration.hpp"
 #include "arcstd/lua/script_lock.hpp"
 #include "arcstd/lua/setting_functions.hpp"
 #include "arcstd/lua/value.hpp"
-#include "arcstd/lua/value_cast.hpp"
+#include "arcstd/lua/value_conversion.hpp"
 #include "arcstd/setting/setting.hpp"
 #include "arcstd/setting/setting_common.hpp"
 #include "arcstd/setting/setting_store.hpp"
@@ -46,7 +46,7 @@ class state_owner;
 template<typename M>
 concept script_manifest = requires {
   { M::id } -> std::convertible_to<util::path>;
-} && value_castable<typename M::input> && value_castable<typename M::output>;
+} && value_convertible<typename M::input> && value_convertible<typename M::output>;
 
 ///
 /// Settings of the Lua engine.
@@ -152,10 +152,10 @@ public: // Modifiers
 
   ///
   /// Register a function for scripts at \p p, e.g. "web.fetch", for as long as the registration is kept.
-  /// \p function takes and returns C++ values, \see function_cast. What it reaches must live as long.
+  /// \p function takes and returns C++ values, \see to_function. What it reaches must live as long.
   /// \return the registration to keep, one of nothing if \p p can not be registered, the reason is logged
   ///
-  template<function_castable F>
+  template<function_convertible F>
   [[nodiscard]] auto register_function(const util::path& p, F&& function) const -> registration_type;
 
   ///
@@ -209,10 +209,10 @@ auto lua_engine::scripts() const -> scripts_type
 
 ///
 ///
-template<function_castable F>
+template<function_convertible F>
 auto lua_engine::register_function(const util::path& p, F&& function) const -> registration_type
 {
-  return register_function(p, function_cast(std::forward<F>(function)));
+  return register_function(p, to_function(std::forward<F>(function)));
 }
 
 ///
@@ -229,12 +229,12 @@ template<script_manifest M>
 auto lua_engine::run(const script_name_type& script, const typename M::input& input) const -> std::optional<typename M::output>
 {
   const auto id = util::path{M::id};
-  const auto result = call(script, id, value_cast<typename M::input>::to(input));
+  const auto result = call(script, id, to_value<typename M::input>(input));
   if(!result)
   {
     return std::nullopt;
   }
-  auto output = value_cast<typename M::output>::from(*result);
+  auto output = from_value<typename M::output>(*result);
   if(!output)
   {
     LOG_ERROR("lua script output rejected: script=\"{}\", function=\"{}\"", script, id.string());
