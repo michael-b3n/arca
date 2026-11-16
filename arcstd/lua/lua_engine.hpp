@@ -7,7 +7,7 @@
 #include "arcstd/lua/script_lock.hpp"
 #include "arcstd/lua/setting_functions.hpp"
 #include "arcstd/lua/value.hpp"
-#include "arcstd/lua/value_conversion.hpp"
+#include "arcstd/lua/value_cast.hpp"
 #include "arcstd/setting/setting.hpp"
 #include "arcstd/setting/setting_common.hpp"
 #include "arcstd/setting/setting_store.hpp"
@@ -46,7 +46,7 @@ class state_owner;
 template<typename M>
 concept script_manifest = requires {
   { M::id } -> std::convertible_to<util::path>;
-} && value_convertible<typename M::input> && value_convertible<typename M::output>;
+} && value_castable<typename M::input> && value_castable<typename M::output>;
 
 ///
 /// Settings of the Lua engine.

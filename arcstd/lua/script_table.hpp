@@ -1,7 +1,7 @@
 #pragma once
 
 #include "arcstd/lua/value.hpp"
-#include "arcstd/lua/value_conversion.hpp"
+#include "arcstd/lua/value_cast.hpp"
 #include "arcstd/util/exception.hpp"
 #include "arcstd/util/string_literal.hpp"
 
@@ -22,7 +22,7 @@ namespace arcstd::lua
 ///
 /// Field \p Key of a script_table, a value of type \p T.
 ///
-template<util::string_literal Key, value_convertible T>
+template<util::string_literal Key, value_castable T>
 struct field final
 {
   // Typedefs
@@ -39,7 +39,7 @@ template<typename F>
 concept script_field = requires {
   { F::key } -> std::convertible_to<std::string_view>;
   typename F::type;
-} && value_convertible<typename F::type>;
+} && value_castable<typename F::type>;
 
 ///
 /// Table of the values of \p Fields, a Lua table with a key per field for scripts.
@@ -97,14 +97,14 @@ private: // Implementation
 /// A table with the keys of the fields. Reading, nil is an empty table and a key of no field makes it none.
 ///
 template<script_field... Fields>
-struct value_conversion<script_table<Fields...>> final
+struct value_cast<script_table<Fields...>> final
 {
   // Typedefs
   using script_table_type = script_table<Fields...>;
 
   // Functions
-  [[nodiscard]] static auto to_value(const script_table_type& v) -> value;
-  [[nodiscard]] static auto from_value(const value& v) -> std::optional<script_table_type>;
+  [[nodiscard]] static auto to(const script_table_type& v) -> value;
+  [[nodiscard]] static auto from(const value& v) -> std::optional<script_table_type>;
 
 private: // Implementation
   template<typename T>
@@ -171,12 +171,12 @@ consteval auto script_table<Fields...>::index() -> std::size_t
 ///
 ///
 template<script_field... Fields>
-auto value_conversion<script_table<Fields...>>::to_value(const script_table_type& v) -> value
+auto value_cast<script_table<Fields...>>::to(const script_table_type& v) -> value
 {
   auto result = table{};
   [&]<std::size_t... I>(std::index_sequence<I...>)
   {
-    (result.entries.emplace_back(value{std::string{Fields::key}}, lua::to_value(std::get<I>(v.values()))), ...);
+    (result.entries.emplace_back(value{std::string{Fields::key}}, to_value(std::get<I>(v.values()))), ...);
   }(std::index_sequence_for<Fields...>{});
   return value{std::move(result)};
 }
@@ -184,7 +184,7 @@ auto value_conversion<script_table<Fields...>>::to_value(const script_table_type
 ///
 ///
 template<script_field... Fields>
-auto value_conversion<script_table<Fields...>>::from_value(const value& v) -> std::optional<script_table_type>
+auto value_cast<script_table<Fields...>>::from(const value& v) -> std::optional<script_table_type>
 {
   // nil is an empty table, so a script may leave out a table of optional fields only
   const auto empty = table{};
@@ -212,9 +212,9 @@ auto value_conversion<script_table<Fields...>>::from_value(const value& v) -> st
 ///
 template<script_field... Fields>
 template<typename T>
-auto value_conversion<script_table<Fields...>>::assign(T& target, const value& v) -> bool
+auto value_cast<script_table<Fields...>>::assign(T& target, const value& v) -> bool
 {
-  auto converted = lua::from_value<T>(v);
+  auto converted = from_value<T>(v);
   if(converted)
   {
     target = std::move(*converted);

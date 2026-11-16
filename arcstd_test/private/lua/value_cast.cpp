@@ -1,7 +1,7 @@
 #include <arcstd/lua/script_table.hpp>
 #include <arcstd/lua/sol.hpp>
 #include <arcstd/lua/sol_conversion.hpp>
-#include <arcstd/lua/value_conversion.hpp>
+#include <arcstd/lua/value_cast.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -23,7 +23,7 @@ namespace
 ///
 /// \return \p v converted to Lua and back
 ///
-template<value_convertible T>
+template<value_castable T>
 [[nodiscard]] auto round_trip(const sol::state& lua, const T& v) -> std::optional<T>
 {
   return from_value<T>(from_sol(to_sol(lua.lua_state(), to_value<T>(v))));
@@ -32,7 +32,7 @@ template<value_convertible T>
 ///
 /// \return what Lua \p expression is as T
 ///
-template<value_convertible T>
+template<value_castable T>
 [[nodiscard]] auto from_script(sol::state& lua, const std::string& expression) -> std::optional<T>
 {
   return from_value<T>(from_sol(lua.script("return " + expression).get<sol::object>()));
@@ -40,7 +40,7 @@ template<value_convertible T>
 
 } // namespace
 
-TEST_CASE("lua_value_conversion_converts_basic_values", "[lua]")
+TEST_CASE("lua_value_cast_converts_basic_values", "[lua]")
 {
   auto lua = sol::state{};
   CHECK(round_trip(lua, true) == true);
@@ -64,7 +64,7 @@ TEST_CASE("lua_value_conversion_converts_basic_values", "[lua]")
   CHECK_FALSE(from_script<bool>(lua, "nil"));
 }
 
-TEST_CASE("lua_value_conversion_throws_for_an_integer_lua_can_not_hold", "[lua]")
+TEST_CASE("lua_value_cast_throws_for_an_integer_lua_can_not_hold", "[lua]")
 {
   const auto lua = sol::state{};
   using limits = std::numeric_limits<std::uint64_t>;
@@ -77,7 +77,7 @@ TEST_CASE("lua_value_conversion_throws_for_an_integer_lua_can_not_hold", "[lua]"
   CHECK(round_trip(lua, std::numeric_limits<std::int64_t>::min()) == std::numeric_limits<std::int64_t>::min());
 }
 
-TEST_CASE("lua_value_conversion_converts_containers", "[lua]")
+TEST_CASE("lua_value_cast_converts_containers", "[lua]")
 {
   auto lua = sol::state{};
   using optional_text = std::optional<std::string>;
@@ -136,7 +136,7 @@ TEST_CASE("lua_value_conversion_converts_containers", "[lua]")
   CHECK_FALSE(from_script<flags>(lua, "{x = 1}"));
 }
 
-TEST_CASE("lua_value_conversion_reads_a_table_by_its_keys", "[lua]")
+TEST_CASE("lua_value_cast_reads_a_table_by_its_keys", "[lua]")
 {
   // Built in C++, the sequence of a table is its keys 1, 2, 3, ... as in Lua
   using numbers = std::map<std::int64_t, std::string>;
@@ -173,37 +173,37 @@ TEST_CASE("lua_value_conversion_reads_a_table_by_its_keys", "[lua]")
   );
 }
 
-TEST_CASE("lua_value_conversion_takes_plain_value_types_only", "[lua]")
+TEST_CASE("lua_value_cast_takes_plain_value_types_only", "[lua]")
 {
-  STATIC_REQUIRE(value_convertible<bool>);
-  STATIC_REQUIRE(value_convertible<std::int64_t>);
-  STATIC_REQUIRE(value_convertible<std::chrono::seconds>);
-  STATIC_REQUIRE(value_convertible<std::map<std::string, std::vector<std::optional<double>>>>);
+  STATIC_REQUIRE(value_castable<bool>);
+  STATIC_REQUIRE(value_castable<std::int64_t>);
+  STATIC_REQUIRE(value_castable<std::chrono::seconds>);
+  STATIC_REQUIRE(value_castable<std::map<std::string, std::vector<std::optional<double>>>>);
   // Const types, a const bool would even be taken as an integer
-  STATIC_REQUIRE_FALSE(value_convertible<const bool>);
-  STATIC_REQUIRE_FALSE(value_convertible<const int>);
-  STATIC_REQUIRE_FALSE(value_convertible<const double>);
-  STATIC_REQUIRE_FALSE(value_convertible<const std::string>);
-  STATIC_REQUIRE_FALSE(value_convertible<const std::chrono::seconds>);
+  STATIC_REQUIRE_FALSE(value_castable<const bool>);
+  STATIC_REQUIRE_FALSE(value_castable<const int>);
+  STATIC_REQUIRE_FALSE(value_castable<const double>);
+  STATIC_REQUIRE_FALSE(value_castable<const std::string>);
+  STATIC_REQUIRE_FALSE(value_castable<const std::chrono::seconds>);
   // References, from would hand out one to a value that is gone
-  STATIC_REQUIRE_FALSE(value_convertible<int&>);
-  STATIC_REQUIRE_FALSE(value_convertible<const int&>);
-  STATIC_REQUIRE_FALSE(value_convertible<const std::string&>);
-  STATIC_REQUIRE_FALSE(value_convertible<std::chrono::seconds&>);
-  STATIC_REQUIRE_FALSE(value_convertible<const std::chrono::seconds&>);
+  STATIC_REQUIRE_FALSE(value_castable<int&>);
+  STATIC_REQUIRE_FALSE(value_castable<const int&>);
+  STATIC_REQUIRE_FALSE(value_castable<const std::string&>);
+  STATIC_REQUIRE_FALSE(value_castable<std::chrono::seconds&>);
+  STATIC_REQUIRE_FALSE(value_castable<const std::chrono::seconds&>);
   // Pointers and views
-  STATIC_REQUIRE_FALSE(value_convertible<int*>);
-  STATIC_REQUIRE_FALSE(value_convertible<const char*>);
-  STATIC_REQUIRE_FALSE(value_convertible<std::string*>);
-  STATIC_REQUIRE_FALSE(value_convertible<std::string_view>);
+  STATIC_REQUIRE_FALSE(value_castable<int*>);
+  STATIC_REQUIRE_FALSE(value_castable<const char*>);
+  STATIC_REQUIRE_FALSE(value_castable<std::string*>);
+  STATIC_REQUIRE_FALSE(value_castable<std::string_view>);
   // Neither inside the containers
-  STATIC_REQUIRE_FALSE(value_convertible<std::vector<const char*>>);
-  STATIC_REQUIRE_FALSE(value_convertible<std::optional<std::string_view>>);
-  STATIC_REQUIRE_FALSE(value_convertible<std::map<std::string, const int>>);
-  STATIC_REQUIRE_FALSE(value_convertible<std::map<int*, int>>);
+  STATIC_REQUIRE_FALSE(value_castable<std::vector<const char*>>);
+  STATIC_REQUIRE_FALSE(value_castable<std::optional<std::string_view>>);
+  STATIC_REQUIRE_FALSE(value_castable<std::map<std::string, const int>>);
+  STATIC_REQUIRE_FALSE(value_castable<std::map<int*, int>>);
 }
 
-TEST_CASE("lua_value_conversion_converts_script_tables", "[lua]")
+TEST_CASE("lua_value_cast_converts_script_tables", "[lua]")
 {
   auto lua = sol::state{};
   using table =

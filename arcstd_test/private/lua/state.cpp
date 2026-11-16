@@ -123,7 +123,7 @@ TEST_CASE("lua_state_register_function_converts_the_values", "[lua]")
   CHECK(check("select(2, pcall(f.join, 'a', 'b', {})):find('argument 2') ~= nil"));
   CHECK(noted == "text");
 
-  // Only callables of one signature and of value_convertible types
+  // Only callables of one signature and of value_castable types
   STATIC_REQUIRE(function_convertible<int (*)(const std::string&)>);
   STATIC_REQUIRE_FALSE(function_convertible<int (*)(const char*)>);
   STATIC_REQUIRE_FALSE(function_convertible<void (*)(std::string&)>);

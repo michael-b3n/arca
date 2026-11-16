@@ -1,7 +1,7 @@
 #pragma once
 
 #include "arcstd/lua/value.hpp"
-#include "arcstd/lua/value_conversion.hpp"
+#include "arcstd/lua/value_cast.hpp"
 #include "arcstd/util/exception.hpp"
 
 #include <concepts>
@@ -39,7 +39,7 @@ namespace detail
 template<typename T>
 struct is_expected_result final : std::false_type
 {};
-template<value_convertible T, value_convertible E>
+template<value_castable T, value_castable E>
 struct is_expected_result<std::expected<T, E>> final : std::true_type
 {};
 template<typename T>
@@ -49,13 +49,13 @@ concept expected_result = is_expected_result<T>::value;
 /// What a function for scripts returns: nothing, a value or an expected_result.
 ///
 template<typename T>
-concept function_result = std::is_void_v<T> || value_convertible<T> || expected_result<T>;
+concept function_result = std::is_void_v<T> || value_castable<T> || expected_result<T>;
 
 ///
 /// \return the argument \p index of a call from a script, nil if it is left out
 /// \throw util::exception if it is no T, the script gets it as error
 ///
-template<value_convertible T>
+template<value_castable T>
 [[nodiscard]] auto argument(const std::span<const value> arguments, const std::size_t index) -> T
 {
   const auto left_out = value{};
@@ -68,10 +68,10 @@ template<value_convertible T>
 }
 
 ///
-/// What a function for scripts takes: a value_convertible type, by value or const reference.
+/// What a function for scripts takes: a value_castable type, by value or const reference.
 ///
 template<typename T>
-concept function_parameter = value_convertible<std::remove_cvref_t<T>> && std::convertible_to<std::remove_cvref_t<T>, T>;
+concept function_parameter = value_castable<std::remove_cvref_t<T>> && std::convertible_to<std::remove_cvref_t<T>, T>;
 
 ///
 /// \return the function a script calls in place of \p callable, \see to_function
@@ -90,7 +90,7 @@ template<typename R, typename... A>
       call(std::index_sequence_for<A...>{});
       return {};
     }
-    else if constexpr(value_convertible<R>)
+    else if constexpr(value_castable<R>)
     {
       return {to_value(call(std::index_sequence_for<A...>{}))};
     }
@@ -116,13 +116,13 @@ template<typename R, typename... A>
 
 ///
 /// Callables to_function converts: one call signature, e.g. a lambda that is not generic, its parameters and its
-/// result value_convertible.
+/// result value_castable.
 ///
 template<typename F>
 concept function_convertible = requires(F&& callable) { detail::wrapped(std::function{std::forward<F>(callable)}); };
 
 ///
-/// \return \p callable as function for scripts. It takes and returns C++ values, \see value_conversion. An argument
+/// \return \p callable as function for scripts. It takes and returns C++ values, \see value_cast. An argument
 /// of another type is an error for the script, one left out is nil, extra ones are ignored.
 ///
 template<function_convertible F>

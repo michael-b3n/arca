@@ -75,7 +75,7 @@ struct table final
 
 ///
 /// Copy of a Lua value, what a script hands to C++ and gets from it,
-/// \see value_conversion. Nil by default. It holds no reference into
+/// \see value_cast. Nil by default. It holds no reference into
 /// the Lua state, so it may outlive it.
 ///
 struct value final : std::variant<nil, bool, integer, number, std::string, table, unsupported>
