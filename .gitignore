@@ -1,6 +1,7 @@
 # Custom
 /build
 /build-shared
+/install
 /CMakeUserPresets.json
 /.vscode
 /.cache

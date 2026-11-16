@@ -63,9 +63,16 @@ endif()
 option(ARCA_BUILD_TESTS "Build the tests of arca and arcstd_test_utils" ${PROJECT_IS_TOP_LEVEL})
 
 #
-# arcstd is static unless chosen otherwise, arcqml is always static.
+# arcstd is static unless chosen otherwise, by this option or by CMake's BUILD_SHARED_LIBS. A build
+# makes one kind, a static and a shared build install side by side. arcqml is always static.
 #
-option(ARCA_BUILD_SHARED "Build arcstd as a shared library" OFF)
+option(ARCA_BUILD_SHARED "Build arcstd as a shared library" ${BUILD_SHARED_LIBS})
+
+#
+# Install arcstd as CMake package arca, for a project that finds it with find_package(arca). A
+# project including arca with add_subdirectory uses it from the build and installs nothing of it.
+#
+option(ARCA_INSTALL "Install arcstd and the CMake package arca" ${PROJECT_IS_TOP_LEVEL})
 
 #
 # Include all subdirectories.
@@ -78,4 +85,12 @@ add_subdirectory(arcstd)
 add_subdirectory(arcqml)
 if(ARCA_BUILD_TESTS)
   add_subdirectory(arcstd_test)
+endif()
+
+#
+# The package config, it loads the targets of the kind a project asks for.
+#
+if(ARCA_INSTALL)
+  include(GNUInstallDirs)
+  install(FILES tools/cmake/arca-config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/arca)
 endif()

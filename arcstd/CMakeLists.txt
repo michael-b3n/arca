@@ -26,7 +26,7 @@ set(ARCSTD_PRIVATE_INC_FILES
   web/web_request.hpp
 )
 list(TRANSFORM ARCSTD_PRIVATE_INC_FILES PREPEND "${CMAKE_CURRENT_LIST_DIR}/")
-set(ARCSTD_PUBLIC_INC_FILES ${ARCSTD_INC_FILES})
+set(ARCSTD_PUBLIC_INC_FILES ${ARCSTD_INC_FILES} ${CMAKE_CURRENT_LIST_DIR}/export.hpp)
 list(REMOVE_ITEM ARCSTD_PUBLIC_INC_FILES ${ARCSTD_PRIVATE_INC_FILES})
 
 #
@@ -52,7 +52,8 @@ pkg_search_module(LUA REQUIRED IMPORTED_TARGET lua5.4)
 pkg_search_module(SQLITE REQUIRED IMPORTED_TARGET sqlite3)
 
 #
-# The libraries only the sources and the private headers need.
+# The libraries only the sources and the private headers need. A static arcstd passes them on to
+# the link of its users, the header only ones are left out of the installed package, \see install.
 #
 set(ARCSTD_PRIVATE_LIBRARIES
   Boost::filesystem
@@ -62,9 +63,9 @@ set(ARCSTD_PRIVATE_LIBRARIES
   PkgConfig::LIBCURL
   PkgConfig::LUA
   PkgConfig::SQLITE
-  sol2::sol2
-  beman::execution
-  rapidcsv::rapidcsv
+  $<BUILD_INTERFACE:sol2::sol2>
+  $<BUILD_INTERFACE:beman::execution>
+  $<BUILD_INTERFACE:rapidcsv::rapidcsv>
 )
 
 cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH ARCSTD_INCLUDE_DIR)
@@ -75,18 +76,20 @@ cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH ARCSTD_INCLUDE_DIR)
 function(add_arcstd_library target type)
   add_library(${target} ${type})
 
-  # The public headers are header sets. Their folders are the include paths: the one above, for "arcstd/...".
-  # The generated header is a set of its own, the build folder may lie inside the other one.
+  # The public headers are a header set. Its folder is the include path: the one above, for "arcstd/...".
   target_sources(${target}
     PRIVATE ${ARCSTD_SRC_FILES} ${ARCSTD_PRIVATE_INC_FILES}
     PUBLIC FILE_SET HEADERS
     BASE_DIRS ${ARCSTD_INCLUDE_DIR}
     FILES ${ARCSTD_PUBLIC_INC_FILES}
-    PUBLIC FILE_SET generated TYPE HEADERS
-    BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/include
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/include/arcstd/export.hpp
   )
   target_compile_definitions(${target} PRIVATE ARCSTD_INTERNAL)
+  target_compile_features(${target} PUBLIC cxx_std_26)
+
+  # One export.hpp for both kinds, a static library tells it so.
+  if(type STREQUAL "STATIC")
+    target_compile_definitions(${target} PUBLIC ARCSTD_STATIC_DEFINE)
+  endif()
 
   # Only what is marked ARCSTD_EXPORT leaves a shared library.
   set_target_properties(${target} PROPERTIES
@@ -125,15 +128,30 @@ add_library(arca::arcstd ALIAS ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
 
 #
-# ARCSTD_EXPORT, written for the kind of library arcstd is.
+# Install arcstd with its public headers and the header only libraries they include, as package
+# arca, \see tools/cmake/arca-config.cmake. Each kind has a targets file of its own, so a static
+# and a shared build install into one prefix.
 #
-include(GenerateExportHeader)
-generate_export_header(${PROJECT_NAME}
-  EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/include/arcstd/export.hpp
-  EXPORT_MACRO_NAME ARCSTD_EXPORT
-  NO_EXPORT_MACRO_NAME ARCSTD_NO_EXPORT
-  STATIC_DEFINE ARCSTD_STATIC_DEFINE
-)
+if(ARCA_INSTALL)
+  include(GNUInstallDirs)
+  if(ARCA_BUILD_SHARED)
+    set(ARCSTD_KIND shared)
+  else()
+    set(ARCSTD_KIND static)
+  endif()
+  install(TARGETS ${PROJECT_NAME} incbin magic_enum
+    EXPORT arca_targets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+  install(EXPORT arca_targets
+    NAMESPACE arca::
+    FILE arca-${ARCSTD_KIND}-targets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/arca
+  )
+endif()
 
 #
 # arcstd_internals is arcstd for the tests of its internals: with the private headers and what they need. A shared
@@ -143,7 +161,6 @@ if(ARCA_BUILD_TESTS)
   add_library(arcstd_internals INTERFACE)
   if(ARCA_BUILD_SHARED)
     add_arcstd_library(arcstd_static STATIC)
-    target_compile_definitions(arcstd_static PUBLIC ARCSTD_STATIC_DEFINE)
     set_target_properties(arcstd_static PROPERTIES EXCLUDE_FROM_ALL ON)
     target_link_libraries(arcstd_internals INTERFACE arcstd_static)
   else()
