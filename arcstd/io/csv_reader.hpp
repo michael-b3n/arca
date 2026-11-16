@@ -15,6 +15,7 @@ namespace rapidcsv
 {
 class Document;
 } // namespace rapidcsv
+
 namespace arcstd::io
 {
 

@@ -46,6 +46,7 @@ namespace detail
 ///
 template<typename T>
 struct signal_signature_extractor;
+
 template<typename R, typename... Args>
 struct signal_signature_extractor<R(Args...)> final
 {
@@ -81,6 +82,7 @@ public:
 ///
 template<signal_like T, template<typename...> typename F>
 struct to_functional;
+
 template<typename T>
 struct to_functional<T, std::function> final
 {

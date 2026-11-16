@@ -189,8 +189,7 @@ using pack_n_types_t = typename pack_n_types<P, T, N>::type;
 ///
 template<packaged P, typename T>
 struct type_index;
-template<packaged P, typename T>
-struct type_index;
+
 template<template<typename...> typename P, typename... Args, typename T>
 struct type_index<P<Args...>, T> final
 {

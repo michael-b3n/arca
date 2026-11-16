@@ -65,6 +65,7 @@ inline constexpr bool are_same_v = are_same<T...>::value;
 ///
 template<typename T>
 struct conditional_unsigned;
+
 template<std::integral T>
 struct conditional_unsigned<T> final
 {
