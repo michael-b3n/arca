@@ -49,6 +49,7 @@ auto to_line_reader_params(const csv_reader::params& p) -> rapidcsv::LineReaderP
 csv_reader::csv_reader(const std::span<const std::byte> data, const params& p)
 {
   auto stream = std::istringstream{
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast) bytes read as chars, a char may alias any byte
     std::string{reinterpret_cast<const char*>(data.data()), data.size()},
     std::ios::binary
   };

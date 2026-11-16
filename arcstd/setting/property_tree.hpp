@@ -42,7 +42,7 @@ public: // Creator
 
 public: // Structors
   property_tree() = default;
-  property_tree(const std::filesystem::path& tree_file_path);
+  explicit property_tree(const std::filesystem::path& tree_file_path);
   ~property_tree() noexcept;
 };
 

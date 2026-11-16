@@ -21,7 +21,7 @@ public: // Typedefs
 
 public: // Structors
   scope_guard() = default;
-  scope_guard(on_destruction_type&& on_destruction);
+  explicit scope_guard(on_destruction_type&& on_destruction);
   ~scope_guard() noexcept;
   scope_guard(scope_guard&& rhs) noexcept;
   scope_guard(const scope_guard&) = delete;

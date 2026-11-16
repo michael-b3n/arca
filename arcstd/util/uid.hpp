@@ -47,7 +47,7 @@ public: // Operators
   constexpr auto operator<=>(const uid&) const = default;
 
 private: // Structors
-  constexpr uid(underlying_type value);
+  constexpr explicit uid(underlying_type value);
 };
 
 ///
@@ -57,7 +57,7 @@ private: // Structors
 template<typename Tag>
 auto uid<Tag>::new_uid() -> uid<tag_type>
 {
-  return {detail::next_uid_value()};
+  return uid{detail::next_uid_value()};
 }
 
 ///

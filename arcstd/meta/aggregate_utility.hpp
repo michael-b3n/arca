@@ -17,11 +17,13 @@ struct any_type final
 {
   any_type() = default;
   template<typename T>
+  // NOLINTNEXTLINE(misc-explicit-constructor) converts to any member, that is its purpose
   operator T&&()
   {
     return std::declval<T&&>();
   }
   template<typename T>
+  // NOLINTNEXTLINE(misc-explicit-constructor) converts to any member, that is its purpose
   operator T&()
   {
     return std::declval<T&>();

@@ -24,6 +24,7 @@ public: // Typedefs
 
 public: // Structors
   template<underlying_setting_type U>
+  // NOLINTNEXTLINE(misc-explicit-constructor) erases the type of any setting it is given
   setting_type_erased(const std::shared_ptr<setting<U>>& setting);
 
 public: // Accessors

@@ -41,7 +41,7 @@ inline constexpr find_uint_t find_uint;
 constexpr auto find_uint_t::operator()(const std::string_view text) const -> std::optional<result>
 {
   std::uint32_t value{0};
-  const auto retval = std::from_chars(text.data(), text.end(), value);
+  const auto retval = std::from_chars(text.data(), text.data() + text.size(), value);
   if(retval.ec != decltype(retval.ec){})
   {
     return std::nullopt;

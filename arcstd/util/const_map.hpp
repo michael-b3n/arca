@@ -76,6 +76,7 @@ public: // Structors
   /// \tparam ...P pack of type pair
   ///
   template<typename... P>
+  // NOLINTNEXTLINE(misc-explicit-constructor) a map is written as a braced list of its pairs
   constexpr const_map(P&&... p)
     requires(meta::are_same_v<std::pair<first_type, second_type>, std::remove_cvref_t<P>...>);
 
@@ -264,6 +265,7 @@ constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::is_equal(
   return static_cast<comparable_type<decltype(lhs)>>(lhs) == static_cast<comparable_type<decltype(rhs)>>(rhs);
 }
 
+// NOLINTBEGIN(modernize-avoid-c-arrays) a braced list of pairs gives its size only to a C array
 namespace detail
 {
 
@@ -297,5 +299,6 @@ consteval auto make_const_bimap(std::pair<F, S> (&&p)[N]) -> auto
   static constexpr auto bidirectional = true;
   return detail::make_const_map_impl<F, S, N, bidirectional>(std::move(p), std::make_index_sequence<N>{});
 }
+// NOLINTEND(modernize-avoid-c-arrays)
 
 } // namespace arcstd::util

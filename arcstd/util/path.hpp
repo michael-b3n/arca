@@ -28,9 +28,11 @@ class ARCSTD_EXPORT path final
 
 public: // Structors
   path() = default;
+  // NOLINTBEGIN(misc-explicit-constructor) a path is given as its string or its sections
   path(const util::string::string_view_type auto& p);
   path(const std::ranges::input_range auto& sections)
     requires(!util::string::string_view_type<decltype(sections)>);
+  // NOLINTEND(misc-explicit-constructor)
 
 public: // Operators
   auto operator<=>(const path& other) const = default;

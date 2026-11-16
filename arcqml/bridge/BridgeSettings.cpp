@@ -14,6 +14,7 @@ namespace
 
 // Instance the QML layer operates on. It is registered by the constructor of the
 // application owned instance and reset when that instance is destroyed.
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables) the one instance, set and reset by it
 arcstd::util::non_owning_ptr<BridgeSettings> instance_{nullptr};
 
 } // anonymous namespace

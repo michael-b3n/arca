@@ -5,7 +5,11 @@
 # other sources: QML addresses a type by its PascalCase name and a property, signal or invokable
 # method by its camelCase name, so those names are not ours to choose.
 #
+#
+# An invokable method QML calls must be a member of the object QML holds, even if it reads no member.
+#
 InheritParentConfig: true
 
 Checks: >
-  -readability-identifier-naming
+  -readability-identifier-naming,
+  -readability-convert-member-functions-to-static

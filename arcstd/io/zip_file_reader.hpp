@@ -84,12 +84,12 @@ public: // Structors
   ///
   /// Construct a ZIP reader for the specified file path.
   ///
-  zip_file_reader(const std::filesystem::path& zip_path, std::string_view password = "");
+  explicit zip_file_reader(const std::filesystem::path& zip_path, std::string_view password = "");
 
   ///
   /// Construct a ZIP reader from in-memory data.
   ///
-  zip_file_reader(std::span<const std::byte> data, std::string_view password = "");
+  explicit zip_file_reader(std::span<const std::byte> data, std::string_view password = "");
 
   ///
   /// Destructor. Closes the archive if open.

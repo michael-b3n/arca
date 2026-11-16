@@ -233,6 +233,7 @@ public: // Variables
   const std::shared_ptr<detail::setting_validator_connector> connector;
 
 public: // Structors
+  // NOLINTNEXTLINE(misc-explicit-constructor) erases the type of any validator it is given
   setting_validator_range_type_erased(const auto& validator)
     requires(detail::type_erased_validator_param_requirement<T, setting_validator_range, decltype(validator)>);
 
@@ -283,9 +284,9 @@ public: // Constants
 
 public: // Structors
   setting_validator_list() = default;
-  setting_validator_list(std::vector<plain_underlying_type> list);
+  explicit setting_validator_list(std::vector<plain_underlying_type> list);
   template<std::ranges::range R>
-  setting_validator_list(const R& range)
+  explicit setting_validator_list(const R& range)
     requires(std::is_same_v<std::ranges::range_value_t<R>, plain_underlying_type>);
 
 public: // Accessors
@@ -349,6 +350,7 @@ public: // Variables
   const std::shared_ptr<detail::setting_validator_connector> connector;
 
 public: // Structors
+  // NOLINTNEXTLINE(misc-explicit-constructor) erases the type of any validator it is given
   setting_validator_list_type_erased(const auto& validator)
     requires(detail::type_erased_validator_param_requirement<T, setting_validator_list, decltype(validator)>);
 

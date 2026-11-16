@@ -182,6 +182,7 @@ auto cache_database::prepare(const std::string_view sql) const -> statement_ptr
     return nullptr;
   }
   auto prepared = util::non_owning_ptr<sqlite3_stmt>{nullptr};
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage) the size is given, sqlite reads no further
   const auto status = sqlite3_prepare_v2(database_.get(), sql.data(), numeric_cast<int>(sql.size()), &prepared, nullptr);
   auto statement = statement_ptr{prepared};
   return succeeded(status, "prepare") ? std::move(statement) : nullptr;

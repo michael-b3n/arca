@@ -7,8 +7,13 @@ InheritParentConfig: true
 Checks: >
   -cppcoreguidelines-avoid-non-const-global-variables,
   -misc-use-internal-linkage,
-  -readability-function-size
+  -readability-function-size,
+  -bugprone-unchecked-optional-access,
+  -bugprone-throwing-static-initialization,
+  -cert-err58-cpp
 
 #
 # Catch2 test case bodies are not headers, so nothing is diagnosed twice here.
+# A test REQUIREs an optional to hold a value before it reads it, the check does not know that REQUIRE ends the
+# test. A static of a test that throws on its initialization fails the test run, which is what a test wants.
 #

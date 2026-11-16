@@ -36,6 +36,7 @@ public: // Structors
   property(property_node node, value_type default_value);
   property(const property<value_type>& other);
   property(property<value_type>&& other) noexcept;
+  ~property() noexcept = default;
 
 public: // Operators
   auto operator=(const property<value_type>& other) & -> property<value_type>&;

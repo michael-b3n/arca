@@ -17,10 +17,10 @@ namespace arcstd::util
 class ARCSTD_EXPORT exception : public std::runtime_error
 {
 public: // Structors
-  exception(
+  explicit exception(
     const std::string& error,
     const std::source_location& loc = std::source_location::current(),
-    const std::stacktrace& stacktrace = std::stacktrace::current()
+    std::stacktrace stacktrace = std::stacktrace::current()
   );
 
 public: // Accessors

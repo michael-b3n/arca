@@ -15,6 +15,7 @@ namespace arcstd::lua
 /// Owner of a Lua state, shared by all of its copies. Each copy can be used on any thread, \see lock.
 /// The setup opens the libraries, creates the root table and runs the embedded init.lua.
 ///
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions) a move is a copy, the moved from one keeps the state
 class state_owner final
 {
   // Variables

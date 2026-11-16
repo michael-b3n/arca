@@ -57,6 +57,7 @@ struct value_range final
   /// Copy constructor accepting value ranges that are lossless convertible to this range.
   ///
   template<meta::lossless_convertible<ValueType> T1>
+  // NOLINTNEXTLINE(misc-explicit-constructor) a lossless conversion, as of the value types
   constexpr value_range(const value_range<T1>& other);
 
   // Operators

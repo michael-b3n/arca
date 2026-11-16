@@ -31,9 +31,10 @@ public: // Static functions
 
 public: // Structors
   template<typename... T>
+  // NOLINTNEXTLINE(misc-explicit-constructor) coordinates are written as a braced list
   constexpr coordinates(T... coords)
     requires(sizeof...(T) == D);
-  constexpr coordinates(std::array<value_type, D> coordinates);
+  constexpr explicit coordinates(std::array<value_type, D> coordinates);
 
 public: // Accessors
   ///

@@ -24,7 +24,7 @@ class ARCSTD_EXPORT web_fetcher_settings final
   const std::shared_ptr<setting::setting_store> setting_store_;
 
 public: // Structors
-  web_fetcher_settings(std::shared_ptr<setting::setting_store> setting_store);
+  explicit web_fetcher_settings(std::shared_ptr<setting::setting_store> setting_store);
 
 public: // Variables
   const setting::setting_store::setting_non_owning_ptr_type<std::chrono::seconds> retry_pause;

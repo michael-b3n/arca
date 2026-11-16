@@ -57,7 +57,7 @@ class ARCSTD_EXPORT lua_engine_settings final
   const std::shared_ptr<setting::setting_store> setting_store_;
 
 public: // Structors
-  lua_engine_settings(std::shared_ptr<setting::setting_store> setting_store);
+  explicit lua_engine_settings(std::shared_ptr<setting::setting_store> setting_store);
 
 public: // Constants
   static constexpr auto folder_name = "scripts";

@@ -36,6 +36,7 @@ public: // Structors
   constexpr bitflags() = default;
   template<typename... Flags>
     requires(meta::are_same_v<E, Flags...>)
+  // NOLINTNEXTLINE(misc-explicit-constructor) a flag is the set of that one flag
   constexpr bitflags(Flags... flags);
 
 public: // Modifiers

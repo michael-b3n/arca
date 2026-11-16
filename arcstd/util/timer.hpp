@@ -39,8 +39,13 @@ class ARCSTD_EXPORT scoped_timer_logger final
   const timer timer_;
 
 public: // Structors
-  scoped_timer_logger(std::source_location source_location = std::source_location::current());
+  explicit scoped_timer_logger(std::source_location source_location = std::source_location::current());
   ~scoped_timer_logger();
+
+  scoped_timer_logger(const scoped_timer_logger&) = delete;
+  scoped_timer_logger(scoped_timer_logger&&) = delete;
+  auto operator=(const scoped_timer_logger&) -> scoped_timer_logger& = delete;
+  auto operator=(scoped_timer_logger&&) -> scoped_timer_logger& = delete;
 };
 
 } // namespace arcstd::util

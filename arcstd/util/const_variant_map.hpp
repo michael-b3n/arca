@@ -56,6 +56,7 @@ public: // Structors
   /// Constructor of const multi type map.
   /// \tparam ...P pack of type key value pairs
   ///
+  // NOLINTNEXTLINE(misc-explicit-constructor) a map is written as a braced list of its pairs
   constexpr const_variant_map(P&&... p);
 
 public: // Accessors
@@ -83,7 +84,7 @@ public: // Operations
   /// \return true if the key was found
   ///
   template<typename T, typename F>
-  constexpr auto visit(const T& key, F&& f) const -> bool
+  constexpr auto visit(const T& key, F f) const -> bool
     requires(meta::contains_v<key_variant_type, std::decay_t<T>>);
 
   ///
@@ -91,7 +92,7 @@ public: // Operations
   /// \tparam F callable type with boolean return type
   ///
   template<typename F>
-  constexpr auto visit_until(F&& f) const -> void
+  constexpr auto visit_until(F f) const -> void
     requires(std::is_invocable_r_v<bool, F, key_variant_type, value_variant_type>);
 };
 
@@ -164,7 +165,7 @@ constexpr auto const_variant_map<P...>::at(const T& key) const -> value_variant_
 ///
 template<detail::const_variant_mappable... P>
 template<typename T, typename F>
-constexpr auto const_variant_map<P...>::visit(const T& key, F&& f) const -> bool
+constexpr auto const_variant_map<P...>::visit(const T& key, F f) const -> bool
   requires(meta::contains_v<key_variant_type, std::decay_t<T>>)
 {
   auto do_on_key_found = [&]<std::size_t I> -> bool
@@ -187,7 +188,7 @@ constexpr auto const_variant_map<P...>::visit(const T& key, F&& f) const -> bool
 ///
 template<detail::const_variant_mappable... P>
 template<typename F>
-constexpr auto const_variant_map<P...>::visit_until(F&& f) const -> void
+constexpr auto const_variant_map<P...>::visit_until(F f) const -> void
   requires(std::is_invocable_r_v<bool, F, key_variant_type, value_variant_type>)
 {
   auto visitor = [&]<std::size_t I>

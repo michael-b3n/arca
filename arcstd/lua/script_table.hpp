@@ -55,6 +55,7 @@ class script_table final
 
 public: // Structors
   script_table() = default;
+  // NOLINTNEXTLINE(misc-explicit-constructor) a table is written as a braced list of its fields
   script_table(typename Fields::type... values)
     requires(sizeof...(Fields) > 0);
 

@@ -40,8 +40,8 @@ cache_store::cache_store(const std::filesystem::path& data_folder, std::shared_p
     ///
     << lua_engine_->register_function(
          "cache.set",
-         [this](const std::string& name, const std::string& key, std::optional<std::string> value)
-         { set(util::identifier{name}, key, std::move(value)); }
+         [this](const std::string& name, const std::string& key, const std::optional<std::string>& value)
+         { set(util::identifier{name}, key, value); }
        )
     ///
     /// \lua Writes many text values to a cache at once, all of them or none, \see `cache.get`.

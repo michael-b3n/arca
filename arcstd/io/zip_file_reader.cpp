@@ -274,6 +274,7 @@ auto zip_file_reader::read_entry_as_string(const zip_entry& entry) const -> std:
   {
     return {};
   }
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast) bytes read as chars, a char may alias any byte
   return {reinterpret_cast<const char*>(data.data()), data.size()};
 }
 
@@ -347,7 +348,7 @@ auto zip_file_reader::create_entry(const zip_stat_t& stat) const -> zip_entry
       return {};
     }(),
     // clang-format off
-    .name = valid(ZIP_STAT_NAME) ? ((stat.name != nullptr) ? std::string{stat.name} : "") : decltype(zip_entry::name){},
+    .name = valid(ZIP_STAT_NAME) && stat.name != nullptr ? std::string{stat.name} : decltype(zip_entry::name){},
     .index = valid(ZIP_STAT_INDEX) ? static_cast<std::uint64_t>(stat.index) : decltype(zip_entry::index){},
     .compression = valid(ZIP_STAT_COMP_METHOD) ? convert_compression_method(stat.comp_method) : decltype(zip_entry::compression){},
     .encryption = valid(ZIP_STAT_ENCRYPTION_METHOD) ? convert_encryption_method(stat.encryption_method) : decltype(zip_entry::encryption){},

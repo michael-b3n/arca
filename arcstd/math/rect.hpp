@@ -43,6 +43,7 @@ public: // Structors
   constexpr rect(coordinates_2d<T1> first, coordinates_2d<T2> second);
 
   template<meta::lossless_convertible<ValueType> T>
+  // NOLINTNEXTLINE(misc-explicit-constructor) a lossless conversion, as of the value types
   constexpr rect(const rect<T>& other);
 
 public: // Operators

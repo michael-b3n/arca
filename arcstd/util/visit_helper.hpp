@@ -12,7 +12,7 @@ namespace detail
 /// \see https://en.cppreference.com/w/cpp/utility/variant/visit
 ///
 template<class... Ts>
-struct overloaded : Ts...
+struct overloaded : Ts... // NOLINT(misc-multiple-inheritance) the overload set of its lambdas
 {
   using Ts::operator()...;
 };

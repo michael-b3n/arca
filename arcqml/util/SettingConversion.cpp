@@ -206,6 +206,7 @@ auto setValueInteger(const auto setting, const auto& value) -> bool
   if constexpr(std::integral<std::remove_cvref_t<decltype(value)>>)
   {
     const auto v = integer_cast<SettingRawValueType<decltype(setting)>>(value);
+    // NOLINTNEXTLINE(bugprone-optional-value-conversion) a value out of range is rejected, it does not clear the setting
     return v ? setting->value(*v) : false;
   }
   else

@@ -14,6 +14,7 @@ namespace arcstd::util
 /// String literal taken as compile time argument: template<util::string_literal Key>.
 /// It takes only a literal ending with '\0'. Accessor `view()` holds all of its characters.
 ///
+// NOLINTBEGIN(modernize-avoid-c-arrays) a string literal is a C array of chars, it converts to no std::array
 template<std::size_t N>
 struct string_literal final
 {
@@ -25,6 +26,7 @@ struct string_literal final
   /// String literal constructor. It is implicit, so a string literal converts to
   /// the template argument. An embedded or missing '\0' does not compile.
   ///
+  // NOLINTNEXTLINE(misc-explicit-constructor) a literal given as template argument converts to it
   consteval string_literal(const char (&s)[N]);
 
   // Static
@@ -67,5 +69,7 @@ constexpr auto string_literal<N>::view() const -> std::string_view
 {
   return {chars, N - 1};
 }
+
+// NOLINTEND(modernize-avoid-c-arrays)
 
 } // namespace arcstd::util
