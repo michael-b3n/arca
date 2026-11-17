@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -24,9 +25,16 @@ namespace arcstd::io
 ///
 class ARCSTD_EXPORT zip_file_reader final
 {
+  // Typedefs
+  struct archive_closer final
+  {
+    auto operator()(util::non_owning_ptr<zip> archive) const noexcept -> void;
+  };
+  using archive_ptr = std::unique_ptr<zip, archive_closer>;
+
   // Variables
   std::string password_;
-  util::non_owning_ptr<zip> zip_handle_;
+  archive_ptr zip_handle_;
 
 public: // Typedefs
   ///
@@ -97,11 +105,11 @@ public: // Structors
   ~zip_file_reader() noexcept;
 
   zip_file_reader(const zip_file_reader&) = delete;
-  zip_file_reader(zip_file_reader&&) = default;
+  zip_file_reader(zip_file_reader&&) noexcept;
 
 public: // Operators
   auto operator=(const zip_file_reader&) -> zip_file_reader& = delete;
-  auto operator=(zip_file_reader&&) -> zip_file_reader& = default;
+  auto operator=(zip_file_reader&&) noexcept -> zip_file_reader&;
 
 public: // Accessors
   ///

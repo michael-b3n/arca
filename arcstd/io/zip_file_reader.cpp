@@ -70,6 +70,15 @@ auto convert_encryption_method(std::uint16_t libzip_method) -> zip_file_reader::
 
 ///
 ///
+auto zip_file_reader::archive_closer::operator()(
+  const util::non_owning_ptr<zip> archive
+) const noexcept -> void
+{
+  zip_discard(archive);
+}
+
+///
+///
 zip_file_reader::zip_file_reader(
   const std::filesystem::path& zip_path, const std::string_view password
 )
@@ -82,7 +91,7 @@ zip_file_reader::zip_file_reader(
 #else
   const int flags = ZIP_RDONLY | ZIP_CHECKCONS;
 #endif
-  zip_handle_ = zip_open(zip_path.string().c_str(), flags, &error_code);
+  zip_handle_.reset(zip_open(zip_path.string().c_str(), flags, &error_code));
   if(zip_handle_ == nullptr)
   {
     const auto msg = [&] -> std::string_view
@@ -107,7 +116,7 @@ zip_file_reader::zip_file_reader(
   }
   else if(!password_.empty())
   {
-    zip_set_default_password(zip_handle_, password_.c_str());
+    zip_set_default_password(zip_handle_.get(), password_.c_str());
   }
 }
 
@@ -134,7 +143,7 @@ zip_file_reader::zip_file_reader(
 #else
   const int flags = ZIP_RDONLY | ZIP_CHECKCONS;
 #endif
-  zip_handle_ = zip_open_from_source(source, flags, &error); // takes ownership of source
+  zip_handle_.reset(zip_open_from_source(source, flags, &error)); // takes ownership of source
   if(zip_handle_ == nullptr)
   {
     const auto* const msg = zip_error_strerror(&error);
@@ -143,20 +152,23 @@ zip_file_reader::zip_file_reader(
   }
   else if(!password_.empty())
   {
-    zip_set_default_password(zip_handle_, password_.c_str());
+    zip_set_default_password(zip_handle_.get(), password_.c_str());
   }
 }
 
 ///
 ///
-zip_file_reader::~zip_file_reader() noexcept
-{
-  if(zip_handle_ != nullptr)
-  {
-    zip_discard(zip_handle_);
-    zip_handle_ = nullptr;
-  }
-}
+zip_file_reader::~zip_file_reader() noexcept = default;
+
+///
+/// In the library and not in the class: the closer of the archive is no part of the interface.
+///
+zip_file_reader::zip_file_reader(zip_file_reader&&) noexcept = default;
+
+///
+/// \see zip_file_reader(zip_file_reader&&)
+///
+auto zip_file_reader::operator=(zip_file_reader&&) noexcept -> zip_file_reader& = default;
 
 ///
 ///
@@ -171,7 +183,7 @@ auto zip_file_reader::entry_count() const -> std::size_t
 {
   // The flag ZIP_FL_UNCHANGED is used since we guarantee
   // to open the archive in read only mode.
-  return is_open() ? zip_get_num_entries(zip_handle_, unchanged_flag) : 0;
+  return is_open() ? zip_get_num_entries(zip_handle_.get(), unchanged_flag) : 0;
 }
 
 ///
@@ -181,7 +193,7 @@ auto zip_file_reader::comment() const -> std::string
   if(is_open())
   {
     int length = 0;
-    const auto* const c = zip_get_archive_comment(zip_handle_, &length, unchanged_flag);
+    const auto* const c = zip_get_archive_comment(zip_handle_.get(), &length, unchanged_flag);
     if((c != nullptr) && length > 0)
     {
       return {c, static_cast<std::size_t>(length)};
@@ -207,7 +219,9 @@ auto zip_file_reader::entries() const -> std::vector<zip_entry>
     util::ranges::index_view(result),
     [&](const auto i)
     {
-      if(zip_stat_index(zip_handle_, static_cast<zip_uint64_t>(i), unchanged_flag, &stat) == 0)
+      if(
+        zip_stat_index(zip_handle_.get(), static_cast<zip_uint64_t>(i), unchanged_flag, &stat) == 0
+      )
       {
         result.at(i) = create_entry(stat);
       }
@@ -250,8 +264,9 @@ auto zip_file_reader::read_entry(const zip_entry& entry) const -> std::vector<st
   }
 
   if(
-    auto* const file =
-      zip_fopen_index(zip_handle_, static_cast<zip_uint64_t>(entry.index.value()), unchanged_flag)
+    auto* const file = zip_fopen_index(
+      zip_handle_.get(), static_cast<zip_uint64_t>(entry.index.value()), unchanged_flag
+    )
   )
   {
     const auto size = entry.size.value();
@@ -310,7 +325,7 @@ auto zip_file_reader::index_of_entry(const std::string& name, const query_flags_
     zip_flags |= ZIP_FL_NOCASE;
   }
   const auto n = std::string{name};
-  const auto index = zip_name_locate(zip_handle_, n.c_str(), zip_flags);
+  const auto index = zip_name_locate(zip_handle_.get(), n.c_str(), zip_flags);
   return index < 0 ? std::nullopt : std::make_optional(static_cast<std::size_t>(index));
 }
 
@@ -327,7 +342,7 @@ auto zip_file_reader::entry_by_index(const std::size_t index, const std::uint32_
 
   zip_stat_t stat;
   zip_stat_init(&stat);
-  if(zip_stat_index(zip_handle_, static_cast<zip_uint64_t>(index), flags, &stat) == 0)
+  if(zip_stat_index(zip_handle_.get(), static_cast<zip_uint64_t>(index), flags, &stat) == 0)
   {
     result = create_entry(stat);
   }
@@ -350,7 +365,7 @@ auto zip_file_reader::create_entry(const zip_stat_t& stat) const -> zip_entry
       {
         zip_uint32_t length = 0;
         const auto* const c =
-          zip_file_get_comment(zip_handle_, stat.index, &length, unchanged_flag);
+          zip_file_get_comment(zip_handle_.get(), stat.index, &length, unchanged_flag);
         if(c && length >= 0)
         {
           return {c, static_cast<std::size_t>(length)};
@@ -385,7 +400,7 @@ auto zip_file_reader::error_message() const -> std::string
   {
     return std::string{"archive not open"};
   }
-  else if(auto* const error = zip_get_error(zip_handle_))
+  else if(auto* const error = zip_get_error(zip_handle_.get()))
   {
     const auto* const strerror = zip_error_strerror(error);
     if(strerror != nullptr)
