@@ -20,22 +20,12 @@ namespace arcstd::setting
 namespace detail
 {
 
-///
-/// Helper type to check if a type T is an optional.
-///
 template<typename T>
 inline constexpr auto is_optional_v = std::is_same_v<std::optional<meta::remove_wrapper_t<T>>, T>;
 
-///
-/// Helper type to check if a type T is a vector.
-///
 template<typename T>
 inline constexpr auto is_vector_v = std::is_same_v<std::vector<meta::remove_wrapper_t<T>>, T>;
 
-///
-/// Helper type removing either vector or optional wrappers if available.
-/// If not available the type itself is returned.
-///
 template<typename T>
 using remove_optional_or_vector_t =
   std::conditional_t<is_optional_v<T> || is_vector_v<T>, meta::remove_wrapper_t<T>, T>;
@@ -48,15 +38,11 @@ concept setting_validator_range_value_type =
   underlying_setting_type<T> &&
   ((std::is_arithmetic_v<T> && !std::is_same_v<T, bool>) || meta::is_duration_v<T>);
 
-///
-/// Helper type to extract validator type from smart pointer.
-///
 template<typename T>
 using validator_t = std::remove_cvref_t<T>::element_type;
 
 ///
-/// Helper concept to check if type erased validator can be constructed from specific validator
-/// type.
+/// \p V points to a validator \p VT of a setting whose type erased type is \p T.
 ///
 template<typename T, template<typename...> typename VT, typename V>
 concept type_erased_validator_param_requirement =
@@ -64,8 +50,7 @@ concept type_erased_validator_param_requirement =
   std::is_same_v<T, setting_type_erased_type_from<typename validator_t<V>::underlying_type>>;
 
 ///
-/// Connector class for setting validators. This class shall be used as base class for all setting
-/// validators.
+/// Base of the validators, it tells the setting that its validator changed.
 ///
 class ARCSTD_EXPORT setting_validator_connector
 {
@@ -78,13 +63,13 @@ public: // Structors
 
 public: // Accessors
   ///
-  /// Register a callback to be called when the setting validator changes.
+  /// Call \p on_changed whenever the validator changes, it replaces the one before.
   ///
   auto connect_on_changed(std::function<void()> on_changed) -> void;
 
 protected: // Functions
   ///
-  /// Notify that the setting validator has changed.
+  /// Tell the setting that its validator changed.
   ///
   auto notify_changed() -> void;
 
@@ -101,8 +86,7 @@ template<typename T>
 concept setting_validator_range_value_type = detail::setting_validator_range_value_type<T>;
 
 ///
-/// Class for unbound setting validators.
-/// If a validator is unbound the setting value can have any value allowed by its type.
+/// Validator that takes every value of the type.
 ///
 struct setting_validator_unbound final : public detail::setting_validator_connector
 {
@@ -181,26 +165,24 @@ public: // Operators
     requires(detail::setting_validator_range_value_type<plain_underlying_type>);
 
   ///
-  /// Validate overload for vector underlying types. \see validate
+  /// \see validate, for one value of a vector
   ///
   [[nodiscard]] auto validate(const plain_underlying_type& value) const -> plain_underlying_type
     requires(is_vector_type && detail::setting_validator_range_value_type<plain_underlying_type>);
 
-public: // Operators
   ///
-  /// Check if value is contained within the validator bounds.
-  /// \return true if value is contained, false otherwise
+  /// \return true if \p value lies in the range
   ///
   [[nodiscard]] auto contains(const T& value) const -> bool
     requires(detail::setting_validator_range_value_type<plain_underlying_type>);
 
   ///
-  /// Contains overload for vector underlying types. \see contains
+  /// \see contains, for one value of a vector
   ///
   [[nodiscard]] auto contains(const plain_underlying_type& value) const -> bool
     requires(is_vector_type && detail::setting_validator_range_value_type<plain_underlying_type>);
 
-public: // Dummy implementation for unsupported types
+public: // Types a range cannot limit, setting_validator<T> names a range for every type
   setting_validator_range(const plain_underlying_type& min, const plain_underlying_type& max)
     requires(!detail::setting_validator_range_value_type<plain_underlying_type>);
   [[nodiscard]] auto validate(const T& value) const -> T
@@ -214,8 +196,7 @@ public: // Dummy implementation for unsupported types
 };
 
 ///
-/// Class for range type setting validators for type erased types.
-/// \see setting_validator_range
+/// Range validator of a type erased setting, \see setting_validator_range.
 ///
 template<underlying_setting_type_erased_type T>
 class setting_validator_range_type_erased final
@@ -257,7 +238,6 @@ public: // Operators
   [[nodiscard]] auto validate(const plain_underlying_type& value) const -> plain_underlying_type
     requires(detail::is_vector_v<T>);
 
-public: // Operators
   ///
   /// \see setting_validator_range::contains
   ///
@@ -299,21 +279,15 @@ public: // Structors
 
 public: // Accessors
   ///
-  /// Check if the validator has any available values.
-  /// \return true if no available values are set, false otherwise
+  /// \return true if no values are set yet, the setting then takes every value
   ///
   [[nodiscard]] auto empty() const -> bool;
-
-  ///
-  /// Get all available values.
-  /// \return list of all available values
-  ///
   [[nodiscard]] auto available() const -> std::vector<plain_underlying_type>;
 
 public: // Modifiers
   ///
-  /// Set the available values. This will replace all previously available values.
-  /// \return true if list is valid and has been set, false otherwise
+  /// Replace the values by the ones of \p range.
+  /// \return false if \p range is empty for a plain type, the values are kept then
   ///
   template<std::ranges::range R>
   [[nodiscard]] auto available(const R& range) -> bool
@@ -321,21 +295,19 @@ public: // Modifiers
 
 public: // Operators
   ///
-  /// Check if value is contained within the validator bounds.
-  /// \return true if value is contained, false otherwise
+  /// \return true if \p value is one of the values
   ///
   [[nodiscard]] auto contains(const T& value) const -> bool;
 
   ///
-  /// Contains overload for vector underlying types. \see contains
+  /// \see contains, for one value of a vector
   ///
   [[nodiscard]] auto contains(const plain_underlying_type& value) const -> bool
     requires is_vector_type;
 };
 
 ///
-/// Class for list type setting validators for type erased types.
-/// \see setting_validator_list
+/// List validator of a type erased setting, \see setting_validator_list.
 ///
 template<underlying_setting_type_erased_type T>
 class setting_validator_list_type_erased final
@@ -390,8 +362,7 @@ public: // Operators
 };
 
 ///
-/// Setting validator variant type.
-/// Optional underlying setting types are stripped away for validators.
+/// Validator of a setting of \p T.
 ///
 template<underlying_setting_type T>
 using setting_validator = std::variant<
@@ -400,8 +371,7 @@ using setting_validator = std::variant<
   typename setting_validator_list<T>::sptr_type>;
 
 ///
-/// Setting validator type erased variant type.
-/// Optional underlying setting types are stripped away for validators.
+/// Validator of a type erased setting of \p T.
 ///
 template<underlying_setting_type T>
 using setting_validator_type_erased = std::variant<

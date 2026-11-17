@@ -20,11 +20,8 @@ namespace arcstd::setting
 namespace detail
 {
 
-///
-/// Basic settings types.
-///
 using setting_basic_variant = std::variant<
-  /*bool added below since std::vector<bool> shall not be allowed*/
+  // bool is added on its own, a std::vector<bool> is no container of bools
   std::int32_t,
   std::int64_t,
   std::uint32_t,
@@ -36,18 +33,12 @@ using setting_basic_variant = std::variant<
   std::chrono::minutes,
   std::filesystem::path>;
 
-///
-/// Basic settings optional variant.
-///
 using setting_basic_optional_variant = meta::for_each_t<setting_basic_variant, std::optional>;
 
-///
-/// Basic settings list variant.
-///
 using setting_basic_list_variant = meta::for_each_t<setting_basic_variant, std::vector>;
 
 ///
-/// To enum setting type converter implementation.
+/// An enum setting is erased to the name of its value.
 ///
 template<typename E>
   requires(std::is_enum_v<E>)
@@ -57,7 +48,7 @@ template<typename E>
 }
 
 ///
-/// To enum setting type converter implementation.
+/// An optional enum setting is erased to the name of its value, if it holds one.
 ///
 template<typename E>
   requires(std::is_enum_v<E>)
@@ -67,7 +58,7 @@ template<typename E>
 }
 
 ///
-/// To enum setting type converter implementation.
+/// A list of enum settings is erased to the names of its values.
 ///
 template<typename E>
   requires(std::is_enum_v<E>)
@@ -78,7 +69,7 @@ template<typename E>
 }
 
 ///
-/// From enum setting type converter implementation.
+/// \throws util::exception if \p v names no value of the enum
 ///
 template<typename E>
   requires(std::is_enum_v<E>)
@@ -92,26 +83,28 @@ template<typename E>
   return *value;
 }
 
-///
-/// From enum setting type converter implementation.
-///
 template<typename T>
   requires(
     std::is_same_v<T, std::optional<typename T::value_type>> &&
     std::is_enum_v<typename T::value_type>
   )
+
+///
+/// \throws util::exception if \p v names no value of the enum
+///
 [[nodiscard]] auto from_type_erased_setting(const std::optional<std::string>& v) -> T
 {
   return v ? T{from_type_erased_setting<typename T::value_type>(*v)} : T{};
 }
 
-///
-/// From enum setting type converter implementation.
-///
 template<typename T>
   requires(
     std::is_same_v<T, std::vector<typename T::value_type>> && std::is_enum_v<typename T::value_type>
   )
+
+///
+/// \throws util::exception if one of \p v names no value of the enum
+///
 [[nodiscard]] auto from_type_erased_setting(const std::vector<std::string>& v) -> T
 {
   return v |
@@ -121,7 +114,6 @@ template<typename T>
 }
 
 ///
-/// From enum setting type converter implementation.
 /// \return std::nullopt if \p v names no value of the enum
 ///
 template<typename E>
@@ -132,7 +124,6 @@ template<typename E>
 }
 
 ///
-/// From enum setting type converter implementation.
 /// \return std::nullopt if \p v names no value of the enum
 ///
 template<typename T>
@@ -152,7 +143,6 @@ template<typename T>
 }
 
 ///
-/// From enum setting type converter implementation.
 /// \return std::nullopt if one of \p v names no value of the enum
 ///
 template<typename T>
@@ -175,9 +165,6 @@ template<typename T>
          std::ranges::to<T>();
 }
 
-///
-/// Helper concept to detect if a given type has a corresponding erased type.
-///
 template<typename E>
 concept type_erasable = requires(E e) {
   { to_type_erased_setting(e) };
@@ -186,7 +173,7 @@ concept type_erasable = requires(E e) {
 } // namespace detail
 
 ///
-/// All supported setting types as a variant type.
+/// The types a setting has in the settings file and in its type erased view.
 ///
 using setting_type_erased_variant = meta::combine_pack_t<
   std::variant<bool, std::optional<bool>>,
@@ -195,38 +182,32 @@ using setting_type_erased_variant = meta::combine_pack_t<
   detail::setting_basic_list_variant>;
 
 ///
-/// Concept for all supported base setting types. These types are type erased settings. Supported
-/// are:
-/// - default types including optional and list variants
+/// A type of setting_type_erased_variant.
 ///
 template<typename T>
 concept underlying_setting_type_erased_type = meta::contains_v<setting_type_erased_variant, T>;
 
 ///
-/// Concept for all supported setting types. Base settings types are a subgroup of this. Supported
-/// are:
-/// - default types including optional and list variants
-/// - enum types
+/// A type a setting can have: a type erased one or an enum, also in an optional or a vector.
 ///
 template<typename T>
 concept underlying_setting_type =
   underlying_setting_type_erased_type<T> || detail::type_erasable<T>;
 
-///
-/// Dummy implementation for from_type_erased_setting for erased setting types.
-/// This allows an easy implementation of setting_type_erased_type_from.
-///
 namespace detail
 {
+
+// An erased type is its own erased type, setting_type_erased_type_from relies on it
 template<underlying_setting_type_erased_type E>
 [[nodiscard]] auto to_type_erased_setting(const E& v) -> E
 {
   return v;
 }
+
 } // namespace detail
 
 ///
-/// Type mapping from underlying setting type to type erased setting type.
+/// The type a setting of \p T has in the settings file.
 ///
 template<underlying_setting_type T>
 using setting_type_erased_type_from = std::conditional_t<
@@ -253,8 +234,7 @@ template<underlying_setting_type T>
 }
 
 ///
-/// Create setting type converter.
-/// \return Converter function from F to T
+/// \return the converter from \p F to \p T, one is the other's type erased type
 ///
 template<underlying_setting_type F, underlying_setting_type T>
   requires(

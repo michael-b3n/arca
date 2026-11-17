@@ -87,7 +87,6 @@ template<typename R, typename... A>
   {
     const auto call = [&]<std::size_t... I>(std::index_sequence<I...>) -> R
     { return callable(argument<std::remove_cvref_t<A>>(arguments, I)...); };
-    // Each kind of function_result
     if constexpr(std::is_void_v<R>)
     {
       call(std::index_sequence_for<A...>{});

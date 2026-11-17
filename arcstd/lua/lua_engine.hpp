@@ -56,11 +56,11 @@ class ARCSTD_EXPORT lua_engine_settings final
   // Variables
   const std::shared_ptr<setting::setting_store> setting_store_;
 
-public: // Structors
-  explicit lua_engine_settings(std::shared_ptr<setting::setting_store> setting_store);
-
 public: // Constants
   static constexpr auto folder_name = "scripts";
+
+public: // Structors
+  explicit lua_engine_settings(std::shared_ptr<setting::setting_store> setting_store);
 
 public: // Variables
   const setting::setting_store::setting_non_owning_ptr_type<bool> enabled;
@@ -68,7 +68,8 @@ public: // Variables
 };
 
 ///
-/// Signals emitted by the Lua engine.
+/// Signals of the Lua engine, `scripts_loaded` is emitted under the Lua lock once the scripts are
+/// loaded, also if there are none.
 ///
 struct lua_engine_signals final
 {
@@ -76,10 +77,9 @@ struct lua_engine_signals final
 };
 
 ///
-/// Lua engine, owns the Lua state and loads the bundled and user scripts \see load_scripts.
-/// An object registers its functions for scripts last in its constructor and keeps the registration
-/// as its last member, \see registration. Signal IDs to connect to:
-/// - scripts_loaded: Emitted under the Lua lock once the scripts are loaded, also if none are.
+/// Owns the Lua state and runs the bundled and the user scripts, \see load_scripts. An object
+/// registers its functions for scripts last in its constructor and keeps the registration as its
+/// last member, \see registration.
 ///
 class ARCSTD_EXPORT lua_engine final : public signal::adapter<lua_engine_signals>
 {
@@ -91,14 +91,14 @@ class ARCSTD_EXPORT lua_engine final : public signal::adapter<lua_engine_signals
   };
 
   // Constants
-  static constexpr auto setting_node = "setting"; // the node of all settings
+  static constexpr auto setting_node = "setting";
 
   // Variables
   const lua_engine_settings settings_;
   const std::function<std::span<const embedded_script>()> bundled_;
   const std::unique_ptr<state_owner> state_owner_;
   mutable std::mutex mtx_;
-  std::map<std::string, script_info> scripts_; // the loaded scripts by name
+  std::map<std::string, script_info> scripts_;
   std::jthread loader_; // last, it joins before the members it uses are destroyed
 
 public: // Typedefs
@@ -111,16 +111,12 @@ public: // Typedefs
 
 public: // Structors
   ///
-  /// Construct the engine with its settings in \p setting_store, \p bundled shall provide the
-  /// compiled scripts when called.
+  /// Engine with its settings in \p setting_store, \p bundled returns the bundled scripts.
   ///
   lua_engine(std::shared_ptr<setting::setting_store> setting_store, bundled_provider_type bundled);
   ~lua_engine() noexcept override;
 
 public: // Accessors
-  ///
-  /// \return the settings of the engine
-  ///
   [[nodiscard]] auto settings() const -> const lua_engine_settings&;
 
   ///
@@ -129,68 +125,64 @@ public: // Accessors
   [[nodiscard]] auto lock() const -> lock_type;
 
   ///
-  /// \return the loaded scripts offering a function for each manifest \p M, all of them without \p
-  /// M, by name
+  /// \return the loaded scripts by name that offer a function of each manifest \p M, all of them
+  /// without a manifest
   ///
   template<script_manifest... M>
   [[nodiscard]] auto scripts() const -> scripts_type;
 
 public: // Modifiers
   ///
-  /// Load the bundled scripts and, if enabled, the user scripts outside of the calling thread, and
-  /// emit scripts_loaded. Called once the functions for scripts are registered, and again to load
-  /// the scripts anew: a loading still running ends after its script first.
+  /// Load the bundled scripts and, if enabled, the user scripts on a thread of their own, then emit
+  /// scripts_loaded. Called once the functions for scripts are registered, and again to reload: a
+  /// loading still running stops after its current script first.
   ///
   auto load_scripts() -> void;
 
   ///
   /// Copy the Lua script \p files into the script folder, replacing a file of the same name. They
-  /// run once the scripts are loaded anew, \see load_scripts.
-  /// \return number of files copied, the others are logged
+  /// run once the scripts are reloaded.
+  /// \return the number of files copied, the others are logged
   ///
   [[nodiscard]] auto import_scripts(const std::vector<std::filesystem::path>& files) const
     -> std::size_t;
 
   ///
-  /// Register a function for scripts at \p p, e.g. "web.fetch", for as long as the registration is
-  /// kept.
-  /// \p function takes and returns C++ values, \see to_function. What it reaches must live as long.
-  /// \return the registration to keep, one of nothing if \p p can not be registered, the reason is
-  /// logged
+  /// Register \p function for scripts at \p p, e.g. "web.fetch", while the registration is kept.
+  /// It takes and returns C++ values, \see to_function, what it reaches must live as long.
+  /// \return the registration, an empty one if \p p can not be registered, the reason is logged
   ///
   template<function_convertible F>
   [[nodiscard]] auto register_function(const util::path& p, F&& function) const
     -> registration_type;
 
   ///
-  /// Register \p setting for scripts at setting and its own path, for as long as the registration
-  /// is kept, \see setting_functions. \p setting must live as long.
-  /// \return the registration to keep, one of nothing if the path can not be registered, the reason
-  /// is logged
+  /// Register \p setting for scripts at "setting.<its path>" while the registration is kept, \see
+  /// setting_functions. \p setting must live as long.
+  /// \return the registration, an empty one if the path can not be registered, the reason is logged
   ///
   template<setting::underlying_setting_type T>
   [[nodiscard]] auto register_setting(setting::setting<T>& setting) const -> registration_type;
 
   ///
-  /// Run the function of the manifest \p M of the script named \p script. Blocks until it returns,
-  /// it may wait e.g. for a web page.
-  /// \return its output, or std::nullopt if it failed, is missing or its output does not fit \p M
+  /// Run the function of manifest \p M of the script \p script, blocks until it returns.
+  /// \return its output, std::nullopt if it failed, is missing or its output does not fit \p M
   ///
   template<script_manifest M>
   [[nodiscard]] auto run(const script_name_type& script, const typename M::input& input) const
     -> std::optional<typename M::output>;
 
   ///
-  /// Run \p code as a user script named \p name, in an environment of its own, \see load_scripts.
-  /// Blocks until it returns.
-  /// \return a copy of what it returns, nil if nothing, or std::nullopt if it failed
+  /// Run \p code as a user script named \p name in an environment of its own, blocks until it
+  /// returns.
+  /// \return a copy of what it returns, nil if nothing, std::nullopt if it failed
   ///
   [[nodiscard]] auto run_script(std::string_view name, std::string_view code) const
     -> std::optional<value>;
 
   ///
-  /// Stop the scripts with force, no script runs from now on. Called before the app ends, so no
-  /// object waits for a script that never returns once it is destroyed, \see state_owner::shutdown
+  /// Stop the scripts with force, none runs from now on. Called before the app ends, so no object
+  /// waits on its destruction for a script that never returns.
   ///
   auto shutdown() const noexcept -> void;
 

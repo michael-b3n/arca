@@ -14,13 +14,14 @@ namespace arcstd::io
 namespace
 {
 
-// Flags for reading original state
+// The archive is opened read only, so it is read as it is on disk
 constexpr zip_flags_t unchanged_flag = ZIP_FL_UNCHANGED;
 
 ///
-/// Convert libzip compression method to our enum.
+/// \return the compression method of the libzip method \p libzip_method
 ///
-auto convert_compression_method(std::uint16_t libzip_method) -> zip_file_reader::compression_method
+[[nodiscard]] auto convert_compression_method(std::uint16_t libzip_method)
+  -> zip_file_reader::compression_method
 {
   using compression_method = zip_file_reader::compression_method;
   switch(libzip_method)
@@ -44,9 +45,10 @@ auto convert_compression_method(std::uint16_t libzip_method) -> zip_file_reader:
 }
 
 ///
-/// Convert libzip encryption method to our enum.
+/// \return the encryption method of the libzip method \p libzip_method
 ///
-auto convert_encryption_method(std::uint16_t libzip_method) -> zip_file_reader::encryption_method
+[[nodiscard]] auto convert_encryption_method(std::uint16_t libzip_method)
+  -> zip_file_reader::encryption_method
 {
   using encryption_method = zip_file_reader::encryption_method;
   switch(libzip_method)
@@ -66,7 +68,7 @@ auto convert_encryption_method(std::uint16_t libzip_method) -> zip_file_reader::
   }
 }
 
-} // anonymous namespace
+} // namespace
 
 ///
 ///
@@ -181,8 +183,6 @@ auto zip_file_reader::is_open() const -> bool
 ///
 auto zip_file_reader::entry_count() const -> std::size_t
 {
-  // The flag ZIP_FL_UNCHANGED is used since we guarantee
-  // to open the archive in read only mode.
   return is_open() ? zip_get_num_entries(zip_handle_.get(), unchanged_flag) : 0;
 }
 

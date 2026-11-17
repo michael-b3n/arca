@@ -8,8 +8,7 @@ namespace arcstd::util
 {
 
 ///
-/// Check if an element is contained in a container.
-/// \return true if `element` is found in container, false if not
+/// \return true if \p container holds \p element
 ///
 [[nodiscard]] constexpr auto contains(const std::ranges::range auto& container, const auto& element)
   -> bool
@@ -21,8 +20,7 @@ namespace arcstd::util
 }
 
 ///
-/// Check if an element is inside a container or not.
-/// \return bool true if element is found in container, false otherwise
+/// \return true if an element of \p container fulfils \p pred
 ///
 [[nodiscard]] constexpr auto contains(const std::ranges::range auto& container, const auto& pred)
   -> bool
@@ -35,8 +33,7 @@ namespace arcstd::util
 }
 
 ///
-/// Check if an element is inside a container or not.
-/// \return bool true if element is found in container, false otherwise
+/// \return true if an element of \p view fulfils \p pred
 ///
 [[nodiscard]] constexpr auto contains(std::ranges::view auto view, const auto& pred) -> bool
   requires(std::predicate<decltype(pred), std::ranges::range_value_t<decltype(view)>>)

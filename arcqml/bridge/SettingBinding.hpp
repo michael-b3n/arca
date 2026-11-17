@@ -23,8 +23,8 @@ namespace arcqml
 /// setting is created from the default value, so QML declares settings of its own. Created by
 /// BridgeSettings only:
 /// \code
-///   readonly property SettingBinding accentColor: BridgeSettings.binding("ui.color.accent",
-///   "#1e301e") color: accentColor.value
+///   readonly property SettingBinding accent: BridgeSettings.binding("ui.color.accent", "#1e301e")
+///   color: accent.value
 /// \endcode
 /// \see BridgeSettings
 ///

@@ -52,9 +52,6 @@ class state final
   std::shared_ptr<detail::state_data> data_;
   std::unique_lock<std::recursive_mutex> lock_;
 
-private: // Structors
-  explicit state(std::shared_ptr<detail::state_data> data);
-
 public: // Structors
   state(const state&) = delete;
   state(state&&) noexcept = default;
@@ -98,6 +95,9 @@ public: // Operations
   template<typename... Args>
   [[nodiscard]] auto call(const sol::protected_function& function, Args&&... args)
     -> std::optional<sol::object>;
+
+private: // Structors
+  explicit state(std::shared_ptr<detail::state_data> data);
 
 private: // Implementation
   [[nodiscard]] auto free_parent(const util::path& p) -> std::optional<sol::table>;

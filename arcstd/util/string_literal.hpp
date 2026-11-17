@@ -23,13 +23,13 @@ struct string_literal final
 
   // Structors
   ///
-  /// String literal constructor. It is implicit, so a string literal converts to
-  /// the template argument. An embedded or missing '\0' does not compile.
+  /// Implicit, so a string literal converts to the template argument. An embedded or a missing
+  /// '\0' does not compile.
   ///
   // NOLINTNEXTLINE(misc-explicit-constructor) a literal given as template argument converts to it
   consteval string_literal(const char (&s)[N]);
 
-  // Static
+  // Static interface
   ///
   /// \return true if the last character of \p s is its only '\0'
   ///

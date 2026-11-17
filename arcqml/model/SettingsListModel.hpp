@@ -121,8 +121,7 @@ public: // Overrides
 
 public: // Modifiers
   ///
-  /// Disconnect all signal connections.
-  /// This will stop the frontend backend communication.
+  /// Disconnect from the setting store, the model follows no change from now on.
   ///
   void disconnect();
 

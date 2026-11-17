@@ -64,8 +64,7 @@ public: // Modifiers
   Q_INVOKABLE void importFiles(const QList<QUrl>& files);
 
   ///
-  /// Disconnect all signal connections.
-  /// This will stop the frontend backend communication.
+  /// Disconnect from the engine, the bridge passes on nothing from now on.
   ///
   void disconnect();
 

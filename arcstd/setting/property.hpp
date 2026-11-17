@@ -44,21 +44,17 @@ public: // Operators
   auto operator==(const property<value_type>& other) const -> bool;
 
 public: // Accessors
-  ///
-  /// Get property value.
-  /// \return value of property
-  ///
   [[nodiscard]] auto value() const -> value_type;
 
 public: // Modifiers
   ///
-  /// Set property value, a change is written to the node.
+  /// Set the value, a change is written to the node.
   ///
   auto value(const value_type& value) -> void;
 
   ///
-  /// Exchange property value, a change is written to the node.
-  /// \return old property value
+  /// Set the value, a change is written to the node.
+  /// \return the old value
   ///
   [[nodiscard]] auto exchange(const value_type& new_value) -> value_type;
 

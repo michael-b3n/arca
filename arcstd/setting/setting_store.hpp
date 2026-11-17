@@ -31,15 +31,12 @@ namespace detail
 {
 
 ///
-/// Conditionally creates the default validator of a new setting.
-/// For enum values, optional or list enums, a list validator is created
-/// \return default validator types
+/// \return a list validator of all values for an enum, also in an optional or a vector, else an
+/// unbound one
 ///
 template<underlying_setting_type T>
 [[nodiscard]] auto conditional_default_validator() -> setting_validator<T>
 {
-  // Unpacks a type from its wrapper. std::vector<T> and std::optional<T>
-  // will return T, which is checked for enum type.
   if constexpr(std::is_enum_v<meta::remove_wrapper_t<T>>)
   {
     using enum_type = meta::remove_wrapper_t<T>;
@@ -54,7 +51,7 @@ template<underlying_setting_type T>
 } // namespace detail
 
 ///
-/// Signals emitted by the setting store.
+/// Signals of the setting store, `setting_created` passes the path of the setting.
 ///
 struct setting_store_signals final
 {
@@ -62,8 +59,8 @@ struct setting_store_signals final
 };
 
 ///
-/// Setting store. This class owns the setting objects and keeps their values in the settings file,
-/// so it is required to live as long as the settings are used.
+/// Owns the settings and keeps their values in the settings file. It must outlive the settings it
+/// hands out.
 ///
 class ARCSTD_EXPORT setting_store final : public signal::adapter<setting_store_signals>
 {
@@ -96,9 +93,6 @@ public: // Typedefs
   using setting_type_erased_non_owning_ptr_variant_type =
     meta::for_each_t<setting_type_erased_variant, setting_type_erased_non_owning_ptr_type>;
 
-  ///
-  /// Settings data struct.
-  ///
   struct setting_data final
   {
     std::string path;
@@ -130,26 +124,20 @@ public: // Static interface
 
 public: // Structors
   ///
-  /// Construct the settings, stored in the settings file of \p data_folder, the folder of the data
-  /// of the app.
+  /// Settings kept in the settings file of \p data_folder, the data folder of the app.
   ///
   explicit setting_store(std::filesystem::path data_folder);
 
 public: // Accessors
-  ///
-  /// \return the folder of the data of the app, the settings are stored in
-  ///
   [[nodiscard]] auto data_folder() const -> const std::filesystem::path&;
 
   ///
-  /// Access all created settings.
-  /// \return list of all created settings
+  /// \return all settings created so far
   ///
   [[nodiscard]] auto type_erased_settings() const -> std::vector<setting_data>;
 
   ///
-  /// Access a type erased setting for the specified path.
-  /// \return type erased setting or nullopt if no setting with the specified path exists
+  /// \return the setting of \p path, std::nullopt if there is none
   ///
   [[nodiscard]] auto type_erased_setting(const std::string& path) const
     -> std::optional<setting_type_erased_non_owning_ptr_variant_type>;
@@ -170,9 +158,7 @@ public: // Modifiers
   ) -> setting_type_erased_non_owning_ptr_variant_type;
 
   ///
-  /// Create or access a setting with no postfix, naming only the validator. \see
-  /// type_erased_setting
-  /// \return the newly created or the already existing setting
+  /// \see type_erased_setting, with no postfix
   ///
   template<underlying_setting_type_erased_type T>
   [[nodiscard]] auto type_erased_setting(
@@ -180,9 +166,9 @@ public: // Modifiers
   ) -> setting_type_erased_non_owning_ptr_variant_type;
 
   ///
-  /// Create a new setting. The setting will be owned by this store and has static lifetime.
-  /// \p postfix is displayed behind the value, e.g. the unit it is measured in.
-  /// \return non owning pointer to the newly created setting
+  /// Create the setting of \p path, owned by this store.
+  /// \throws util::exception if a setting of \p path exists
+  /// \return the setting
   ///
   template<underlying_setting_type T>
   [[nodiscard]] auto create_setting(
@@ -193,8 +179,7 @@ public: // Modifiers
   ) -> setting_non_owning_ptr_type<T>;
 
   ///
-  /// Create a new setting with no postfix, naming only the validator. \see create_setting
-  /// \return non owning pointer to the newly created setting
+  /// \see create_setting, with no postfix
   ///
   template<underlying_setting_type T>
   [[nodiscard]] auto create_setting(
@@ -236,8 +221,6 @@ auto setting_store::type_erased_setting(
     it->setting
   );
   lock.unlock();
-
-  // If the setting already exists, check if the value type is the same as the requested type.
   if(setting_exists)
   {
     const auto is_same_value_type = std::visit(

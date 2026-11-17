@@ -10,9 +10,8 @@ namespace arcstd::util
 {
 
 ///
-/// Performs a static_cast during compile time and a numeric cast on runtime.
-/// \tparam T arithmetic type to cast to
-/// \return casted value
+/// \return \p v as T, a static_cast in a constant expression, else a numeric_cast
+/// \throws boost::numeric::bad_numeric_cast at runtime if T can not hold \p v
 ///
 template<typename T>
 [[nodiscard]] constexpr auto numeric_cast_rt(auto&& v) -> T

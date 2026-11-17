@@ -20,8 +20,7 @@ namespace arcstd::io
 {
 
 ///
-/// Read-only access to the cells of a CSV document as strings, wraps rapidcsv.
-/// \note The complete document is held in memory.
+/// Reads the cells of a CSV document as strings, the whole document is held in memory.
 ///
 class ARCSTD_EXPORT csv_reader final
 {
@@ -30,34 +29,29 @@ class ARCSTD_EXPORT csv_reader final
 
 public: // Typedefs
   ///
-  /// Parameters describing the layout of the CSV document.
+  /// The layout of the document.
   ///
   struct params final
   {
-    char separator{','};            // cell separator character
-    bool header{true};              // if true, the first row contains the column names
-    bool trim{false};               // if true, leading and trailing whitespace of a cell is removed
-    bool skip_comment_lines{false}; // if true, lines starting with `comment_prefix` are ignored
-    bool skip_empty_lines{false};   // if true, empty lines are ignored
+    char separator{','};
+    bool header{true}; // the first row names the columns
+    bool trim{false};  // of the whitespace around a cell
+    bool skip_comment_lines{false};
+    bool skip_empty_lines{false};
   };
 
 public: // Constants
-  ///
-  /// Prefix marking a comment line. \see params::skip_comment_lines
-  ///
   static constexpr char comment_prefix = '#';
 
 public: // Structors
   ///
-  /// Construct a CSV reader from in-memory data. Intended for compiled in resources.
-  /// Parameters describing the document layout must be provided.
+  /// Reader of the document \p data, e.g. a compiled in resource.
   /// \throws util::exception if the data cannot be parsed
   ///
   csv_reader(std::span<const std::byte> data, const params& p);
 
   ///
-  /// Construct a CSV reader for the specified file path with parameters describing the document
-  /// layout.
+  /// Reader of the document file \p csv_path.
   /// \throws util::exception if the file cannot be read or parsed
   ///
   csv_reader(const std::filesystem::path& csv_path, const params& p);
@@ -72,51 +66,35 @@ public: // Operators
 
 public: // Accessors
   ///
-  /// Get the number of data rows. The header row is not counted.
-  /// \return number of rows
+  /// \return the number of rows, without the header row
   ///
   [[nodiscard]] auto row_count() const -> std::size_t;
-
-  ///
-  /// Get the number of columns.
-  /// \return number of columns
-  ///
   [[nodiscard]] auto column_count() const -> std::size_t;
 
   ///
-  /// Get the names of all columns as defined by the header row.
-  /// \return list of column names, empty if the document has no header row
+  /// \return the names of the header row, none without one
   ///
   [[nodiscard]] auto column_names() const -> std::vector<std::string>;
 
   ///
-  /// Get the index of the column with the specified name.
-  /// \return column index if found, std::nullopt otherwise
+  /// \return the index of the column \p name, std::nullopt if there is none
   ///
   [[nodiscard]] auto column_index(std::string_view name) const -> std::optional<std::size_t>;
 
   ///
-  /// Get the cell at the specified column and row.
-  /// \return cell value if column and row exist, std::nullopt otherwise
+  /// \return the cell of \p column and \p row, std::nullopt if there is none
   ///
   [[nodiscard]] auto cell(std::size_t column, std::size_t row) const -> std::optional<std::string>;
-
-  ///
-  /// Get the cell of the named column at the specified row.
-  /// \return cell value if column and row exist, std::nullopt otherwise
-  ///
   [[nodiscard]] auto cell(std::string_view column, std::size_t row) const
     -> std::optional<std::string>;
 
   ///
-  /// Get all cells of the row at the specified index.
-  /// \return cells of the row, empty if the row does not exist
+  /// \return the cells of \p row, none if there is no such row
   ///
   [[nodiscard]] auto row(std::size_t row) const -> std::vector<std::string>;
 
   ///
-  /// Get all cells of the named column.
-  /// \return cells of the column, empty if the column does not exist
+  /// \return the cells of \p column, none if there is no such column
   ///
   [[nodiscard]] auto column(std::string_view column) const -> std::vector<std::string>;
 };

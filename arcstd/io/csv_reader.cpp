@@ -15,36 +15,33 @@ namespace
 {
 
 ///
-/// Create rapidcsv label params from the csv reader params.
-/// \return rapidcsv label params
+/// \return the label params of \p p
 ///
-auto to_label_params(const csv_reader::params& p) -> rapidcsv::LabelParams
+[[nodiscard]] auto to_label_params(const csv_reader::params& p) -> rapidcsv::LabelParams
 {
-  // The second parameter denotes the column holding the row labels, which is not supported.
+  // No column of row labels, csv_reader has none
   return rapidcsv::LabelParams{p.header ? 0 : -1, -1};
 }
 
 ///
-/// Create rapidcsv separator params from the csv reader params.
-/// \return rapidcsv separator params
+/// \return the separator params of \p p
 ///
-auto to_separator_params(const csv_reader::params& p) -> rapidcsv::SeparatorParams
+[[nodiscard]] auto to_separator_params(const csv_reader::params& p) -> rapidcsv::SeparatorParams
 {
   return rapidcsv::SeparatorParams{p.separator, p.trim};
 }
 
 ///
-/// Create rapidcsv line reader params from the csv reader params.
-/// \return rapidcsv line reader params
+/// \return the line reader params of \p p
 ///
-auto to_line_reader_params(const csv_reader::params& p) -> rapidcsv::LineReaderParams
+[[nodiscard]] auto to_line_reader_params(const csv_reader::params& p) -> rapidcsv::LineReaderParams
 {
   return rapidcsv::LineReaderParams{
     p.skip_comment_lines, csv_reader::comment_prefix, p.skip_empty_lines
   };
 }
 
-} // anonymous namespace
+} // namespace
 
 ///
 ///

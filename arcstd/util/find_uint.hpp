@@ -10,23 +10,19 @@ namespace arcstd::util
 {
 
 ///
-/// Find unsigned integer within string functor.
+/// Reads the unsigned integer at the start of a text, \see find_uint.
 ///
 struct find_uint_t final
 {
-  ///
-  /// Result of find_uint.
-  ///
   struct result final
   {
-    std::uint32_t value;           // Unsigned integer value found in string_view
-    std::size_t post_value_offset; // Offset index after value from begin of provided text
+    std::uint32_t value;
+    std::size_t post_value_offset; // of the first character after the number
     constexpr auto operator<=>(const result&) const = default;
   };
 
   ///
-  /// Find unsigned integer within string view.
-  /// \return result with value and meta information
+  /// \return the number \p text starts with, std::nullopt if it starts with none
   ///
   [[nodiscard]] constexpr auto operator()(std::string_view text) const -> std::optional<result>;
 };

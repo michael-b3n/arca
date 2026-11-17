@@ -12,31 +12,24 @@ namespace arcstd::web
 {
 
 ///
-/// Web request, fetches the content of a web page with libcurl.
+/// Fetches the content of a web page with libcurl.
 ///
 class web_request final
 {
 public: // Typedefs
-  ///
-  /// Error codes for web content fetching operations.
-  ///
   enum class error_code
   {
-    init_failed,    ///< Failed to initialize curl
-    request_failed, ///< HTTP request failed
-    not_found,      ///< HTTP 404 or 410, the server has no such page
-    invalid_url,    ///< Invalid URL provided
-    timeout,        ///< Request timed out
-    unknown,        ///< Unknown error occurred
+    init_failed,
+    request_failed,
+    not_found, ///< HTTP 404 or 410, the server has no such page
+    invalid_url,
+    timeout,
+    unknown,
   };
-
-public: // Structors
-  web_request() = default;
-  ~web_request() noexcept = default;
 
 public: // Operations
   ///
-  /// \return Content of the webpage, or an error code
+  /// \return the content of the web page at \p url, or why it failed
   ///
   [[nodiscard]] static auto fetch(std::string_view url) -> std::expected<std::string, error_code>;
 };

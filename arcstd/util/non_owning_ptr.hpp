@@ -6,7 +6,7 @@ namespace arcstd::util
 {
 
 ///
-/// Pointer type wrapper to indicate, that the pointer is not owned.
+/// Pointer that owns nothing, its target lives elsewhere.
 ///
 template<typename T>
   requires(!std::is_pointer_v<T>)

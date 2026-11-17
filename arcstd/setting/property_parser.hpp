@@ -22,7 +22,7 @@ namespace arcstd::setting
 {
 
 ///
-/// All valid property_core types in a pack.
+/// The types the tree holds as the text of one node.
 ///
 using basic_property_value_types = std::tuple<
   bool,
@@ -38,22 +38,13 @@ using basic_property_value_types = std::tuple<
   double,
   std::string>;
 
-///
-/// Property type concept.
-///
 template<typename T>
 concept basic_property_value_type =
   meta::contains_v<basic_property_value_types, std::remove_cv_t<T>>;
 
-///
-/// Basic property tree type.
-///
 using property_tree_type = boost::property_tree::ptree;
 using property_path_type = property_tree_type::path_type;
 
-///
-/// Pair type concept.
-///
 template<typename T>
 concept property_parser_pair_type = requires(T) {
   T::first;
@@ -61,9 +52,8 @@ concept property_parser_pair_type = requires(T) {
 };
 
 ///
-/// Property parser defines read and write operations from user defined type to basic property value
-/// type. The reader returns the value stored in tree if successfully read, else it must return the
-/// default value. The writer writes the provided value to the tree.
+/// Reads and writes a value below a path of the tree, a composed one split into nodes of basic
+/// values. `read` returns std::nullopt if the tree holds no such value there.
 ///
 struct property_parser final
 {

@@ -31,13 +31,13 @@ concept connector_kind = requires(
 };
 
 ///
-/// Signal adapter class.
+/// Base of a class with the signals \p T, others connect to them, the class emits them.
 ///
 template<std::default_initializable T>
 class adapter
 {
   // Variables
-  mutable T sigs_; // mutable to be able to fire and connect from constant members
+  mutable T sigs_; // const members emit and connect too
 
 public: // Typedefs
   using signals_type = T;
@@ -48,28 +48,26 @@ public: // Structors
 
 public: // Modifiers
   ///
-  /// Connect a slot to the signal specified by the projection.
-  /// \return scoped connection corresponding to connected slot
+  /// Connect \p slot to the signal \p sig_projection projects to.
+  /// \return the connection, it disconnects when destroyed
   ///
   [[nodiscard]] auto connect(auto sig_projection, auto&& slot) const -> scoped_connection_type;
 
   ///
-  /// Connect a slot to the signal specified by the projection, allowing extended functionality.
-  /// \return connection corresponding to connected slot
+  /// Connect the extended \p slot, it gets its connection as first argument, \see connect.
+  /// \return the connection
   ///
   [[nodiscard]] auto connect_extended(auto sig_projection, auto&& slot) const -> connection_type;
 
   ///
-  /// Connect a slot to the signal specified by the projection, the slot is queued by \p connections
-  /// instead of being called by the emitting thread. The connection ends with \p connections.
+  /// Connect \p slot, \p connections queues it instead of the emitting thread calling it. The
+  /// connection ends with \p connections.
   ///
   auto connect_queued(auto sig_projection, auto&& slot, connector_kind auto& connections) const
     -> void;
 
   ///
-  /// Connect an extended slot to the signal specified by the projection, the slot is queued by \p
-  /// connections instead of being called by the emitting thread. The connection ends with \p
-  /// connections.
+  /// \see connect_queued, for an extended \p slot
   ///
   auto connect_queued_extended(
     auto sig_projection, auto&& slot, connector_kind auto& connections
@@ -77,9 +75,8 @@ public: // Modifiers
 
 protected: // Accessors
   ///
-  /// Emit the signal specified by the projection, passing the provided arguments to the connected
-  /// slots.
-  /// \return result of the signal call, if any
+  /// Emit the signal \p sig_projection projects to with \p args.
+  /// \return the result of the signal, if it has one
   ///
   auto notify(auto sig_projection, auto&&... args) -> auto;
 };

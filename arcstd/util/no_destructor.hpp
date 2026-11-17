@@ -20,9 +20,6 @@ class no_destructor final
   };
 
 public: // Structors
-  ///
-  /// Construct the held T of \p args.
-  ///
   template<typename... Args>
   explicit no_destructor(Args&&... args);
   ~no_destructor() noexcept;

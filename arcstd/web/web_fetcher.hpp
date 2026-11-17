@@ -31,7 +31,7 @@ public: // Variables
 };
 
 ///
-/// Web fetcher, fetches web pages. Registered for scripts as web.fetch(url).
+/// Fetches web pages, registered for scripts as web.fetch(url).
 ///
 class ARCSTD_EXPORT web_fetcher final
 {
@@ -54,8 +54,8 @@ public: // Typedefs
 
 public: // Structors
   ///
-  /// Construct the fetcher with its settings in \p setting_store and its function for the scripts
-  /// of \p lua_engine, none without one.
+  /// Fetcher with its settings in \p setting_store and its function for the scripts of
+  /// \p lua_engine, none without one.
   ///
   web_fetcher(
     std::shared_ptr<setting::setting_store> setting_store,
@@ -64,16 +64,13 @@ public: // Structors
   ~web_fetcher() noexcept;
 
 public: // Accessors
-  ///
-  /// \return the settings of the fetcher
-  ///
   [[nodiscard]] auto settings() const -> const web_fetcher_settings&;
 
 public: // Operations
   ///
-  /// \return the web page at \p url, or why it failed: the name of the error.
-  /// Blocks until it is fetched. During the retry pause a failed url gets the same failure without
-  /// a request.
+  /// Fetch the web page at \p url, blocks until it is fetched. During the retry pause a failed url
+  /// gets the same failure again without a request.
+  /// \return the page, or why it failed: the name of the error
   ///
   [[nodiscard]] auto fetch(std::string_view url) const -> page_type;
 };

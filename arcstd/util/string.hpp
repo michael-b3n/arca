@@ -17,15 +17,11 @@
 namespace arcstd::util::string
 {
 
-///
-/// Concept to check if T is string view type.
-///
 template<typename T>
 concept string_view_type = std::is_convertible_v<T, std::string_view>;
 
 ///
-/// Create string view array from string literal args.
-/// \return string view array
+/// \return \p args as an array of std::string_view
 ///
 template<string_view_type... S>
 [[nodiscard]] constexpr auto to_string_view_array(S&&... args)
@@ -35,8 +31,7 @@ template<string_view_type... S>
 }
 
 ///
-/// Split string_view by delimiter and return vector of string parts.
-/// \return vector of string parts
+/// \return the parts of \p data between the \p delimiter
 ///
 [[nodiscard]] constexpr auto split(const std::string_view data, const auto delimiter)
   -> std::vector<std::string>
@@ -75,8 +70,7 @@ template<string_view_type... S>
 }
 
 ///
-/// Join string parts with delimiter and return the joined string.
-/// \return Joined string
+/// \return \p parts joined with \p delimiter between them
 ///
 [[nodiscard]] constexpr auto join(const std::ranges::range auto& parts, const auto delimiter)
   -> std::string
@@ -99,8 +93,7 @@ template<string_view_type... S>
 }
 
 ///
-/// Check if string_view starts with prefix.
-/// \return true if string_view starts with prefix, false otherwise
+/// \return true if \p data starts with \p prefix
 ///
 [[nodiscard]] constexpr auto starts_with(const std::string_view data, const std::string_view prefix)
   -> bool
@@ -114,8 +107,7 @@ template<string_view_type... S>
 }
 
 ///
-/// Check if string_view ends with postfix.
-/// \return true if string_view ends with postfix, false otherwise
+/// \return true if \p data ends with \p postfix
 ///
 [[nodiscard]] constexpr auto ends_with(const std::string_view data, const std::string_view postfix)
   -> bool
@@ -133,8 +125,7 @@ template<string_view_type... S>
 }
 
 ///
-/// Check if string_view starts with prefix.
-/// \return true if string_view starts with char, false otherwise
+/// \return true if \p data starts with \p prefix_char
 ///
 [[nodiscard]] constexpr auto starts_with(const std::string_view data, const char prefix_char)
   -> bool
@@ -143,8 +134,7 @@ template<string_view_type... S>
 }
 
 ///
-/// Check if string_view ends with postfix.
-/// \return true if string_view ends with char, false otherwise
+/// \return true if \p data ends with \p postfix_char
 ///
 [[nodiscard]] constexpr auto ends_with(const std::string_view data, const char postfix_char) -> bool
 {
@@ -152,9 +142,8 @@ template<string_view_type... S>
 }
 
 ///
-/// Check if string_view ends with a formatted number (e.g., " (1)", " [2], or other").
-/// In \p format '{}' stands for the number, e.g. " ({})" or " [{}]".
-/// \return true if string_view ends with a formatted number, false otherwise
+/// \return true if \p data ends with a number in \p format,
+/// where "{}" stands for the number, e.g. " ({})" or " [{}]"
 ///
 [[nodiscard]] constexpr auto ends_with_formatted_uint(
   const std::string_view data, const std::string_view format = ""

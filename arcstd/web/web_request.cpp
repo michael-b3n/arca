@@ -12,7 +12,8 @@ namespace
 {
 
 ///
-/// Callback function for libcurl to write received data.
+/// Append what libcurl received to the string \p userdata.
+/// \return the number of bytes taken, all of them
 ///
 // NOLINTNEXTLINE(misc-const-correctness) curl calls it with the signature it documents
 auto write_callback(char* ptr, std::size_t size, std::size_t nmemb, void* userdata) -> std::size_t
@@ -44,7 +45,7 @@ auto web_request::fetch(std::string_view url) -> std::expected<std::string, erro
   }
 
   std::string result;
-  result.reserve(4096); // Reserve some space to reduce allocations
+  result.reserve(4096);
 
   const auto url_str = std::string(url);
   curl_easy_setopt(curl, CURLOPT_URL, url_str.c_str());
@@ -53,8 +54,8 @@ auto web_request::fetch(std::string_view url) -> std::expected<std::string, erro
   // Web pages only, scripts pass their own urls and file:// would reach local files
   curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,https");
   curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, "http,https");
-  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // Follow redirects
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);       // 30 second timeout
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "arcstd-web-request/1.0");
 
   const CURLcode res = curl_easy_perform(curl);

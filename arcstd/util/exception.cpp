@@ -43,4 +43,18 @@ exception::exception(
 {
 }
 
+///
+///
+auto exception::where() const -> const std::source_location&
+{
+  return location_;
+}
+
+///
+///
+auto exception::stack() const -> const std::stacktrace&
+{
+  return stacktrace_;
+}
+
 } // namespace arcstd::util

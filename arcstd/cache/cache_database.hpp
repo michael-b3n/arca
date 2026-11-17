@@ -21,10 +21,9 @@ namespace arcstd::cache
 {
 
 ///
-/// Cache database. Keeps text values by key in a SQLite database file, so they last
-/// beyond the run of the app and several processes may use the file at once. A
-/// cache is not worth a failing script: a database that can not be opened, read
-/// or written is logged, the cache then holds nothing and keeps nothing.
+/// Keeps text values by key in a SQLite database file, so they last beyond the run of the app and
+/// several processes may use the file at once. A cache is not worth a failing script: a database
+/// that can not be opened, read or written is logged, the cache then holds and keeps nothing.
 ///
 class cache_database final
 {
@@ -62,13 +61,13 @@ public: // Operators
 
 public: // Accessors
   ///
-  /// \return the value of \p key, none if it is not cached
+  /// \return the value of \p key, std::nullopt if it is not cached
   ///
   [[nodiscard]] auto get(const std::string& key) const -> std::optional<std::string>;
 
 public: // Modifiers
   ///
-  /// Cache \p value for \p key, none removes it.
+  /// Cache \p value for \p key, std::nullopt removes it.
   ///
   auto set(const std::string& key, const std::optional<std::string>& value) -> void;
 

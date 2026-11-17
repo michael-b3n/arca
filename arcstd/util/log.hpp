@@ -13,9 +13,6 @@
 namespace arcstd::util
 {
 
-///
-/// List of all available logger levels.
-///
 enum class logger_level
 {
   debug,
@@ -25,8 +22,7 @@ enum class logger_level
 };
 
 ///
-/// Get the global log level, debug messages are only logged in debug builds.
-/// \return global log level
+/// \return the lowest level logged, debug only in a debug build
 ///
 [[nodiscard]] constexpr auto global_log_level() -> logger_level
 {
@@ -38,35 +34,21 @@ enum class logger_level
 }
 
 ///
-/// Log message with debug level. A message that can not be written is dropped, logging never
-/// throws.
+/// Log \p msg, a message that can not be written is dropped: logging never throws.
 ///
 ARCSTD_EXPORT auto log_debug(std::string_view msg) noexcept -> void;
-
-///
-/// Log message with info level.
-///
 ARCSTD_EXPORT auto log_info(std::string_view msg) noexcept -> void;
-
-///
-/// Log message with warning level.
-///
 ARCSTD_EXPORT auto log_warn(std::string_view msg) noexcept -> void;
-
-///
-/// Log message with error level.
-///
 ARCSTD_EXPORT auto log_error(std::string_view msg) noexcept -> void;
 
 ///
-/// Init logger and shutdown logger with RAII.
-/// \note Messages logged while no logger instance is alive are dropped.
+/// The logger while it lives, a message logged without one is dropped.
 ///
 struct ARCSTD_EXPORT logger final
 {
   ///
-  /// Init the logger, writing to the folder logs of \p data_folder, the folder of the data of the
-  /// app. The \p header is written at the top of every log file, rotated files included.
+  /// Log to the folder "logs" of \p data_folder, the data folder of the app. \p header is written
+  /// at the top of every log file, rotated ones included.
   ///
   explicit logger(const std::filesystem::path& data_folder, std::string header = {});
   ~logger() noexcept;
@@ -124,9 +106,6 @@ auto log_formatted(const std::format_string<Args...> fmt, Args&&... args) noexce
 
 } // namespace arcstd::util
 
-///
-/// Internal std formatted string helper macro.
-///
 // clang-format off
 #define INT_LOG_INTERNAL_FMT_STR(LEVEL, FMT_STR, ...)                                                                                                                                                                  \
   {                                                                                                                                                                                                                    \
@@ -141,7 +120,7 @@ auto log_formatted(const std::format_string<Args...> fmt, Args&&... args) noexce
 // clang-format on
 
 ///
-/// Default logging macros
+/// Log the message \p FMT_STR formats, with the folder and the file of the caller in front.
 ///
 // clang-format off
 #define LOG_DEBUG(FMT_STR, ...) INT_LOG_INTERNAL_FMT_STR(::arcstd::util::logger_level::debug, FMT_STR __VA_OPT__(,) __VA_ARGS__);

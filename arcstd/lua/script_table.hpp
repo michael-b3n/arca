@@ -53,6 +53,9 @@ class script_table final
   // Variables
   values_type values_;
 
+public: // Constants
+  static constexpr auto keys = std::array<std::string_view, sizeof...(Fields)>{Fields::key...};
+
 public: // Structors
   script_table() = default;
   // NOLINTNEXTLINE(misc-explicit-constructor) a table is written as a braced list of its fields
@@ -62,30 +65,19 @@ public: // Structors
 public: // Operators
   auto operator==(const script_table& other) const -> bool = default;
 
-public: // Constants
-  static constexpr auto keys = std::array<std::string_view, sizeof...(Fields)>{Fields::key...};
-
 public: // Accessors
   ///
   /// \return the value of the field \p Key
   ///
   template<util::string_literal Key>
   [[nodiscard]] auto get() const -> const auto&;
-
-  ///
-  /// \return the value of the field \p Key
-  ///
   template<util::string_literal Key>
   [[nodiscard]] auto get() -> auto&;
 
   ///
-  /// \return const references of the values of all fields
+  /// \return the values of all fields, in the order of the fields
   ///
   [[nodiscard]] auto values() const -> const values_type&;
-
-  ///
-  /// \return references to the values of all fields
-  ///
   [[nodiscard]] auto values() -> values_type&;
 
 private: // Implementation

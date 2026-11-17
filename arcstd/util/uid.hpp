@@ -18,7 +18,7 @@ namespace detail
 } // namespace detail
 
 ///
-/// Unique ID type.
+/// ID unique among all IDs of the program, of a type of its own per \p Tag.
 ///
 template<typename Tag>
 class uid final
@@ -33,10 +33,9 @@ public: // Typedefs
   using tag_type = Tag;
   using underlying_type = decltype(value_);
 
-public: // Static helpers
+public: // Static interface
   ///
-  /// Get new typesafe unique ID.
-  /// \return new typesafe unique ID
+  /// \return an ID no other one has
   ///
   [[nodiscard]] static auto new_uid() -> uid<tag_type>;
 
@@ -51,8 +50,6 @@ private: // Structors
 };
 
 ///
-/// Get new typesafe unique ID.
-/// \return new typesafe unique ID
 ///
 template<typename Tag>
 auto uid<Tag>::new_uid() -> uid<tag_type>

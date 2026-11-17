@@ -12,20 +12,18 @@ namespace arcstd::setting
 {
 
 ///
-/// Struct containing signals for setting class.
+/// Signals of a setting.
 ///
 struct setting_signals final
 {
-  /// Value changed signal: will be emitted when the setting value changes.
   signal::signal_type<void()> value_changed;
-  /// Validator changed signal: will be emitted when the setting validator changes. A change of the
-  /// setting validator can change the value of the setting. In the case the signal `value_changed`
-  /// will be emitted first.
+  /// A changed validator can change the value, `value_changed` is emitted first then.
   signal::signal_type<void()> validator_changed;
 };
 
 ///
-/// Setting class.
+/// Setting at `path`: a value its validator limits, kept in the settings file by its property.
+/// `postfix` is shown behind the value, e.g. its unit.
 ///
 template<underlying_setting_type T>
 class setting final : public signal::adapter<setting_signals>
@@ -51,15 +49,12 @@ public: // Structors
   );
 
 public: // Accessors
-  ///
-  /// Access setting value.
-  /// \return reference to setting value
-  ///
   [[nodiscard]] auto value() const -> value_type;
 
 public: // Modifiers
   ///
-  /// Set setting value.
+  /// Set the value \p v, as far as the validator lets it.
+  /// \return false if the validator corrected or rejected \p v
   ///
   [[nodiscard]] auto value(const value_type& v) -> bool;
 
@@ -133,8 +128,7 @@ auto setting<T>::value(const value_type& v) -> bool
     },
     [&](const setting_validator_list<value_type>::sptr_type& validator_list) -> bool
     {
-      // check if the value is contained in the list or if the list is empty (special case).
-      // Empty list means the validator is not initialized, so validation is ignored.
+      // An empty list is a validator not set up yet, it takes every value
       const auto contains = validator_list->contains(v) || validator_list->empty();
       if(contains)
       {
@@ -168,8 +162,7 @@ auto setting<T>::validate() -> void
     },
     [&](const setting_validator_list<value_type>::sptr_type& validator_list)
     {
-      // Check if the value is contained in the list or if the list is empty (special case).
-      // Empty list means the validator is not initialized, so validation is ignored.
+      // An empty list is a validator not set up yet, it takes every value
       const auto contains = validator_list->contains(value_.value()) || validator_list->empty();
       if(!contains)
       {

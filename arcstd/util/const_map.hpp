@@ -31,9 +31,8 @@ concept mappable_types = requires {
 };
 
 ///
-/// Concept to check if type that shall be accessed is explicit for bidirectional maps.
-/// Explicit types are required if first and second types are equality comparable.
-/// The concept is always true for unidirectional maps.
+/// A bimap whose two types compare with each other must be asked with the exact type \p T, else it
+/// would not know which side to look up.
 ///
 template<typename T, typename F, typename S, bool BidirectionalFlag>
 concept explicit_if_equality_comparable =
@@ -47,17 +46,15 @@ concept comparable_with = explicit_if_equality_comparable<T, F, S, Bidirectional
 } // namespace detail
 
 ///
-/// Const bimap with compile time access to values.
+/// Map of \p N pairs looked up at compile time, by the first and, as bimap, by the second value.
+/// \see make_const_map and make_const_bimap
 ///
 template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag = true>
   requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
 class const_map final
 {
-  ///
-  /// Compile time pointer comparisons are not defined, even though with GCC a constexpr const_map
-  /// with pairs of type pair<C, const char*> will compile. Other compilers like clang will not. The
-  /// comparable_type templated alias should be used for comparing elements.
-  ///
+  // Typedefs
+  // Strings compare as std::string_view: a constant expression may not compare pointers
   template<typename C>
   using comparable_type =
     std::conditional_t<std::is_convertible_v<C, std::string_view>, std::string_view, C>;
@@ -74,10 +71,6 @@ public: // Typedefs
   using const_reverse_iterator = typename std::array<value_type, N>::const_reverse_iterator;
 
 public: // Structors
-  ///
-  /// Constructor of const bimap.
-  /// \tparam ...P pack of type pair
-  ///
   template<typename... P>
   // NOLINTNEXTLINE(misc-explicit-constructor) a map is written as a braced list of its pairs
   constexpr const_map(P&&... p)
@@ -85,20 +78,15 @@ public: // Structors
 
 public: // Accessors
   ///
-  /// Checks if first value is contained in const bimap.
-  /// \tparam F type must be equality comparable with first_type or first_type if first and second
-  /// types are similar.
-  /// \return true, if first value was found, false otherwise
+  /// \return true if a pair has the first value \p first, \see
+  /// detail::explicit_if_equality_comparable
   ///
   template<typename F>
   [[nodiscard]] constexpr auto contains(const F& first) const -> bool
     requires(detail::comparable_with<F, first_type, second_type, BidirectionalFlag>);
 
   ///
-  /// Checks if second value is contained in const bimap.
-  /// \tparam F type must be equality comparable with second_type or second_type if first and second
-  /// types are similar.
-  /// \return true, if second value was found, false otherwise
+  /// \return true if a pair has the second value \p second
   ///
   template<typename S>
   [[nodiscard]] constexpr auto contains(const S& second) const -> bool
@@ -107,54 +95,41 @@ public: // Accessors
     );
 
   ///
-  /// Access second value corresponding to first value.
-  /// \tparam F type must be equality comparable with first_type or first_type if first and second
-  /// types are similar.
-  /// \return const reference to second element of pair corresponding to first
+  /// \return the second value of \p first, \see detail::explicit_if_equality_comparable
+  /// \throws util::exception if there is none
   ///
   template<typename F>
   [[nodiscard]] constexpr auto at(const F& first) const -> const second_type&
     requires(detail::comparable_with<F, first_type, second_type, BidirectionalFlag>);
 
   ///
-  /// Access first value corresponding to second value.
-  /// \tparam F type must be equality comparable with second_type or second_type if first and second
-  /// types are similar.
-  /// \return const reference to first element of pair corresponding to second
+  /// \return the first value of \p second
+  /// \throws util::exception if there is none
   ///
   template<typename S>
   [[nodiscard]] constexpr auto at(const S& second) const -> const first_type&
     requires(
       detail::comparable_with<S, second_type, first_type, BidirectionalFlag> && BidirectionalFlag
     );
-
-  ///
-  /// Tells how many entries are in the bimap.
-  /// \return size of bimap
-  ///
   [[nodiscard]] constexpr auto size() const -> size_type;
 
-public: // Iterator Overloads
-  [[nodiscard]] constexpr auto begin() const -> const_iterator { return map_.begin(); }
-  [[nodiscard]] constexpr auto cbegin() const -> const_iterator { return map_.cbegin(); }
-  [[nodiscard]] constexpr auto end() const -> const_iterator { return map_.end(); }
-  [[nodiscard]] constexpr auto cend() const -> const_iterator { return map_.cend(); }
-  [[nodiscard]] constexpr auto rbegin() const -> const_reverse_iterator { return map_.rbegin(); }
-  [[nodiscard]] constexpr auto crbegin() const -> const_reverse_iterator { return map_.crbegin(); }
-  [[nodiscard]] constexpr auto rend() const -> const_reverse_iterator { return map_.rend(); }
-  [[nodiscard]] constexpr auto crend() const -> const_reverse_iterator { return map_.crend(); }
+public: // Iterators
+  [[nodiscard]] constexpr auto begin() const -> const_iterator;
+  [[nodiscard]] constexpr auto cbegin() const -> const_iterator;
+  [[nodiscard]] constexpr auto end() const -> const_iterator;
+  [[nodiscard]] constexpr auto cend() const -> const_iterator;
+  [[nodiscard]] constexpr auto rbegin() const -> const_reverse_iterator;
+  [[nodiscard]] constexpr auto crbegin() const -> const_reverse_iterator;
+  [[nodiscard]] constexpr auto rend() const -> const_reverse_iterator;
+  [[nodiscard]] constexpr auto crend() const -> const_reverse_iterator;
 
 private: // Implementation
   ///
-  /// Checks if values are equal using `comparable_type` for comparison.
-  /// \return true if equal, false otherwise
+  /// \return true if \p lhs equals \p rhs, compared as comparable_type
   ///
   [[nodiscard]] constexpr auto is_equal(const auto& lhs, const auto& rhs) const -> bool;
 };
 
-///
-/// Const bimap type check.
-///
 template<typename T>
 struct is_const_map : std::false_type
 {};
@@ -164,9 +139,6 @@ struct is_const_map<const_map<FirstType, SecondType, N>> : std::true_type
 template<typename T>
 constexpr bool is_const_map_v = is_const_map<T>::value;
 
-///
-/// Const bimap type concept.
-///
 template<typename T>
 concept const_map_type = is_const_map_v<T>;
 
@@ -285,6 +257,85 @@ constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::size() co
 ///
 template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag>
   requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
+constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::begin() const
+  -> const_iterator
+{
+  return map_.begin();
+}
+
+///
+///
+template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag>
+  requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
+constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::cbegin() const
+  -> const_iterator
+{
+  return map_.cbegin();
+}
+
+///
+///
+template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag>
+  requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
+constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::end() const -> const_iterator
+{
+  return map_.end();
+}
+
+///
+///
+template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag>
+  requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
+constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::cend() const
+  -> const_iterator
+{
+  return map_.cend();
+}
+
+///
+///
+template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag>
+  requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
+constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::rbegin() const
+  -> const_reverse_iterator
+{
+  return map_.rbegin();
+}
+
+///
+///
+template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag>
+  requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
+constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::crbegin() const
+  -> const_reverse_iterator
+{
+  return map_.crbegin();
+}
+
+///
+///
+template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag>
+  requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
+constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::rend() const
+  -> const_reverse_iterator
+{
+  return map_.rend();
+}
+
+///
+///
+template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag>
+  requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
+constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::crend() const
+  -> const_reverse_iterator
+{
+  return map_.crend();
+}
+
+///
+///
+template<typename FirstType, typename SecondType, std::size_t N, bool BidirectionalFlag>
+  requires(detail::mappable_types<FirstType, SecondType, BidirectionalFlag>)
 constexpr auto const_map<FirstType, SecondType, N, BidirectionalFlag>::is_equal(
   const auto& lhs, const auto& rhs
 ) const -> bool
@@ -301,7 +352,7 @@ namespace detail
 /// \return the const_map of \p p, use make_const_map or make_const_bimap
 ///
 template<typename F, typename S, std::size_t N, bool BidirectionalFlag, std::size_t... Is>
-consteval auto make_const_map_impl(
+[[nodiscard]] consteval auto make_const_map_impl(
   std::pair<F, S> (&&p)[N], [[maybe_unused]] std::index_sequence<Is...> /*sequence*/
 ) -> auto
 {
@@ -315,7 +366,7 @@ consteval auto make_const_map_impl(
 /// "e_1"}})
 ///
 template<typename F, typename S, std::size_t N>
-consteval auto make_const_map(std::pair<F, S> (&&p)[N]) -> auto
+[[nodiscard]] consteval auto make_const_map(std::pair<F, S> (&&p)[N]) -> auto
 {
   static constexpr auto unidirectional = false;
   return detail::make_const_map_impl<F, S, N, unidirectional>(
@@ -327,7 +378,7 @@ consteval auto make_const_map(std::pair<F, S> (&&p)[N]) -> auto
 /// \return the const_map of \p p, looked up in both directions
 ///
 template<typename F, typename S, std::size_t N>
-consteval auto make_const_bimap(std::pair<F, S> (&&p)[N]) -> auto
+[[nodiscard]] consteval auto make_const_bimap(std::pair<F, S> (&&p)[N]) -> auto
 {
   static constexpr auto bidirectional = true;
   return detail::make_const_map_impl<F, S, N, bidirectional>(

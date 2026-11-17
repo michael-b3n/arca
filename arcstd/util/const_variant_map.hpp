@@ -15,9 +15,6 @@ namespace arcstd::util
 namespace detail
 {
 
-///
-/// Const variant mappable trait to check if type P has first_type and second_type.
-///
 template<typename P>
 concept const_variant_mappable = requires {
   typename P::first_type;
@@ -27,7 +24,7 @@ concept const_variant_mappable = requires {
 } // namespace detail
 
 ///
-/// Const multi type map with multi type key value access.
+/// Map of the pairs \p P, each of its own key and value type, the values are handed out as variant.
 ///
 template<detail::const_variant_mappable... P>
 class const_variant_map
@@ -52,27 +49,20 @@ public: // Constants
   static constexpr auto size = sizeof...(P);
 
 public: // Structors
-  ///
-  /// Constructor of const multi type map.
-  /// \tparam ...P pack of type key value pairs
-  ///
   // NOLINTNEXTLINE(misc-explicit-constructor) a map is written as a braced list of its pairs
   constexpr const_variant_map(P&&... p);
 
 public: // Accessors
   ///
-  /// Checks if map contains key.
-  /// \tparam T key type
-  /// \return true if key was found, false otherwise
+  /// \return true if the map has \p key
   ///
   template<typename T>
   [[nodiscard]] constexpr auto contains(const T& key) const -> bool
     requires(meta::contains_v<key_variant_type, std::decay_t<T>>);
 
   ///
-  /// Access value variant type.
-  /// \tparam T key type
-  /// \return copied value corresponding to key packed in a variant
+  /// \return a copy of the value of \p key
+  /// \throws util::exception if there is none
   ///
   template<typename T>
   [[nodiscard]] constexpr auto at(const T& key) const -> value_variant_type
@@ -88,8 +78,7 @@ public: // Operations
     requires(meta::contains_v<key_variant_type, std::decay_t<T>>);
 
   ///
-  /// Apply callable to key-value pairs until callable returns false.
-  /// \tparam F callable type with boolean return type
+  /// Call \p f with each key and value until it returns false.
   ///
   template<typename F>
   constexpr auto visit_until(F f) const -> void

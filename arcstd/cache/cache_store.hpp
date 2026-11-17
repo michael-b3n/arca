@@ -17,9 +17,9 @@ namespace arcstd::cache
 class cache_database;
 
 ///
-/// Cache store, keeps text values of the scripts beyond the run of the app, in a database file per
-/// cache name. Registered for scripts as cache.get(name, key) and cache.set(name, key, value),
-/// a script names its own cache, e.g. after itself.
+/// Keeps text values of the scripts beyond the run of the app, in a database file per cache name.
+/// Registered for scripts as cache.get(name, key) and cache.set(name, key, value), a script names
+/// its own cache, e.g. after itself.
 ///
 class ARCSTD_EXPORT cache_store final
 {
@@ -35,8 +35,8 @@ class ARCSTD_EXPORT cache_store final
 
 public: // Structors
   ///
-  /// Construct the store of the caches in the folder "cache" of \p data_folder, with its functions
-  /// for the scripts of \p lua_engine, none without one.
+  /// Caches in the folder "cache" of \p data_folder, with their functions for the scripts of
+  /// \p lua_engine, none without one.
   ///
   cache_store(
     const std::filesystem::path& data_folder, std::shared_ptr<lua::lua_engine> lua_engine

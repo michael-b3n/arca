@@ -8,8 +8,7 @@ namespace arcstd::util::ranges
 {
 
 ///
-/// Return an iota view over the whole range of the given range object.
-/// \return iota view from 0 to size of range
+/// \return the indices of \p range
 ///
 template<std::ranges::sized_range R>
 [[nodiscard]] constexpr auto index_view(const R& range) -> auto
@@ -18,9 +17,7 @@ template<std::ranges::sized_range R>
 }
 
 ///
-/// Return an iota view from a start index to the end of the given range object.
-/// If the begin index is larger then the range size, the view is empty.
-/// \return iota view from given start index to size of range
+/// \return the indices of \p range from \p begin, none if it lies beyond
 ///
 template<std::ranges::sized_range R>
 [[nodiscard]] constexpr auto index_view_from(
@@ -32,10 +29,7 @@ template<std::ranges::sized_range R>
 }
 
 ///
-/// Return an iota view from zero to the specified end index. Performs a max size check with the
-/// given range. If the end index is larger then the range size, the view will go over the full
-/// range.
-/// \return iota view from zero to the given end index or size of range if end is larger
+/// \return the indices of \p range up to \p end, all of them if it lies beyond
 ///
 template<std::ranges::sized_range R>
 [[nodiscard]] constexpr auto index_view_to(const R& range, const std::ranges::range_size_t<R> end)
@@ -46,8 +40,7 @@ template<std::ranges::sized_range R>
 }
 
 ///
-/// Return an iota view from zero to the specified end index.
-/// \return iota view from zero to the given end index
+/// \return the indices 0 up to \p end, none if it is negative
 ///
 [[nodiscard]] constexpr auto index_view_to(const std::integral auto end) -> auto
 {
@@ -55,8 +48,7 @@ template<std::ranges::sized_range R>
 }
 
 ///
-/// Return an iota view from first to the specified end index.
-/// \return iota view from first to the given end index
+/// \return the indices from \p first up to \p second, in their common type
 ///
 [[nodiscard]] constexpr auto index_view_between(
   const std::integral auto first, const std::integral auto second

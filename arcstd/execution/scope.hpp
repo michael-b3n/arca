@@ -10,8 +10,8 @@ namespace arcstd::execution
 {
 
 ///
-/// Scope holding launched work, \see launch. Destruction requests a stop and
-/// waits for the work, so the work may refer to whatever outlives the scope.
+/// Scope of launched work, \see launch. Destroyed, it requests a stop and waits for the work, so
+/// the work may refer to whatever outlives the scope.
 ///
 class ARCSTD_EXPORT scope final
 {
@@ -22,9 +22,9 @@ class ARCSTD_EXPORT scope final
   struct impl;
 
   // Variables
+  const std::unique_ptr<impl> impl_;
   mutable std::mutex mtx_;
   bool stopped_{false};
-  const std::unique_ptr<impl> impl_;
 
 public: // Structors
   scope();

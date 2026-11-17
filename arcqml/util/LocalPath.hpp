@@ -25,7 +25,7 @@ class LocalPath final : public QObject
   QML_ELEMENT
   QML_SINGLETON
 
-public: // Static
+public: // Static interface
   ///
   /// \return the local paths of \p urls as a file dialog reports them,
   /// one naming nothing on this machine is logged and left out

@@ -7,9 +7,7 @@ namespace arcstd::util
 {
 
 ///
-/// Get the pretty function name from the source location.
-/// The pretty function name is the function name without the namespace and without the parameters.
-/// \return Pretty function name as std::string_view
+/// \return the name of the function of \p loc, without its namespace and its parameters
 ///
 [[nodiscard]] constexpr auto filter_function_name(const std::source_location& loc)
   -> std::string_view
@@ -26,9 +24,7 @@ namespace arcstd::util
 }
 
 ///
-/// Get the pretty file name from the source location.
-/// The pretty file name is the file name without the path and without the file extension.
-/// \return Pretty file name as std::string_view
+/// \return the name of the file of \p loc, without its folder and its extension
 ///
 [[nodiscard]] constexpr auto filter_file_name(const std::source_location& loc) -> std::string_view
 {
@@ -44,9 +40,7 @@ namespace arcstd::util
 }
 
 ///
-/// Get the pretty folder name from the source location.
-/// The pretty folder name is the name of the parent folder of the file without the complete path.
-/// \return Pretty folder name as std::string_view
+/// \return the name of the folder of the file of \p loc, without the path above it
 ///
 [[nodiscard]] constexpr auto filter_folder_name(const std::source_location& loc) -> std::string_view
 {

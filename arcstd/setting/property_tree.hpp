@@ -14,9 +14,7 @@ namespace arcstd::setting
 {
 
 ///
-/// Property tree. This class loads the settings file and saves it again, its nodes hold the
-/// properties, \see property_node.
-/// \note This class must be created as a shared pointer.
+/// Settings file: loads it and saves it again, its nodes hold the properties, \see property_node.
 ///
 class property_tree final : public std::enable_shared_from_this<property_tree>
 {
@@ -34,10 +32,9 @@ public: // Typedefs
   using sptr_type = std::shared_ptr<property_tree>;
   using path_type = property_path_type;
 
-public: // Creator
+public: // Static interface
   ///
-  /// Property tree creator
-  /// \return
+  /// \return the tree of \p tree_file_path, the living one if there is one: one tree per file
   ///
   [[nodiscard]] static auto create(const std::filesystem::path& tree_file_path)
     -> property_tree::sptr_type;

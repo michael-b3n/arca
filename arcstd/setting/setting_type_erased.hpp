@@ -9,8 +9,8 @@ namespace arcstd::setting
 {
 
 ///
-/// Type erased setting class. This class wraps the general setting interface.
-/// `This` must be destroyed before the underlying setting is destroyed.
+/// Setting of any type seen as its type erased type \p T, e.g. an enum as its name. It keeps the
+/// setting alive, the signal adapter is the setting's.
 ///
 template<underlying_setting_type_erased_type T>
 class setting_type_erased final
@@ -28,15 +28,11 @@ public: // Structors
   setting_type_erased(const std::shared_ptr<setting<U>>& setting);
 
 public: // Accessors
-  ///
-  /// Access setting value.
-  /// \return reference to setting value
-  ///
   [[nodiscard]] auto value() const -> value_type;
 
 public: // Modifiers
   ///
-  /// Set setting value.
+  /// \see setting::value
   ///
   [[nodiscard]] auto value(const value_type& v) -> bool;
 
@@ -47,9 +43,6 @@ public: // Variables
   const std::string postfix;
 };
 
-///
-/// Deduction guide for setting_type_erased.
-///
 template<underlying_setting_type U>
 setting_type_erased(const std::shared_ptr<setting<U>>& setting)
   -> setting_type_erased<setting_type_erased_type_from<U>>;
@@ -58,8 +51,7 @@ namespace detail
 {
 
 ///
-/// Convert setting validator to type erased setting validator.
-/// \return type erased setting validator
+/// \return \p validator as the validator of the type erased setting
 ///
 template<underlying_setting_type U>
 [[nodiscard]] auto validator_type_erased(const setting_validator<U>& validator)

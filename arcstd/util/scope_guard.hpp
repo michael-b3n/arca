@@ -9,7 +9,7 @@ namespace arcstd::util
 {
 
 ///
-/// Move-only guard calling a callable on destruction or reset.
+/// Calls its callable once, when destroyed or reset.
 ///
 class ARCSTD_EXPORT scope_guard final
 {
@@ -32,7 +32,7 @@ public: // Operators
 
 public: // Modifiers
   ///
-  /// Reset the guard, calling the callable if it exists.
+  /// Call the callable now, if it was not called yet.
   ///
   auto reset() -> void;
 
@@ -41,10 +41,8 @@ private: // Implementation
 };
 
 ///
-/// Shared scope guard class. This class allows multiple scope_guard instances to share the same
-/// underlying callable, ensuring that the callable is only executed once when all guards are
-/// destroyed or reset. This is useful for cases where multiple components need to share the same
-/// cleanup logic.
+/// Guard of a callable shared by several guards, it is called once the last of them is destroyed
+/// or reset, \see creator.
 ///
 class ARCSTD_EXPORT shared_scope_guard final
 {
@@ -54,24 +52,20 @@ class ARCSTD_EXPORT shared_scope_guard final
 
 public: // Typedefs
   ///
-  /// A helper class to create a bound scope exit action instance.
-  /// Multiple calls to the create function will return a guard that is bound to the same underlying
-  /// instance, ensuring that the on_destruction callback is only called once when all guards are
-  /// destroyed or reset.
+  /// Hands out the guards of one callable.
   ///
   class ARCSTD_EXPORT creator final
   {
     // Variables
     std::weak_ptr<scope_guard> instance_;
 
-  public: // Constructors
+  public: // Structors
     creator() = default;
 
   public: // Operations
     ///
-    /// Create a bound scope exit action instance.
-    /// \return A scope_guard instance bound to the same underlying
-    /// instance as other guards created by this function
+    /// \return a guard of \p on_destruction, or of the callable of the guards still alive, which
+    /// keep theirs and drop \p on_destruction
     ///
     [[nodiscard]] auto create(scope_guard::on_destruction_type&& on_destruction)
       -> shared_scope_guard;
@@ -89,14 +83,13 @@ public: // Operators
 
 public: // Accessors
   ///
-  /// Check if the guard is the initial guard holding the callable.
-  /// \return true if the guard is the initial guard, false otherwise
+  /// \return true if the creator made the callable's guard for this guard
   ///
   [[nodiscard]] auto is_initial_instance() const -> bool;
 
 public: // Modifiers
   ///
-  /// Reset the guard, calling the callable if it exists.
+  /// Let go of the callable, it is called if this was the last guard.
   ///
   auto reset() -> void;
 

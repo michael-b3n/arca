@@ -13,14 +13,12 @@ namespace arcstd::system
 struct ARCSTD_EXPORT filesystem final
 {
   ///
-  /// Get path to executable.
-  /// \return path to executable location
+  /// \return the path of the running executable
   ///
   [[nodiscard]] static auto executable_location() -> std::filesystem::path;
 
   ///
-  /// Get path to executable folder.
-  /// \return path to executable folder
+  /// \return the folder of the running executable
   ///
   [[nodiscard]] static auto executable_folder() -> std::filesystem::path;
 };

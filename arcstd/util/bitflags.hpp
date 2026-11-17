@@ -10,9 +10,7 @@ namespace arcstd::util
 {
 
 ///
-/// Class for managing bitflags based on enum values.
-/// This class allows combining multiple enum values into
-/// a single bitfield for efficient storage and querying.
+/// Set of flags of the enum \p E, whose values count up from 0. The members follow std::bitset.
 ///
 template<enum_type E>
 class bitflags final
@@ -40,86 +38,33 @@ public: // Structors
   constexpr bitflags(Flags... flags);
 
 public: // Modifiers
-  ///
-  /// Set a flag to true.
-  ///
   constexpr auto set(E flag) -> void;
-
-  ///
-  /// Set a flag to false.
-  ///
   constexpr auto reset(E flag) -> void;
-
-  ///
-  /// Reset all flags to false.
-  ///
   constexpr auto reset() -> void;
-
-  ///
-  /// Flip a flag.
-  /// \return Reference to this
-  ///
   constexpr auto flip(E flag) -> bitflags&;
-
-  ///
-  /// Flip all flags.
-  /// \return Reference to this
-  ///
   constexpr auto flip() -> bitflags&;
 
 public: // Accessors
-  ///
-  /// Test if a flag is set.
-  /// \return true if the flag is set, false otherwise
-  ///
   [[nodiscard]] constexpr auto test(E flag) const -> bool;
 
   ///
-  /// Check if a flag is set (alias for test).
-  /// \return true if the flag is set, false otherwise
+  /// \see test
   ///
   [[nodiscard]] constexpr auto has(E flag) const -> bool;
 
   ///
-  /// Check if any of the flags in other are set in this.
-  /// \return true if any flags match, false otherwise
+  /// \return true if one of the flags of \p other is set
   ///
   [[nodiscard]] constexpr auto has_any(bitflags other) const -> bool;
 
   ///
-  /// Check if all of the flags in other are set in this.
-  /// \return true if all flags match, false otherwise
+  /// \return true if all flags of \p other are set
   ///
   [[nodiscard]] constexpr auto has_all(bitflags other) const -> bool;
-
-  ///
-  /// Check if all bits are set to true.
-  /// \return true if all bits are set, false otherwise
-  ///
   [[nodiscard]] constexpr auto all() const -> bool;
-
-  ///
-  /// Check if any bit is set to true.
-  /// \return true if any bit is set, false otherwise
-  ///
   [[nodiscard]] constexpr auto any() const -> bool;
-
-  ///
-  /// Check if no bits are set to true.
-  /// \return true if no bits are set, false otherwise
-  ///
   [[nodiscard]] constexpr auto none() const -> bool;
-
-  ///
-  /// Count the number of bits set to true.
-  /// \return Number of bits set to true
-  ///
   [[nodiscard]] constexpr auto count() const -> std::size_t;
-
-  ///
-  /// Get the number of bits that the bitflags holds.
-  /// \return Total number of bits
-  ///
   [[nodiscard]] constexpr auto size() const -> std::size_t;
 
 public: // Operators

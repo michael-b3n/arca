@@ -22,7 +22,7 @@ class coordinates final
 public: // Typedefs
   using value_type = ValueType;
 
-public: // Static functions
+public: // Static interface
   ///
   /// Get the distance between two coordinates.
   /// \return distance between `first` and `second`

@@ -10,21 +10,18 @@ namespace arcstd::util
 {
 
 ///
-/// Utility class for formatting and converting values to strings.
+/// Formats values with std::format.
 ///
 struct format final
 {
   ///
-  /// Concatenates all elements of the range into a single string with the given delimiter.
-  /// \return A string that contains all elements of the range separated by the delimiter
+  /// \return the elements of \p range formatted, \p delimiter between them
   ///
   [[nodiscard]] static auto join(const std::ranges::range auto& range, std::string_view delimiter)
     -> std::string;
 
   ///
-  /// Converts a `std::optional` to a string using std::format.
-  /// \return A string representation of the optional value. If the optional is empty, "nullopt" is
-  /// returned.
+  /// \return \p value formatted, "nullopt" if it holds none
   ///
   template<typename T>
   [[nodiscard]] static auto to_string(const std::optional<T>& value) -> std::string;
