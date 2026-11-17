@@ -7,11 +7,10 @@ project(beman_execution VERSION 0.3.0 LANGUAGES CXX)
 # libstdc++ has std::execution. Update by replacing include/beman with the headers of the wanted
 # revision.
 #
-# Local changes, to be kept or dropped with care on an update:
-# - detail/stop_when.hpp no longer prints "stop_when: stop requested" to stdout.
-# - detail/inplace_stop_source.hpp registers a callback under the lock. Without it a callback
-#   registered while the stop is requested is lost, arcstd_private_test
-#   "stop_callback_registered_while_the_stop_is_requested_is_called".
+# Two local changes are to be kept or dropped with care on an update. detail/stop_when.hpp no longer
+# prints "stop_when: stop requested" to stdout. detail/inplace_stop_source.hpp registers a callback
+# under the lock, without it a callback registered while the stop is requested is lost, see the
+# test stop_callback_registered_while_the_stop_is_requested_is_called of arcstd_private_test.
 #
 add_library(beman_execution INTERFACE)
 target_compile_features(beman_execution INTERFACE cxx_std_23)

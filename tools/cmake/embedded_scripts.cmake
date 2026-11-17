@@ -1,9 +1,7 @@
 #
-# configure_embedded_scripts(<output> HEADER <header> NAMESPACE <namespace> SCRIPTS <file>...)
-#
-# Generate the source <output> that compiles the Lua scripts in with #embed. It defines all() and
-# find() of <header> in <namespace>, \see embedded_scripts.cpp.in. The compiler tracks the scripts
-# as dependencies of <output>, a new script needs no other change than a new configure.
+# Generate the source <output> that compiles the Lua scripts SCRIPTS in with #embed. It defines
+# all() and find() of the header HEADER in the namespace NAMESPACE, see embedded_scripts.cpp.in. The
+# compiler tracks the scripts as dependencies of <output>, a new script needs a new configure only.
 #
 function(configure_embedded_scripts output)
   cmake_parse_arguments(PARSE_ARGV 1 arg "" "HEADER;NAMESPACE" "SCRIPTS")
