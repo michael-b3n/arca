@@ -29,16 +29,15 @@ list(TRANSFORM ARCSTD_PRIVATE_INC_FILES PREPEND "${CMAKE_CURRENT_LIST_DIR}/")
 set(ARCSTD_PUBLIC_INC_FILES ${ARCSTD_INC_FILES} ${CMAKE_CURRENT_LIST_DIR}/export.hpp)
 list(REMOVE_ITEM ARCSTD_PUBLIC_INC_FILES ${ARCSTD_PRIVATE_INC_FILES})
 
-#
-# Compile the Lua scripts of lua/internal into the library, a new script needs no other change.
-# The label is the namespace of the scripts, \see lua/internal_scripts.hpp.
-#
-include(incbin)
+# The Lua scripts of lua/internal set up the state, a new one needs no other change.
+include(embedded_scripts)
 file(GLOB ARCSTD_LUA_INTERNAL CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/lua/internal/*.lua")
-set(INCBIN_HEADER arcstd/lua/internal_scripts.hpp)
-set(INCBIN_NAMESPACE arcstd::lua::internal)
-configure_incbin_source(internal ${PROJECT_SOURCE_DIR}/../tools/cmake/embedded_scripts.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/lua/internal.cpp ${ARCSTD_LUA_INTERNAL})
-list(APPEND ARCSTD_SRC_FILES ${CMAKE_CURRENT_BINARY_DIR}/lua/internal.cpp)
+configure_embedded_scripts(${CMAKE_CURRENT_BINARY_DIR}/lua/internal_scripts.cpp
+  HEADER arcstd/lua/internal_scripts.hpp
+  NAMESPACE arcstd::lua::internal
+  SCRIPTS ${ARCSTD_LUA_INTERNAL}
+)
+list(APPEND ARCSTD_SRC_FILES ${CMAKE_CURRENT_BINARY_DIR}/lua/internal_scripts.cpp)
 
 find_package(Boost REQUIRED COMPONENTS filesystem url)
 find_package(spdlog REQUIRED)
@@ -101,7 +100,6 @@ function(add_arcstd_library target type)
   # Link libraries, public are those the public headers need.
   target_link_libraries(${target}
     PUBLIC Boost::headers
-    PUBLIC incbin::incbin
     PUBLIC magic_enum::magic_enum
     PUBLIC stdc++exp
     PRIVATE ${ARCSTD_PRIVATE_LIBRARIES}
@@ -139,7 +137,7 @@ if(ARCA_INSTALL)
   else()
     set(ARCSTD_KIND static)
   endif()
-  install(TARGETS ${PROJECT_NAME} incbin magic_enum
+  install(TARGETS ${PROJECT_NAME} magic_enum
     EXPORT arca_targets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
