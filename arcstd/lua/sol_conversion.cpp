@@ -19,8 +19,8 @@ namespace
 static_assert(std::is_same_v<lua_Integer, integer>);
 static_assert(std::is_same_v<lua_Number, number>);
 
-// No C++ type a script value converts to is nested this deep, and a table containing itself ends
-// here
+// No C++ type a script value converts to is nested this deep,
+// and a table containing itself ends here
 constexpr auto max_table_depth = std::size_t{100};
 
 ///
@@ -30,7 +30,7 @@ constexpr auto max_table_depth = std::size_t{100};
 {
   switch(object.get_type())
   {
-  case sol::type::lua_nil:
+  case sol::type::lua_nil: [[fallthrough]];
   case sol::type::none: return value{};
   case sol::type::boolean: return value{object.as<bool>()};
   case sol::type::number:
@@ -54,10 +54,10 @@ constexpr auto max_table_depth = std::size_t{100};
     );
     return value{std::move(result)};
   }
-  case sol::type::function:
-  case sol::type::userdata:
-  case sol::type::lightuserdata:
-  case sol::type::thread:
+  case sol::type::function: [[fallthrough]];
+  case sol::type::userdata: [[fallthrough]];
+  case sol::type::lightuserdata: [[fallthrough]];
+  case sol::type::thread: [[fallthrough]];
   case sol::type::poly: return value{unsupported{}};
   }
   return value{unsupported{}};
