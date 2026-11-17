@@ -1,10 +1,10 @@
 #include "arcstd/util/log.hpp"
-#include "arcstd/util/date.hpp"
 
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <filesystem>
 #include <format>
@@ -13,6 +13,7 @@
 #include <mutex>
 #include <print>
 #include <ranges>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -21,35 +22,43 @@ namespace arcstd::util
 namespace
 {
 
-///
-/// Constants
-///
 constexpr auto logger_name = std::string_view{"main"};
 constexpr auto latest_log_file_name = std::string_view{"latest.log"};
 
 ///
-/// Convert u8 string view to normal string.
-/// \warning Normal strings are encoded in utf-8.
-/// \return string with content of string
+/// \return \p u8string as std::string, which spdlog takes as UTF-8
 ///
-inline auto to_string(const std::u8string& u8string) -> std::string
+[[nodiscard]] auto to_string(const std::u8string& u8string) -> std::string
 {
   return std::string{u8string.begin(), u8string.end()};
 }
 
 ///
-/// Lock logger mutex.
+/// \return the current time in CET as file name, e.g. "2026-11-17_09-30-00.000"
 ///
-inline auto lock_logger() -> std::scoped_lock<std::mutex>
+[[nodiscard]] auto format_current_time_cet() -> std::string
+{
+  const auto time_point = std::chrono::system_clock::now();
+  static const auto* const cet = std::chrono::locate_zone("Etc/GMT-1");
+  return std::format(
+    "{:%F_%H-%M-%S}",
+    std::chrono::zoned_time{cet, std::chrono::floor<std::chrono::milliseconds>(time_point)}
+  );
+}
+
+///
+/// \return the lock of the logger, it is set up and torn down under it
+///
+[[nodiscard]] auto lock_logger() -> std::scoped_lock<std::mutex>
 {
   static std::mutex mtx;
   return std::scoped_lock{mtx};
 }
 
 ///
-/// Convert logger level to spdlog level.
+/// \return \p level as level of spdlog
 ///
-constexpr auto to_spdlog_level(const logger_level level) -> spdlog::level::level_enum
+[[nodiscard]] constexpr auto to_spdlog_level(const logger_level level) -> spdlog::level::level_enum
 {
   switch(level)
   {
@@ -65,8 +74,9 @@ constexpr auto to_spdlog_level(const logger_level level) -> spdlog::level::level
 /// Delete the oldest session log files in \p log_directory, such that at most \p max_count remain.
 /// \return number of deleted files
 ///
-inline auto prune_log_files(const std::filesystem::path& log_directory, const std::size_t max_count)
-  -> std::size_t
+[[nodiscard]] auto prune_log_files(
+  const std::filesystem::path& log_directory, const std::size_t max_count
+) -> std::size_t
 {
   auto ec = std::error_code{};
   const auto is_session_log = [&](const auto& entry)
@@ -93,9 +103,9 @@ inline auto prune_log_files(const std::filesystem::path& log_directory, const st
 }
 
 ///
-/// Setup logger.
+/// Set up the logger in the folder "logs" of \p data_folder, \see logger::logger.
 ///
-inline auto init_log(const std::filesystem::path& data_folder, std::string header) -> void
+auto init_log(const std::filesystem::path& data_folder, std::string header) -> void
 {
   static constexpr auto log_dir = std::string_view("logs");
   static constexpr auto log_pattern = std::string_view("[%Y-%m-%d %H:%M:%S] [%L] [%t] %v");
@@ -144,9 +154,9 @@ inline auto init_log(const std::filesystem::path& data_folder, std::string heade
 }
 
 ///
-/// Access logger.
+/// \return the logger, none if it is not set up
 ///
-inline auto get_logger() -> std::shared_ptr<spdlog::logger>
+[[nodiscard]] auto get_logger() -> std::shared_ptr<spdlog::logger>
 {
   return spdlog::get(std::string{logger_name});
 }
@@ -154,8 +164,7 @@ inline auto get_logger() -> std::shared_ptr<spdlog::logger>
 ///
 /// Log \p msg with \p level, drop it if it can not be written.
 ///
-inline auto log_message(const spdlog::level::level_enum level, const std::string_view msg) noexcept
-  -> void
+auto log_message(const spdlog::level::level_enum level, const std::string_view msg) noexcept -> void
 {
   try
   {
