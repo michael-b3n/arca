@@ -2,55 +2,65 @@
 
 [![CI](https://github.com/michael-b3n/arca/actions/workflows/ci.yml/badge.svg)](https://github.com/michael-b3n/arca/actions/workflows/ci.yml)
 
-General C++26 objects and Qml bindings for applications.
+arca is a foundation for scriptable desktop applications in C++26. It holds what such an
+application needs besides its own domain: settings that are validated and kept in a settings file,
+Lua scripts that extend the application and the services they use (a cache that outlives the run,
+web requests), logging, work on a thread pool and signals between objects. The QML module `ArcQml`
+binds these to a Qt Quick interface: settings, scripts and logs, plus controls, styles and shapes.
 
-## Repository
+The general helpers below them (type traits, math, string and enum utilities) serve applications
+and games alike. Code that belongs to one application stays there: arca knows no domain.
 
-| Folder | Content |
-|---|---|
-| `arcstd` | The C++ library, a collection of helpers by area, see [Use in a project](#use-in-a-project) |
-| `arcqml` | The Qt layer, QML module `ArcQml`: controls, styles, icons and shapes, and the bindings of the settings, scripts and logs: their bridges and models |
-| `arcstd_test` | Catch2 tests of `arcstd`: `arcstd_test` uses it like a project does, `arcstd_private_test` (folder `private`) tests the internals. And `arcstd_test_utils`, the test helpers a project built on arca may use too |
-| `libs_external` | Third party sources, used as they are |
-| `tools` | CMake helpers and the clang-tidy runner |
+## Libraries
+
+Each area of `arcstd` is a folder, a namespace and a library. A library links the ones it builds
+on, so a project takes only what it uses:
+
+```
+core ─┬─ io
+      └─ setting ── lua ─┬─ cache
+                         └─ web
+```
+
+| Library | Areas | Main components | Third party |
+|---|---|---|---|
+| `arca::core` | `util`, `meta`, `math`, `signal`, `execution`, `system` | `log`, `exception`, `enum`; `signal::adapter`; `execution::launch` and `scope` | spdlog, magic_enum, Boost, beman.execution |
+| `arca::io` | `io` | `csv_reader`, `zip_file_reader` | libzip, rapidcsv |
+| `arca::setting` | `setting` | `setting_store` owns the settings and keeps them in the settings file, `setting` and its validators | Boost.PropertyTree |
+| `arca::lua` | `lua` | `lua_engine` runs the bundled and the user scripts, `value` and `value_cast` convert between C++ and Lua | Lua, sol2 |
+| `arca::cache` | `cache` | `cache_store`, text values of the scripts beyond the run, `cache.get` in Lua | SQLite |
+| `arca::web` | `web` | `web_fetcher`, web pages for the scripts, `web.fetch` in Lua | libcurl, Boost.URL |
+| `arca::arcstd` | all | all libraries above | |
+| `ArcQmlplugin` | `arcqml` | QML module `ArcQml` | Qt |
+
+Headers are included as `<arcstd/<area>/...>`. A helper names the types it hands out as aliases,
+e.g. `setting_store::validator_type<T>`. An application calls `execution::shutdown_thread_pool()`
+last, once its objects that launch work are gone.
+
+Only the Boost headers and magic_enum reach the public headers, the other third party libraries
+stay private. Private headers lie beside the public ones, are listed in `arcstd/CMakeLists.txt`
+and refuse to be included by a project. `arcstd_test_utils` holds test helpers, also for the tests
+of projects built on arca.
 
 ## Use in a project
 
-Add arca as a subdirectory, e.g. a git submodule, and link the targets:
+As subdirectory, e.g. a git submodule:
 
 ```cmake
 add_subdirectory(arca)
-target_link_libraries(app PRIVATE arca::arcstd ArcQmlplugin)
+target_link_libraries(app PRIVATE arca::lua ArcQmlplugin)
 ```
 
-The tests of arca build when it is the top level project, or with `ARCA_BUILD_TESTS=ON`.
-`arcstd` is a static library, with `ARCA_BUILD_SHARED=ON` a shared one; the project then places `libarcstd.dll` beside
-its executables. `ArcQml` is always static.
+Or installed:
 
-A project includes the headers of an area by `#include <arcstd/<area>/...>`, the folder is the namespace:
+```cmake
+find_package(arca REQUIRED)  # or COMPONENTS static / shared
+target_link_libraries(app PRIVATE arca::lua)
+```
 
-| Area | Helpers |
-|---|---|
-| `setting` | `setting_store` owns the settings and keeps them in the settings file; the settings, their validators and type erased views |
-| `lua` | `lua_engine` owns the Lua state, loads the scripts and runs their functions; the values, tables and functions of scripts |
-| `cache` | `cache_store` keeps text values beyond the run, for scripts as `cache.get` and `cache.set` |
-| `web` | `web_fetcher` fetches web pages, for scripts as `web.fetch` |
-| `signal` | Signals, their adapter and connections, `queued_connections` run slots on the thread pool |
-| `execution` | `scope` and `launch`, work on the thread pool |
-| `io` | csv and zip readers |
-| `system` | The file system |
-| `meta`, `math`, `util` | Type traits, math and general utilities |
-
-A helper object names the types it hands out as type aliases, e.g. `setting_store::validator_type<T>` or
-`lua_engine::registration_type`. A project calls `execution::shutdown_thread_pool()` before it ends, once its objects
-that launch work are gone.
-
-The private headers lie beside the public ones: the database of a cache, the web request, the Lua state, the property
-tree of the settings file and the execution library. They are listed in `arcstd/CMakeLists.txt` and refuse to be
-included by a project, with an `#error`.
-
-A shared `arcstd` exports what is marked `ARCSTD_EXPORT`. Third party libraries in the public headers are the Boost
-headers, magic_enum and incbin; Lua, sol2 and the others are private.
+The libraries are static, with `ARCA_BUILD_SHARED=ON` shared; an application then places the
+`libarcstd_<name>.dll` it uses beside itself. A static and a shared build install side by side.
+`configure_embedded_scripts` of `tools/cmake` compiles Lua scripts into a library with `#embed`.
 
 ## Development
 
@@ -62,9 +72,9 @@ cmake --build --preset gcc-release
 ctest --preset gcc-release
 ```
 
-The preset `gcc-release-shared` builds `arcstd` as a shared library, into `build-shared`.
-The target `all_verify_interface_header_sets` compiles each public header on its own, with the include paths a project
-gets: none may include a private header.
+`gcc-release-shared` builds shared libraries, into `build-shared`. The target
+`all_verify_interface_header_sets` compiles each public header on its own, the target `install`
+installs into `install/<config>`.
 
 ## License
 
