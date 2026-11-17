@@ -1,25 +1,19 @@
 cmake_minimum_required(VERSION 4.3)
 
-#
-# Set global CMake variables.
-#
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/tools/cmake")
 
-#
-# Limit CMake to only provide "Release" and "Debug" others are not needed, when arca is built on its own.
-# see https://cmake.org/cmake/help/latest/variable/CMAKE_CONFIGURATION_TYPES.html
-#
+# Built on its own, arca offers Release and Debug only, a project including it brings its own.
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   set(CMAKE_CONFIGURATION_TYPES Release Debug)
 endif()
 
-project(arca)
+project(arca LANGUAGES C CXX)
 
 #
 # Settings of a build of arca on its own, a project including arca brings its own.
 #
 if(PROJECT_IS_TOP_LEVEL)
-  # An empty build type builds without optimization and debug info.
+  # An empty build type would build without optimization and debug info.
   get_property(IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
   if(NOT IS_MULTI_CONFIG AND NOT CMAKE_BUILD_TYPE)
     message(FATAL_ERROR "CMAKE_BUILD_TYPE is not set, configure with a preset, e.g. `cmake --preset gcc-release --fresh`")
@@ -36,7 +30,7 @@ if(PROJECT_IS_TOP_LEVEL)
   add_compile_options(-Wall -Wpedantic)
   set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
-  # Source paths in __FILE__ and std::source_location are kept relative.
+  # Source paths in __FILE__ and std::source_location stay relative.
   add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:-fmacro-prefix-map=${CMAKE_SOURCE_DIR}/=>)
 
   # GNU ld overflows REL32 relocations linking clang objects against the GCC-built mingw libraries.
@@ -47,38 +41,22 @@ if(PROJECT_IS_TOP_LEVEL)
   enable_testing()
 endif()
 
-#
-# Main Qt Versions, a project including arca may choose others.
-#
-if(NOT DEFINED QT_VERSION_NAME)
-  set(QT_VERSION_NAME Qt6)
-endif()
-if(NOT DEFINED QT_VERSION_NUMBER)
-  set(QT_VERSION_NUMBER 6.11)
-endif()
+# The Qt of arcqml, a project including arca may choose another.
+set(QT_VERSION_NAME Qt6 CACHE STRING "Qt major version of arcqml, e.g. Qt6")
+set(QT_VERSION_NUMBER 6.11 CACHE STRING "Lowest Qt version arcqml takes")
 
-#
-# The tests and their helpers, which the tests of a project built on arca may use too.
-#
 option(ARCA_BUILD_TESTS "Build the tests of arca and arcstd_test_utils" ${PROJECT_IS_TOP_LEVEL})
 
-#
-# arcstd is static unless chosen otherwise, by this option or by CMake's BUILD_SHARED_LIBS. A build
-# makes one kind, a static and a shared build install side by side. arcqml is always static.
-#
+# One kind per build, a static and a shared build install side by side. arcqml is always static.
 option(ARCA_BUILD_SHARED "Build arcstd as a shared library" ${BUILD_SHARED_LIBS})
 
-#
-# Install arcstd as CMake package arca, for a project that finds it with find_package(arca). A
-# project including arca with add_subdirectory uses it from the build and installs nothing of it.
-#
-option(ARCA_INSTALL "Install arcstd and the CMake package arca" ${PROJECT_IS_TOP_LEVEL})
+# For a project that finds arca with find_package(arca). One that includes it with
+# add_subdirectory uses it from the build.
+option(ARCA_INSTALL "Install arcstd as the CMake package arca" ${PROJECT_IS_TOP_LEVEL})
 
-#
-# Include all subdirectories.
-#
 add_subdirectory(libs_external)
 
+# Below the external libraries, their switches need not name every value.
 add_compile_options(-Wswitch-enum)
 
 add_subdirectory(arcstd)
@@ -87,9 +65,6 @@ if(ARCA_BUILD_TESTS)
   add_subdirectory(arcstd_test)
 endif()
 
-#
-# The package config, it loads the targets of the kind a project asks for.
-#
 if(ARCA_INSTALL)
   include(GNUInstallDirs)
   install(FILES tools/cmake/arca-config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/arca)

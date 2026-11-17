@@ -1,10 +1,3 @@
-cmake_minimum_required(VERSION 4.3)
-
-project(arcstd)
-
-#
-# Define target sources
-#
 file(GLOB ARCSTD_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.cpp")
 file(GLOB ARCSTD_INC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.hpp")
 
@@ -46,13 +39,13 @@ find_package(sol2 3.5 REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_search_module(LIBCURL REQUIRED IMPORTED_TARGET libcurl)
-# sol2 3.5 is made for Lua 5.1 to 5.4, the unversioned mingw package already ships 5.5.
+# sol2 3.5 is made for Lua 5.1 to 5.4, the unversioned MSYS2 package already ships 5.5.
 pkg_search_module(LUA REQUIRED IMPORTED_TARGET lua5.4)
 pkg_search_module(SQLITE REQUIRED IMPORTED_TARGET sqlite3)
 
 #
-# The libraries only the sources and the private headers need. A static arcstd passes them on to
-# the link of its users, the header only ones are left out of the installed package, \see install.
+# What only the sources and the private headers need. A static arcstd passes them on to the link of
+# its users, the header only ones stay out of the installed package.
 #
 set(ARCSTD_PRIVATE_LIBRARIES
   Boost::filesystem
@@ -67,23 +60,23 @@ set(ARCSTD_PRIVATE_LIBRARIES
   $<BUILD_INTERFACE:rapidcsv::rapidcsv>
 )
 
+# The public headers are included as "arcstd/...", from the folder above.
 cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH ARCSTD_INCLUDE_DIR)
 
 #
-# Define the library \p target of \p type from the sources of arcstd.
+# Define the library \p target of \p type, STATIC or SHARED, from the sources of arcstd.
 #
 function(add_arcstd_library target type)
   add_library(${target} ${type})
-
-  # The public headers are a header set. Its folder is the include path: the one above, for "arcstd/...".
   target_sources(${target}
     PRIVATE ${ARCSTD_SRC_FILES} ${ARCSTD_PRIVATE_INC_FILES}
-    PUBLIC FILE_SET HEADERS
-    BASE_DIRS ${ARCSTD_INCLUDE_DIR}
-    FILES ${ARCSTD_PUBLIC_INC_FILES}
+    PUBLIC FILE_SET HEADERS BASE_DIRS ${ARCSTD_INCLUDE_DIR} FILES ${ARCSTD_PUBLIC_INC_FILES}
   )
-  target_compile_definitions(${target} PRIVATE ARCSTD_INTERNAL)
   target_compile_features(${target} PUBLIC cxx_std_26)
+  target_compile_definitions(${target}
+    PRIVATE ARCSTD_INTERNAL $<$<CONFIG:Debug>:ARCSTD_DEBUG>
+    PUBLIC $<$<PLATFORM_ID:Windows>:NOMINMAX>
+  )
 
   # One export.hpp for both kinds, a static library tells it so.
   if(type STREQUAL "STATIC")
@@ -97,38 +90,28 @@ function(add_arcstd_library target type)
     DEFINE_SYMBOL arcstd_EXPORTS
   )
 
-  # Link libraries, public are those the public headers need.
+  # Public are the libraries the public headers need, stdc++exp holds std::stacktrace.
   target_link_libraries(${target}
-    PUBLIC Boost::headers
-    PUBLIC magic_enum::magic_enum
-    PUBLIC stdc++exp
-    PRIVATE ${ARCSTD_PRIVATE_LIBRARIES}
+    PUBLIC Boost::headers magic_enum::magic_enum stdc++exp
+    PRIVATE ${ARCSTD_PRIVATE_LIBRARIES} $<$<PLATFORM_ID:Windows>:mswsock>
   )
-  if(WIN32)
-    target_link_libraries(${target} PRIVATE mswsock)
-    target_compile_definitions(${target} PUBLIC NOMINMAX)
-  endif()
-
-  target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:ARCSTD_DEBUG>)
 endfunction()
 
-#
-# The library, static unless ARCA_BUILD_SHARED is set.
-#
 if(ARCA_BUILD_SHARED)
-  add_arcstd_library(${PROJECT_NAME} SHARED)
+  add_arcstd_library(arcstd SHARED)
 else()
-  add_arcstd_library(${PROJECT_NAME} STATIC)
+  add_arcstd_library(arcstd STATIC)
 endif()
-add_library(arca::arcstd ALIAS ${PROJECT_NAME})
+add_library(arca::arcstd ALIAS arcstd)
 
-# The target all_verify_interface_header_sets compiles each public header on its own: none may include a private one.
-set_target_properties(${PROJECT_NAME} PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
+# The target all_verify_interface_header_sets compiles each public header on its own: none may
+# include a private one.
+set_target_properties(arcstd PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
 
 #
-# Install arcstd with its public headers and the header only libraries they include, as package
-# arca, \see tools/cmake/arca-config.cmake. Each kind has a targets file of its own, so a static
-# and a shared build install into one prefix.
+# Install arcstd with its public headers and magic_enum, which they include, as package arca, \see
+# tools/cmake/arca-config.cmake. Each kind has a targets file of its own, so a static and a shared
+# build install into one prefix.
 #
 if(ARCA_INSTALL)
   include(GNUInstallDirs)
@@ -137,7 +120,7 @@ if(ARCA_INSTALL)
   else()
     set(ARCSTD_KIND static)
   endif()
-  install(TARGETS ${PROJECT_NAME} magic_enum
+  install(TARGETS arcstd magic_enum
     EXPORT arca_targets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -152,8 +135,8 @@ if(ARCA_INSTALL)
 endif()
 
 #
-# arcstd_internals is arcstd for the tests of its internals: with the private headers and what they need. A shared
-# library hides the internals, so it is a static one of its own then.
+# arcstd_internals is arcstd for the tests of its internals, with the private headers and what they
+# need. A shared library hides the internals, then it is a static one of its own.
 #
 if(ARCA_BUILD_TESTS)
   add_library(arcstd_internals INTERFACE)
@@ -162,7 +145,7 @@ if(ARCA_BUILD_TESTS)
     set_target_properties(arcstd_static PROPERTIES EXCLUDE_FROM_ALL ON)
     target_link_libraries(arcstd_internals INTERFACE arcstd_static)
   else()
-    target_link_libraries(arcstd_internals INTERFACE ${PROJECT_NAME})
+    target_link_libraries(arcstd_internals INTERFACE arcstd)
   endif()
   target_compile_definitions(arcstd_internals INTERFACE ARCSTD_INTERNAL)
   target_link_libraries(arcstd_internals INTERFACE ${ARCSTD_PRIVATE_LIBRARIES})

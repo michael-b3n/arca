@@ -28,3 +28,8 @@ runs:
     - name: Test
       shell: msys2 {0}
       run: ctest --preset ${{ inputs.preset }}
+
+    # The package arca installs into the install folder of the preset
+    - name: Install
+      shell: msys2 {0}
+      run: cmake --build --preset ${{ inputs.preset }} --target install
