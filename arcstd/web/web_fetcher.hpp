@@ -18,7 +18,7 @@ namespace arcstd::web
 ///
 /// Settings of the web fetcher.
 ///
-class ARCSTD_EXPORT web_fetcher_settings final
+class ARCSTD_WEB_EXPORT web_fetcher_settings final
 {
   // Variables
   const std::shared_ptr<setting::setting_store> setting_store_;
@@ -33,7 +33,7 @@ public: // Variables
 ///
 /// Fetches web pages, registered for scripts as web.fetch(url).
 ///
-class ARCSTD_EXPORT web_fetcher final
+class ARCSTD_WEB_EXPORT web_fetcher final
 {
   // Typedefs
   struct failure_t final

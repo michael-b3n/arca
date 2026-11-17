@@ -11,6 +11,6 @@ namespace arcstd::execution
 /// pool. Without the call the pool is never destroyed: a shared arcstd destroys its statics after
 /// Windows ended the threads, joining them then would never return.
 ///
-ARCSTD_EXPORT auto shutdown_thread_pool() noexcept -> void;
+ARCSTD_CORE_EXPORT auto shutdown_thread_pool() noexcept -> void;
 
 } // namespace arcstd::execution

@@ -12,7 +12,7 @@ namespace arcstd::signal
 ///
 /// Keeps connections and disconnects them when destroyed.
 ///
-class ARCSTD_EXPORT connection_store final
+class ARCSTD_CORE_EXPORT connection_store final
 {
   // Variables
   mutable std::mutex mtx_;

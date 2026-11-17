@@ -13,7 +13,7 @@ namespace arcstd::util
 ///
 /// Measures the time since its construction.
 ///
-class ARCSTD_EXPORT timer final
+class ARCSTD_CORE_EXPORT timer final
 {
   // Variables
   std::chrono::system_clock::time_point time_point_;
@@ -31,7 +31,7 @@ public: // Accessors
 ///
 /// Logs the time of its life when destroyed, with the function of \p source_location.
 ///
-class ARCSTD_EXPORT scoped_timer_logger final
+class ARCSTD_CORE_EXPORT scoped_timer_logger final
 {
   // Variables
   const std::source_location source_location_;

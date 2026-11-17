@@ -17,7 +17,7 @@ qt_add_qml_module(ArcQml
 )
 
 target_link_libraries(ArcQml
-  PUBLIC arca::arcstd
+  PUBLIC arca::lua
   PRIVATE ${QT_VERSION_NAME}::Gui ${QT_VERSION_NAME}::Quick ${QT_VERSION_NAME}::QuickControls2
 )
 

@@ -52,7 +52,7 @@ concept type_erased_validator_param_requirement =
 ///
 /// Base of the validators, it tells the setting that its validator changed.
 ///
-class ARCSTD_EXPORT setting_validator_connector
+class ARCSTD_SETTING_EXPORT setting_validator_connector
 {
   // Variables
   std::function<void()> on_changed_{nullptr};

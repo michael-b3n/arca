@@ -19,15 +19,8 @@ file(GLOB ARCSTD_TEST_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*
 add_executable(arcstd_test ${ARCSTD_TEST_SRC_FILES})
 target_link_libraries(arcstd_test PRIVATE Catch2::Catch2WithMain arcstd_test_utils arca::arcstd)
 
-# Test discovery runs the tests after the build, they need the library beside them.
-if(ARCA_BUILD_SHARED)
-  add_custom_command(TARGET arcstd_test POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:arcstd> $<TARGET_FILE_DIR:arcstd_test>
-  )
-endif()
-
 #
-# The tests of the internals in the folder private, they include the private headers too, \see
+# The tests of the internals in the folder private, they include the private headers too, see
 # arcstd_internals.
 #
 file(GLOB ARCSTD_PRIVATE_TEST_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/private/*/*.cpp")

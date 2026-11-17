@@ -24,7 +24,7 @@ namespace arcstd::signal
 /// No slot connected through it runs once disconnect returned, a slot queued by then is dropped.
 /// \see adapter::connect_queued and adapter::connect_queued_extended
 ///
-class ARCSTD_EXPORT queued_connections final
+class ARCSTD_CORE_EXPORT queued_connections final
 {
   // Typedefs
   ///

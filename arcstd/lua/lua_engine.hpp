@@ -51,7 +51,7 @@ concept script_manifest = requires {
 ///
 /// Settings of the Lua engine.
 ///
-class ARCSTD_EXPORT lua_engine_settings final
+class ARCSTD_LUA_EXPORT lua_engine_settings final
 {
   // Variables
   const std::shared_ptr<setting::setting_store> setting_store_;
@@ -81,7 +81,7 @@ struct lua_engine_signals final
 /// registers its functions for scripts last in its constructor and keeps the registration as its
 /// last member, \see registration.
 ///
-class ARCSTD_EXPORT lua_engine final : public signal::adapter<lua_engine_signals>
+class ARCSTD_LUA_EXPORT lua_engine final : public signal::adapter<lua_engine_signals>
 {
   // Typedefs
   struct script_info final

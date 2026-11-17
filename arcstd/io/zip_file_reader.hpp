@@ -22,7 +22,7 @@ namespace arcstd::io
 ///
 /// Reads the entries of a ZIP archive.
 ///
-class ARCSTD_EXPORT zip_file_reader final
+class ARCSTD_IO_EXPORT zip_file_reader final
 {
   // Typedefs
   struct archive_closer final

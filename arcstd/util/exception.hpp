@@ -14,7 +14,7 @@ namespace arcstd::util
 ///
 /// Exception of arcstd, it keeps where it was thrown and the stack trace.
 ///
-class ARCSTD_EXPORT exception : public std::runtime_error
+class ARCSTD_CORE_EXPORT exception : public std::runtime_error
 {
 public: // Structors
   explicit exception(
@@ -36,7 +36,7 @@ protected: // Variables
 /// \return the report of the exception being handled: its message and, of an util::exception, its
 /// location and stack trace
 ///
-[[nodiscard]] ARCSTD_EXPORT auto exception_report() -> std::string;
+[[nodiscard]] ARCSTD_CORE_EXPORT auto exception_report() -> std::string;
 
 } // namespace arcstd::util
 

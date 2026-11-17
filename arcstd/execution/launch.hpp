@@ -12,6 +12,6 @@ namespace arcstd::execution
 /// Run \p work on the thread pool, detached in \p scope which waits for it. An exception it throws
 /// is logged.
 ///
-ARCSTD_EXPORT auto launch(std::move_only_function<void()> work, scope& scope) -> void;
+ARCSTD_CORE_EXPORT auto launch(std::move_only_function<void()> work, scope& scope) -> void;
 
 } // namespace arcstd::execution

@@ -1,12 +1,10 @@
 #
-# Package config of arca, installed next to the targets of arcstd. It provides arca::arcstd, static
-# or shared, whichever was installed:
-#
-#   find_package(arca REQUIRED)                    # the kind BUILD_SHARED_LIBS asks for, else the other
-#   find_package(arca REQUIRED COMPONENTS static)  # or shared, that kind only
-#
-# arca_SHARED_LIBS chooses the kind too, before BUILD_SHARED_LIBS. A shared arcstd is the DLL in
-# bin, an application copies it next to itself, e.g. with $<TARGET_RUNTIME_DLLS:app>.
+# Package config of arca, installed next to the targets of arcstd. It provides the libraries
+# arca::core, arca::io, arca::setting, arca::lua, arca::cache and arca::web, and arca::arcstd with
+# all of them, static or shared, whichever was installed. find_package(arca) takes the kind
+# arca_SHARED_LIBS or else BUILD_SHARED_LIBS asks for and the other one if that is not installed,
+# COMPONENTS static or shared takes that kind only. A shared library is a DLL in bin, an application
+# copies them next to itself, e.g. with $<TARGET_RUNTIME_DLLS:app>.
 #
 include(CMakeFindDependencyMacro)
 
@@ -59,7 +57,8 @@ if(NOT EXISTS "${arca_targets}")
 endif()
 
 #
-# The libraries the targets name: the public headers need Boost, a static arcstd links all it uses.
+# The libraries the targets name: the public headers need Boost, a static arcstd links all its
+# libraries use.
 #
 if(arca_kind STREQUAL "static")
   find_dependency(Boost COMPONENTS filesystem url)

@@ -21,7 +21,7 @@ class cache_database;
 /// Registered for scripts as cache.get(name, key) and cache.set(name, key, value), a script names
 /// its own cache, e.g. after itself.
 ///
-class ARCSTD_EXPORT cache_store final
+class ARCSTD_CACHE_EXPORT cache_store final
 {
   // Constants
   static constexpr auto folder_name = "cache";

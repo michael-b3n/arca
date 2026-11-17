@@ -13,7 +13,7 @@ namespace detail
 ///
 /// \return the next value of the counter all unique IDs share
 ///
-[[nodiscard]] ARCSTD_EXPORT auto next_uid_value() -> std::uint64_t;
+[[nodiscard]] ARCSTD_CORE_EXPORT auto next_uid_value() -> std::uint64_t;
 
 } // namespace detail
 

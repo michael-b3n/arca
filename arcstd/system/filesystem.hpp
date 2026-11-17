@@ -10,7 +10,7 @@ namespace arcstd::system
 ///
 /// Places of the file system the app uses.
 ///
-struct ARCSTD_EXPORT filesystem final
+struct ARCSTD_CORE_EXPORT filesystem final
 {
   ///
   /// \return the path of the running executable

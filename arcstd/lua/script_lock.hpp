@@ -11,7 +11,7 @@ namespace arcstd::lua
 /// Lock of the scripts, \see lua_engine::lock. As long as it lives no script runs on another thread
 /// and nothing is registered or taken back there. The thread holding it may lock again.
 ///
-class ARCSTD_EXPORT script_lock final
+class ARCSTD_LUA_EXPORT script_lock final
 {
   // Variables
   std::shared_ptr<const void> state_;
