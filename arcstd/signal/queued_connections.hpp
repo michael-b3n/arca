@@ -2,7 +2,6 @@
 
 #include "arcstd/execution/launch.hpp"
 #include "arcstd/execution/scope.hpp"
-#include "arcstd/export.hpp"
 #include "arcstd/signal/common.hpp"
 #include "arcstd/signal/connection_store.hpp"
 
@@ -24,7 +23,7 @@ namespace arcstd::signal
 /// No slot connected through it runs once disconnect returned, a slot queued by then is dropped.
 /// \see adapter::connect_queued and adapter::connect_queued_extended
 ///
-class ARCSTD_CORE_EXPORT queued_connections final
+class queued_connections final
 {
   // Typedefs
   ///

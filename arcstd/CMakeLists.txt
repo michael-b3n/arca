@@ -19,19 +19,13 @@ include(embedded_scripts)
 # The public headers are included as "arcstd/...", from the folder above.
 cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH ARCSTD_INCLUDE_DIR)
 
-# A shared arcstd hides the internals, the tests of the internals link static libraries of their own.
-if(ARCA_BUILD_SHARED)
-  set(ARCSTD_KIND SHARED)
-else()
-  set(ARCSTD_KIND STATIC)
-endif()
 set(ARCSTD_LIBRARIES "")
 
 #
-# Define the library arcstd_<name> of the folders AREAS, linking the arcstd libraries DEPENDS names
-# and the PUBLIC_LIBRARIES. A header of PRIVATE_HEADERS, relative to arcstd, refuses to be included
-# without ARCSTD_INTERNAL, which only the sources of the library and the tests of the internals
-# define. PRIVATE_LIBRARIES are what only the sources and the private headers need: a static
+# Define the static library arcstd_<name> of the folders AREAS, linking the arcstd libraries DEPENDS
+# names and the PUBLIC_LIBRARIES. A header of PRIVATE_HEADERS, relative to arcstd, refuses to be
+# included without ARCSTD_INTERNAL, which only the sources of the library and the tests of the
+# internals define. PRIVATE_LIBRARIES are what only the sources and the private headers need: the
 # library passes them on to the link of its users, header only ones stay out of the installed
 # package. SOURCES are generated sources the library compiles too.
 #
@@ -51,56 +45,27 @@ function(add_arcstd_library name)
   if(headers AND arg_PRIVATE_HEADERS)
     list(REMOVE_ITEM headers ${arg_PRIVATE_HEADERS})
   endif()
-  if(name STREQUAL "core")
-    list(APPEND headers ${CMAKE_CURRENT_LIST_DIR}/export.hpp)
-  endif()
+  list(TRANSFORM arg_DEPENDS PREPEND arcstd_ OUTPUT_VARIABLE depends)
 
-  set(kinds ${ARCSTD_KIND})
-  if(ARCA_BUILD_TESTS AND ARCA_BUILD_SHARED)
-    list(APPEND kinds INTERNALS)
-  endif()
-  foreach(kind IN LISTS kinds)
-    if(kind STREQUAL "INTERNALS")
-      set(suffix _internals)
-      set(type STATIC)
-    else()
-      set(suffix "")
-      set(type ${kind})
-    endif()
-    set(target arcstd_${name}${suffix})
-    list(TRANSFORM arg_DEPENDS PREPEND arcstd_ OUTPUT_VARIABLE depends)
-    list(TRANSFORM depends APPEND "${suffix}")
-
-    add_library(${target} ${type})
-    target_sources(${target}
-      PRIVATE ${sources} ${arg_PRIVATE_HEADERS}
-      PUBLIC FILE_SET HEADERS BASE_DIRS ${ARCSTD_INCLUDE_DIR} FILES ${headers}
-    )
-    target_compile_features(${target} PUBLIC cxx_std_26)
-    target_compile_definitions(${target}
-      PRIVATE ARCSTD_INTERNAL $<$<CONFIG:Debug>:ARCSTD_DEBUG>
-      PUBLIC $<$<PLATFORM_ID:Windows>:NOMINMAX> $<$<STREQUAL:${type},STATIC>:ARCSTD_STATIC_DEFINE>
-    )
-    target_link_libraries(${target}
-      PUBLIC ${depends} ${arg_PUBLIC_LIBRARIES}
-      PRIVATE ${arg_PRIVATE_LIBRARIES}
-    )
-    # Only what is marked ARCSTD_<NAME>_EXPORT leaves a shared library.
-    set_target_properties(${target} PROPERTIES
-      CXX_VISIBILITY_PRESET hidden
-      VISIBILITY_INLINES_HIDDEN ON
-      DEFINE_SYMBOL arcstd_${name}_EXPORTS
-      EXPORT_NAME ${name}
-    )
-    if(kind STREQUAL "INTERNALS")
-      set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL ON)
-    else()
-      # The target all_verify_interface_header_sets compiles each public header on its own: none
-      # may include a private one.
-      set_target_properties(${target} PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
-      add_library(arca::${name} ALIAS ${target})
-    endif()
-  endforeach()
+  set(target arcstd_${name})
+  add_library(${target} STATIC)
+  add_library(arca::${name} ALIAS ${target})
+  target_sources(${target}
+    PRIVATE ${sources} ${arg_PRIVATE_HEADERS}
+    PUBLIC FILE_SET HEADERS BASE_DIRS ${ARCSTD_INCLUDE_DIR} FILES ${headers}
+  )
+  target_compile_features(${target} PUBLIC cxx_std_26)
+  target_compile_definitions(${target}
+    PRIVATE ARCSTD_INTERNAL $<$<CONFIG:Debug>:ARCSTD_DEBUG>
+    PUBLIC $<$<PLATFORM_ID:Windows>:NOMINMAX>
+  )
+  target_link_libraries(${target}
+    PUBLIC ${depends} ${arg_PUBLIC_LIBRARIES}
+    PRIVATE ${arg_PRIVATE_LIBRARIES}
+  )
+  # The target all_verify_interface_header_sets compiles each public header on its own: none may
+  # include a private one.
+  set_target_properties(${target} PROPERTIES EXPORT_NAME ${name} VERIFY_INTERFACE_HEADER_SETS ON)
 
   set(ARCSTD_LIBRARIES ${ARCSTD_LIBRARIES} ${name} PARENT_SCOPE)
   set(ARCSTD_${name}_PRIVATE_LIBRARIES ${arg_PRIVATE_LIBRARIES} PARENT_SCOPE)
@@ -166,39 +131,31 @@ add_library(arca::arcstd ALIAS arcstd)
 
 #
 # Install the libraries with their public headers and magic_enum, which they include, as package
-# arca, see tools/cmake/arca-config.cmake. Each kind has a targets file of its own, so a static and
-# a shared build install into one prefix.
+# arca, see tools/cmake/arca-config.cmake.
 #
 if(ARCA_INSTALL)
   include(GNUInstallDirs)
-  string(TOLOWER ${ARCSTD_KIND} ARCSTD_KIND_NAME)
   install(TARGETS ${ARCSTD_TARGETS} arcstd magic_enum
     EXPORT arca_targets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   )
   install(EXPORT arca_targets
     NAMESPACE arca::
-    FILE arca-${ARCSTD_KIND_NAME}-targets.cmake
+    FILE arca-targets.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/arca
   )
 endif()
 
 #
-# arcstd_internals is arcstd for the tests of its internals: with the private headers and what they
-# need, static also in a shared build.
+# arcstd_internals is arcstd for the tests of its internals, with the private headers and what they
+# need.
 #
 if(ARCA_BUILD_TESTS)
   add_library(arcstd_internals INTERFACE)
   target_compile_definitions(arcstd_internals INTERFACE ARCSTD_INTERNAL)
+  target_link_libraries(arcstd_internals INTERFACE ${ARCSTD_TARGETS})
   foreach(name IN LISTS ARCSTD_LIBRARIES)
-    if(ARCA_BUILD_SHARED)
-      target_link_libraries(arcstd_internals INTERFACE arcstd_${name}_internals)
-    else()
-      target_link_libraries(arcstd_internals INTERFACE arcstd_${name})
-    endif()
     target_link_libraries(arcstd_internals INTERFACE ${ARCSTD_${name}_PRIVATE_LIBRARIES})
   endforeach()
 endif()

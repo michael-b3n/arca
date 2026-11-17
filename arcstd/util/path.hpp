@@ -1,6 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
 #include "arcstd/util/string.hpp"
 
 #include <ranges>
@@ -16,7 +15,7 @@ namespace arcstd::util
 /// Empty sections are left out, so "a..b." is the path "a.b". Built from sections, each is read the
 /// same way.
 ///
-class ARCSTD_CORE_EXPORT path final
+class path final
 {
   // Typedefs
   using sections_type = std::vector<std::string>;

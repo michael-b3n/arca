@@ -45,14 +45,6 @@
       }
     },
     {
-      "name": "shared",
-      "hidden": true,
-      "binaryDir": "${sourceDir}/build-shared",
-      "cacheVariables": {
-        "ARCA_BUILD_SHARED": "ON"
-      }
-    },
-    {
       "name": "clang-debug",
       "displayName": "Clang Debug",
       "inherits": ["base", "clang", "debug"]
@@ -71,19 +63,13 @@
       "name": "gcc-release",
       "displayName": "GCC Release",
       "inherits": ["base", "gcc", "release"]
-    },
-    {
-      "name": "gcc-release-shared",
-      "displayName": "GCC Release, arcstd shared",
-      "inherits": ["shared", "base", "gcc", "release"]
     }
   ],
   "buildPresets": [
     { "name": "clang-debug", "configurePreset": "clang-debug" },
     { "name": "clang-release", "configurePreset": "clang-release" },
     { "name": "gcc-debug", "configurePreset": "gcc-debug" },
-    { "name": "gcc-release", "configurePreset": "gcc-release" },
-    { "name": "gcc-release-shared", "configurePreset": "gcc-release-shared" }
+    { "name": "gcc-release", "configurePreset": "gcc-release" }
   ],
   "testPresets": [
     {
@@ -95,7 +81,6 @@
     { "name": "clang-debug", "inherits": "base", "configurePreset": "clang-debug" },
     { "name": "clang-release", "inherits": "base", "configurePreset": "clang-release" },
     { "name": "gcc-debug", "inherits": "base", "configurePreset": "gcc-debug" },
-    { "name": "gcc-release", "inherits": "base", "configurePreset": "gcc-release" },
-    { "name": "gcc-release-shared", "inherits": "base", "configurePreset": "gcc-release-shared" }
+    { "name": "gcc-release", "inherits": "base", "configurePreset": "gcc-release" }
   ]
 }

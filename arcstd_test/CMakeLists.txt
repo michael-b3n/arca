@@ -12,8 +12,8 @@ target_include_directories(arcstd_test_utils INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 target_link_libraries(arcstd_test_utils INTERFACE Catch2::Catch2 arca::arcstd)
 
 #
-# The tests of the interface, built like a project on arcstd: they include the public headers only
-# and link the library as it is, static or shared.
+# The tests of the interface, built like a project on arcstd: they include the public headers
+# only.
 #
 file(GLOB ARCSTD_TEST_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*/*.cpp")
 add_executable(arcstd_test ${ARCSTD_TEST_SRC_FILES})

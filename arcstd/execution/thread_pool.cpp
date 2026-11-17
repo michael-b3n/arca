@@ -63,7 +63,7 @@ namespace beman::execution::parallel_scheduler_replacement
 
 ///
 /// The backend of the parallel scheduler, in place of the one the library defaults to. That one is
-/// a static of an inline function: no app can shut it down, and a shared arcstd destroys it after
+/// a static of an inline function: no app can shut it down, and in a DLL it is destroyed after
 /// Windows ended its threads, the join then never returns. The library offers this function to be
 /// replaced, std::execution does the same.
 ///

@@ -20,8 +20,6 @@ if(PROJECT_IS_TOP_LEVEL)
   endif()
 
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  # The executables find the libraries of a shared build beside them.
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   set(CMAKE_CXX_STANDARD 26)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -48,9 +46,6 @@ set(QT_VERSION_NAME Qt6 CACHE STRING "Qt major version of arcqml, e.g. Qt6")
 set(QT_VERSION_NUMBER 6.11 CACHE STRING "Lowest Qt version arcqml takes")
 
 option(ARCA_BUILD_TESTS "Build the tests of arca and arcstd_test_utils" ${PROJECT_IS_TOP_LEVEL})
-
-# One kind per build, a static and a shared build install side by side. arcqml is always static.
-option(ARCA_BUILD_SHARED "Build arcstd as a shared library" ${BUILD_SHARED_LIBS})
 
 # For a project that finds arca with find_package(arca). One that includes it with
 # add_subdirectory uses it from the build.

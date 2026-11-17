@@ -1,7 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
-
 #include <cstdint>
 #include <format>
 
@@ -13,7 +11,7 @@ namespace detail
 ///
 /// \return the next value of the counter all unique IDs share
 ///
-[[nodiscard]] ARCSTD_CORE_EXPORT auto next_uid_value() -> std::uint64_t;
+[[nodiscard]] auto next_uid_value() -> std::uint64_t;
 
 } // namespace detail
 

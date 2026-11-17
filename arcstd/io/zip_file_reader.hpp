@@ -1,6 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
 #include "arcstd/util/bitflags.hpp"
 #include "arcstd/util/non_owning_ptr.hpp"
 
@@ -22,7 +21,7 @@ namespace arcstd::io
 ///
 /// Reads the entries of a ZIP archive.
 ///
-class ARCSTD_IO_EXPORT zip_file_reader final
+class zip_file_reader final
 {
   // Typedefs
   struct archive_closer final

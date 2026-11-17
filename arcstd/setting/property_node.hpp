@@ -1,6 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
 #include "arcstd/setting/setting_common.hpp"
 
 #include <memory>
@@ -15,7 +14,7 @@ class property_tree;
 ///
 /// Node of a settings file, where a property keeps its value, \see property.
 ///
-class ARCSTD_SETTING_EXPORT property_node final
+class property_node final
 {
   // Variables
   std::shared_ptr<property_tree> tree_;

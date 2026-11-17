@@ -1,6 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
 #include "arcstd/util/path.hpp"
 
 #include <memory>
@@ -22,7 +21,7 @@ struct state_data;
 /// paths are free again and a script still holding a function gets an error calling it. It waits
 /// for the running script, which may be inside a function.
 ///
-class ARCSTD_LUA_EXPORT registration final
+class registration final
 {
   // Friends
   friend class state;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
 #include "arcstd/meta/for_each.hpp"
 #include "arcstd/meta/type_traits.hpp"
 #include "arcstd/setting/property.hpp"
@@ -62,7 +61,7 @@ struct setting_store_signals final
 /// Owns the settings and keeps their values in the settings file. It must outlive the settings it
 /// hands out.
 ///
-class ARCSTD_SETTING_EXPORT setting_store final : public signal::adapter<setting_store_signals>
+class setting_store final : public signal::adapter<setting_store_signals>
 {
   // Typedefs
   template<underlying_setting_type_erased_type T>

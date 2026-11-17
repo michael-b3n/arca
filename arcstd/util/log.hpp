@@ -1,6 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
 #include "arcstd/util/source_location_helpers.hpp"
 
 #include <filesystem>
@@ -36,15 +35,15 @@ enum class logger_level
 ///
 /// Log \p msg, a message that can not be written is dropped: logging never throws.
 ///
-ARCSTD_CORE_EXPORT auto log_debug(std::string_view msg) noexcept -> void;
-ARCSTD_CORE_EXPORT auto log_info(std::string_view msg) noexcept -> void;
-ARCSTD_CORE_EXPORT auto log_warn(std::string_view msg) noexcept -> void;
-ARCSTD_CORE_EXPORT auto log_error(std::string_view msg) noexcept -> void;
+auto log_debug(std::string_view msg) noexcept -> void;
+auto log_info(std::string_view msg) noexcept -> void;
+auto log_warn(std::string_view msg) noexcept -> void;
+auto log_error(std::string_view msg) noexcept -> void;
 
 ///
 /// The logger while it lives, a message logged without one is dropped.
 ///
-struct ARCSTD_CORE_EXPORT logger final
+struct logger final
 {
   ///
   /// Log to the folder "logs" of \p data_folder, the data folder of the app. \p header is written

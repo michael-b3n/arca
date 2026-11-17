@@ -1,7 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
-
 #include <cstddef>
 #include <filesystem>
 #include <memory>
@@ -22,7 +20,7 @@ namespace arcstd::io
 ///
 /// Reads the cells of a CSV document as strings, the whole document is held in memory.
 ///
-class ARCSTD_IO_EXPORT csv_reader final
+class csv_reader final
 {
   // Variables
   std::unique_ptr<rapidcsv::Document> document_;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
-
 #include <filesystem>
 
 namespace arcstd::system
@@ -10,7 +8,7 @@ namespace arcstd::system
 ///
 /// Places of the file system the app uses.
 ///
-struct ARCSTD_CORE_EXPORT filesystem final
+struct filesystem final
 {
   ///
   /// \return the path of the running executable

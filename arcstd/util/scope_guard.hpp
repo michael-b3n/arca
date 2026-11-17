@@ -1,7 +1,5 @@
 #pragma once
 
-#include "arcstd/export.hpp"
-
 #include <functional>
 #include <memory>
 
@@ -11,7 +9,7 @@ namespace arcstd::util
 ///
 /// Calls its callable once, when destroyed or reset.
 ///
-class ARCSTD_CORE_EXPORT scope_guard final
+class scope_guard final
 {
   // Variables
   std::move_only_function<void()> on_destruction_;
@@ -44,7 +42,7 @@ private: // Implementation
 /// Guard of a callable shared by several guards, it is called once the last of them is destroyed
 /// or reset, \see creator.
 ///
-class ARCSTD_CORE_EXPORT shared_scope_guard final
+class shared_scope_guard final
 {
   // Variables
   bool is_initial_instance_{false};
@@ -54,7 +52,7 @@ public: // Typedefs
   ///
   /// Hands out the guards of one callable.
   ///
-  class ARCSTD_CORE_EXPORT creator final
+  class creator final
   {
     // Variables
     std::weak_ptr<scope_guard> instance_;

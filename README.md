@@ -54,13 +54,14 @@ target_link_libraries(app PRIVATE arca::lua ArcQmlplugin)
 Or installed:
 
 ```cmake
-find_package(arca REQUIRED)  # or COMPONENTS static / shared
+find_package(arca REQUIRED)
 target_link_libraries(app PRIVATE arca::lua)
 ```
 
-The libraries are static, with `ARCA_BUILD_SHARED=ON` shared; an application then places the
-`libarcstd_<name>.dll` it uses beside itself. A static and a shared build install side by side.
-`configure_embedded_scripts` of `tools/cmake` compiles Lua scripts into a library with `#embed`.
+The libraries are static and pass the third party libraries they use on to the link of the
+application. Those are the shared libraries of MSYS2, as is the C++ runtime of MinGW: an
+application ships their DLLs beside itself. `configure_embedded_scripts` of `tools/cmake` compiles
+Lua scripts into a library with `#embed`.
 
 ## Development
 
@@ -72,9 +73,8 @@ cmake --build --preset gcc-release
 ctest --preset gcc-release
 ```
 
-`gcc-release-shared` builds shared libraries, into `build-shared`. The target
-`all_verify_interface_header_sets` compiles each public header on its own, the target `install`
-installs into `install/<config>`.
+The target `all_verify_interface_header_sets` compiles each public header on its own, the target
+`install` installs into `install/<config>`.
 
 ## License
 
