@@ -21,8 +21,8 @@ class no_destructor final
 
 public: // Structors
   template<typename... Args>
-  explicit no_destructor(Args&&... args);
-  ~no_destructor() noexcept;
+  constexpr explicit no_destructor(Args&&... args);
+  constexpr ~no_destructor() noexcept;
 
   no_destructor(const no_destructor&) = delete;
   no_destructor(no_destructor&&) = delete;
@@ -30,15 +30,15 @@ public: // Structors
   auto operator=(no_destructor&&) -> no_destructor& = delete;
 
 public: // Accessors
-  [[nodiscard]] auto operator*() -> T&;
-  [[nodiscard]] auto operator->() -> T*;
+  [[nodiscard]] constexpr auto operator*() -> T&;
+  [[nodiscard]] constexpr auto operator->() -> T*;
 };
 
 ///
 ///
 template<typename T>
 template<typename... Args>
-no_destructor<T>::no_destructor(Args&&... args)
+constexpr no_destructor<T>::no_destructor(Args&&... args)
   : value{std::forward<Args>(args)...}
 {
 }
@@ -48,14 +48,14 @@ no_destructor<T>::no_destructor(Args&&... args)
 ///
 template<typename T>
 // NOLINTNEXTLINE(modernize-use-equals-default) a default one would destroy it
-no_destructor<T>::~no_destructor() noexcept
+constexpr no_destructor<T>::~no_destructor() noexcept
 {
 }
 
 ///
 ///
 template<typename T>
-auto no_destructor<T>::operator*() -> T&
+constexpr auto no_destructor<T>::operator*() -> T&
 {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access) the one member, constructed
   return value;
@@ -64,7 +64,7 @@ auto no_destructor<T>::operator*() -> T&
 ///
 ///
 template<typename T>
-auto no_destructor<T>::operator->() -> T*
+constexpr auto no_destructor<T>::operator->() -> T*
 {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access) the one member, constructed
   return std::addressof(value);

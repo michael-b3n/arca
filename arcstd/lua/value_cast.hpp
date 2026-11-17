@@ -53,13 +53,13 @@ concept value_castable = detail::plain<T> && requires(const T& v, const value& c
 /// \return \p v as the value a script sees
 ///
 template<value_castable T>
-[[nodiscard]] auto to_value(const T& v) -> value;
+[[nodiscard]] constexpr auto to_value(const T& v) -> value;
 
 ///
 /// \return \p v as T, std::nullopt if it is no T
 ///
 template<value_castable T>
-[[nodiscard]] auto from_value(const value& v) -> std::optional<T>;
+[[nodiscard]] constexpr auto from_value(const value& v) -> std::optional<T>;
 
 namespace detail
 {
@@ -68,7 +68,7 @@ namespace detail
 /// \return the values of \p items, std::nullopt if one of them is none
 ///
 template<std::ranges::input_range R>
-[[nodiscard]] auto all_or_none(R&& items)
+[[nodiscard]] constexpr auto all_or_none(R&& items)
   -> std::optional<std::vector<typename std::ranges::range_value_t<R>::value_type>>;
 
 } // namespace detail
@@ -79,20 +79,20 @@ template<std::ranges::input_range R>
 template<>
 struct value_cast<bool> final
 {
-  [[nodiscard]] static auto to(bool v) -> value;
-  [[nodiscard]] static auto from(const value& v) -> std::optional<bool>;
+  [[nodiscard]] static constexpr auto to(bool v) -> value;
+  [[nodiscard]] static constexpr auto from(const value& v) -> std::optional<bool>;
 };
 
 ///
 /// A Lua integer, a number is none even of an integral value. Out of the range of T it is none.
-/// \throw boost::numeric::bad_numeric_cast from to, if Lua can not hold the value
+/// \throw boost::numeric::bad_numeric_cast from to at runtime, if Lua can not hold the value
 ///
 template<std::integral T>
   requires(detail::plain<T> && !std::same_as<T, bool>)
 struct value_cast<T> final
 {
-  [[nodiscard]] static auto to(T v) -> value;
-  [[nodiscard]] static auto from(const value& v) -> std::optional<T>;
+  [[nodiscard]] static constexpr auto to(T v) -> value;
+  [[nodiscard]] static constexpr auto from(const value& v) -> std::optional<T>;
 };
 
 ///
@@ -102,8 +102,8 @@ template<std::floating_point T>
   requires detail::plain<T>
 struct value_cast<T> final
 {
-  [[nodiscard]] static auto to(T v) -> value;
-  [[nodiscard]] static auto from(const value& v) -> std::optional<T>;
+  [[nodiscard]] static constexpr auto to(T v) -> value;
+  [[nodiscard]] static constexpr auto from(const value& v) -> std::optional<T>;
 };
 
 ///
@@ -112,8 +112,8 @@ struct value_cast<T> final
 template<>
 struct value_cast<std::string> final
 {
-  [[nodiscard]] static auto to(const std::string& v) -> value;
-  [[nodiscard]] static auto from(const value& v) -> std::optional<std::string>;
+  [[nodiscard]] static constexpr auto to(const std::string& v) -> value;
+  [[nodiscard]] static constexpr auto from(const value& v) -> std::optional<std::string>;
 };
 
 ///
@@ -123,8 +123,8 @@ template<typename T>
   requires(detail::plain<T> && meta::is_duration_v<T>)
 struct value_cast<T> final
 {
-  [[nodiscard]] static auto to(const T& v) -> value;
-  [[nodiscard]] static auto from(const value& v) -> std::optional<T>;
+  [[nodiscard]] static constexpr auto to(const T& v) -> value;
+  [[nodiscard]] static constexpr auto from(const value& v) -> std::optional<T>;
 };
 
 ///
@@ -143,8 +143,8 @@ struct value_cast<std::filesystem::path> final
 template<value_castable T>
 struct value_cast<std::optional<T>> final
 {
-  [[nodiscard]] static auto to(const std::optional<T>& v) -> value;
-  [[nodiscard]] static auto from(const value& v) -> std::optional<std::optional<T>>;
+  [[nodiscard]] static constexpr auto to(const std::optional<T>& v) -> value;
+  [[nodiscard]] static constexpr auto from(const value& v) -> std::optional<std::optional<T>>;
 };
 
 ///
@@ -153,8 +153,8 @@ struct value_cast<std::optional<T>> final
 template<value_castable T>
 struct value_cast<std::vector<T>> final
 {
-  [[nodiscard]] static auto to(const std::vector<T>& v) -> value;
-  [[nodiscard]] static auto from(const value& v) -> std::optional<std::vector<T>>;
+  [[nodiscard]] static constexpr auto to(const std::vector<T>& v) -> value;
+  [[nodiscard]] static constexpr auto from(const value& v) -> std::optional<std::vector<T>>;
 };
 
 ///
@@ -170,7 +170,7 @@ struct value_cast<std::map<K, T>> final
 ///
 ///
 template<value_castable T>
-auto to_value(const T& v) -> value
+constexpr auto to_value(const T& v) -> value
 {
   return value_cast<T>::to(v);
 }
@@ -178,7 +178,7 @@ auto to_value(const T& v) -> value
 ///
 ///
 template<value_castable T>
-auto from_value(const value& v) -> std::optional<T>
+constexpr auto from_value(const value& v) -> std::optional<T>
 {
   return value_cast<T>::from(v);
 }
@@ -186,7 +186,7 @@ auto from_value(const value& v) -> std::optional<T>
 ///
 ///
 template<std::ranges::input_range R>
-auto detail::all_or_none(R&& items)
+constexpr auto detail::all_or_none(R&& items)
   -> std::optional<std::vector<typename std::ranges::range_value_t<R>::value_type>>
 {
   const auto values = std::forward<R>(items) | std::ranges::to<std::vector>();
@@ -200,14 +200,14 @@ auto detail::all_or_none(R&& items)
 
 ///
 ///
-inline auto value_cast<bool>::to(const bool v) -> value
+constexpr auto value_cast<bool>::to(const bool v) -> value
 {
   return value{v};
 }
 
 ///
 ///
-inline auto value_cast<bool>::from(const value& v) -> std::optional<bool>
+constexpr auto value_cast<bool>::from(const value& v) -> std::optional<bool>
 {
   const auto held = std::get_if<bool>(&v);
   return (held != nullptr) ? std::optional{*held} : std::nullopt;
@@ -217,16 +217,16 @@ inline auto value_cast<bool>::from(const value& v) -> std::optional<bool>
 ///
 template<std::integral T>
   requires(detail::plain<T> && !std::same_as<T, bool>)
-auto value_cast<T>::to(const T v) -> value
+constexpr auto value_cast<T>::to(const T v) -> value
 {
-  return value{numeric_cast<integer>(v)};
+  return value{util::numeric_cast_rt<integer>(v)};
 }
 
 ///
 ///
 template<std::integral T>
   requires(detail::plain<T> && !std::same_as<T, bool>)
-auto value_cast<T>::from(const value& v) -> std::optional<T>
+constexpr auto value_cast<T>::from(const value& v) -> std::optional<T>
 {
   const auto held = std::get_if<integer>(&v);
   return held && std::in_range<T>(*held) ? std::optional{static_cast<T>(*held)} : std::nullopt;
@@ -236,7 +236,7 @@ auto value_cast<T>::from(const value& v) -> std::optional<T>
 ///
 template<std::floating_point T>
   requires detail::plain<T>
-auto value_cast<T>::to(const T v) -> value
+constexpr auto value_cast<T>::to(const T v) -> value
 {
   return value{static_cast<number>(v)};
 }
@@ -245,7 +245,7 @@ auto value_cast<T>::to(const T v) -> value
 ///
 template<std::floating_point T>
   requires detail::plain<T>
-auto value_cast<T>::from(const value& v) -> std::optional<T>
+constexpr auto value_cast<T>::from(const value& v) -> std::optional<T>
 {
   if(const auto held = std::get_if<integer>(&v))
   {
@@ -257,14 +257,14 @@ auto value_cast<T>::from(const value& v) -> std::optional<T>
 
 ///
 ///
-inline auto value_cast<std::string>::to(const std::string& v) -> value
+constexpr auto value_cast<std::string>::to(const std::string& v) -> value
 {
   return value{v};
 }
 
 ///
 ///
-inline auto value_cast<std::string>::from(const value& v) -> std::optional<std::string>
+constexpr auto value_cast<std::string>::from(const value& v) -> std::optional<std::string>
 {
   const auto held = std::get_if<std::string>(&v);
   return (held != nullptr) ? std::optional{*held} : std::nullopt;
@@ -274,7 +274,7 @@ inline auto value_cast<std::string>::from(const value& v) -> std::optional<std::
 ///
 template<typename T>
   requires(detail::plain<T> && meta::is_duration_v<T>)
-auto value_cast<T>::to(const T& v) -> value
+constexpr auto value_cast<T>::to(const T& v) -> value
 {
   return to_value(v.count());
 }
@@ -283,7 +283,7 @@ auto value_cast<T>::to(const T& v) -> value
 ///
 template<typename T>
   requires(detail::plain<T> && meta::is_duration_v<T>)
-auto value_cast<T>::from(const value& v) -> std::optional<T>
+constexpr auto value_cast<T>::from(const value& v) -> std::optional<T>
 {
   return from_value<typename T::rep>(v).transform([](const auto count) { return T{count}; });
 }
@@ -307,7 +307,7 @@ inline auto value_cast<std::filesystem::path>::from(const value& v)
 ///
 ///
 template<value_castable T>
-auto value_cast<std::optional<T>>::to(const std::optional<T>& v) -> value
+constexpr auto value_cast<std::optional<T>>::to(const std::optional<T>& v) -> value
 {
   return v ? to_value(*v) : value{};
 }
@@ -315,7 +315,7 @@ auto value_cast<std::optional<T>>::to(const std::optional<T>& v) -> value
 ///
 ///
 template<value_castable T>
-auto value_cast<std::optional<T>>::from(const value& v) -> std::optional<std::optional<T>>
+constexpr auto value_cast<std::optional<T>>::from(const value& v) -> std::optional<std::optional<T>>
 {
   if(std::holds_alternative<nil>(v))
   {
@@ -327,7 +327,7 @@ auto value_cast<std::optional<T>>::from(const value& v) -> std::optional<std::op
 ///
 ///
 template<value_castable T>
-auto value_cast<std::vector<T>>::to(const std::vector<T>& v) -> value
+constexpr auto value_cast<std::vector<T>>::to(const std::vector<T>& v) -> value
 {
   auto result = table{};
   std::ranges::for_each(
@@ -335,7 +335,7 @@ auto value_cast<std::vector<T>>::to(const std::vector<T>& v) -> value
     [&](const T& item)
     {
       result.entries.emplace_back(
-        value{numeric_cast<integer>(result.entries.size() + 1)}, to_value(item)
+        value{util::numeric_cast_rt<integer>(result.entries.size() + 1)}, to_value(item)
       );
     }
   );
@@ -345,7 +345,7 @@ auto value_cast<std::vector<T>>::to(const std::vector<T>& v) -> value
 ///
 ///
 template<value_castable T>
-auto value_cast<std::vector<T>>::from(const value& v) -> std::optional<std::vector<T>>
+constexpr auto value_cast<std::vector<T>>::from(const value& v) -> std::optional<std::vector<T>>
 {
   const auto held = std::get_if<table>(&v);
   // Else e.g. a table by key would be read as an empty list

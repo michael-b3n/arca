@@ -33,7 +33,7 @@ namespace arcstd::math
 ///
 template<typename T, typename F>
   requires(std::is_invocable_r_v<bool, F, const std::vector<T>&>)
-auto for_each_combination(const std::vector<std::vector<T>>& nested, F func) -> void
+constexpr auto for_each_combination(const std::vector<std::vector<T>>& nested, F func) -> void
 {
   if(nested.empty())
   {

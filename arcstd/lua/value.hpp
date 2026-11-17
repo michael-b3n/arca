@@ -53,22 +53,22 @@ struct table final
   ///
   /// \return how many of the keys 1, 2, 3, ... the table has in a row, the length # gives in Lua
   ///
-  [[nodiscard]] auto length() const -> std::size_t;
+  [[nodiscard]] constexpr auto length() const -> std::size_t;
 
   ///
   /// \return true if the table is a list: its keys are 1 to its length and no others
   ///
-  [[nodiscard]] auto is_sequence() const -> bool;
+  [[nodiscard]] constexpr auto is_sequence() const -> bool;
 
   ///
   /// \return the values of the keys 1 to the length, in that order
   ///
-  [[nodiscard]] auto sequence() const -> std::vector<value>;
+  [[nodiscard]] constexpr auto sequence() const -> std::vector<value>;
 
   ///
   /// \return the value of the key \p name, nil if the table has none
   ///
-  [[nodiscard]] auto field(std::string_view name) const -> value;
+  [[nodiscard]] constexpr auto field(std::string_view name) const -> value;
 };
 
 ///
@@ -92,7 +92,7 @@ struct table::entry final
 
 ///
 ///
-inline auto table::length() const -> std::size_t
+constexpr auto table::length() const -> std::size_t
 {
   const auto index = [](const entry& e) { return std::get_if<integer>(&e.key); };
   auto indices = entries | std::views::transform(index) |
@@ -106,14 +106,14 @@ inline auto table::length() const -> std::size_t
 
 ///
 ///
-inline auto table::is_sequence() const -> bool
+constexpr auto table::is_sequence() const -> bool
 {
   return entries.size() == length();
 }
 
 ///
 ///
-inline auto table::sequence() const -> std::vector<value>
+constexpr auto table::sequence() const -> std::vector<value>
 {
   auto result = std::vector<value>(length());
   std::ranges::for_each(
@@ -132,7 +132,7 @@ inline auto table::sequence() const -> std::vector<value>
 
 ///
 ///
-inline auto table::field(const std::string_view name) const -> value
+constexpr auto table::field(const std::string_view name) const -> value
 {
   const auto it = std::ranges::find_if(
     entries,

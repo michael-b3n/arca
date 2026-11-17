@@ -42,7 +42,7 @@ using setting_basic_list_variant = meta::for_each_t<setting_basic_variant, std::
 ///
 template<typename E>
   requires(std::is_enum_v<E>)
-[[nodiscard]] auto to_type_erased_setting(const E& v) -> std::string
+[[nodiscard]] constexpr auto to_type_erased_setting(const E& v) -> std::string
 {
   return std::string{util::enum_name(v)};
 }
@@ -52,7 +52,8 @@ template<typename E>
 ///
 template<typename E>
   requires(std::is_enum_v<E>)
-[[nodiscard]] auto to_type_erased_setting(const std::optional<E>& v) -> std::optional<std::string>
+[[nodiscard]] constexpr auto to_type_erased_setting(const std::optional<E>& v)
+  -> std::optional<std::string>
 {
   return v ? std::optional{to_type_erased_setting(*v)} : std::nullopt;
 }
@@ -62,7 +63,7 @@ template<typename E>
 ///
 template<typename E>
   requires(std::is_enum_v<E>)
-[[nodiscard]] auto to_type_erased_setting(const std::vector<E>& v) -> auto
+[[nodiscard]] constexpr auto to_type_erased_setting(const std::vector<E>& v) -> auto
 {
   return v | std::views::transform([](const auto& item) { return to_type_erased_setting(item); }) |
          std::ranges::to<std::vector<std::string>>();
@@ -73,7 +74,7 @@ template<typename E>
 ///
 template<typename E>
   requires(std::is_enum_v<E>)
-[[nodiscard]] auto from_type_erased_setting(const std::string& v) -> E
+[[nodiscard]] constexpr auto from_type_erased_setting(const std::string& v) -> E
 {
   const auto value = util::to_enum<E>(v);
   if(!value)
@@ -92,7 +93,7 @@ template<typename T>
 ///
 /// \throws util::exception if \p v names no value of the enum
 ///
-[[nodiscard]] auto from_type_erased_setting(const std::optional<std::string>& v) -> T
+[[nodiscard]] constexpr auto from_type_erased_setting(const std::optional<std::string>& v) -> T
 {
   return v ? T{from_type_erased_setting<typename T::value_type>(*v)} : T{};
 }
@@ -105,7 +106,7 @@ template<typename T>
 ///
 /// \throws util::exception if one of \p v names no value of the enum
 ///
-[[nodiscard]] auto from_type_erased_setting(const std::vector<std::string>& v) -> T
+[[nodiscard]] constexpr auto from_type_erased_setting(const std::vector<std::string>& v) -> T
 {
   return v |
          std::views::transform([](const auto& item)
@@ -118,7 +119,7 @@ template<typename T>
 ///
 template<typename E>
   requires(std::is_enum_v<E>)
-[[nodiscard]] auto try_from_type_erased_setting(const std::string& v) -> std::optional<E>
+[[nodiscard]] constexpr auto try_from_type_erased_setting(const std::string& v) -> std::optional<E>
 {
   return util::to_enum<E>(v);
 }
@@ -131,7 +132,7 @@ template<typename T>
     std::is_same_v<T, std::optional<typename T::value_type>> &&
     std::is_enum_v<typename T::value_type>
   )
-[[nodiscard]] auto try_from_type_erased_setting(const std::optional<std::string>& v)
+[[nodiscard]] constexpr auto try_from_type_erased_setting(const std::optional<std::string>& v)
   -> std::optional<T>
 {
   if(!v)
@@ -149,7 +150,7 @@ template<typename T>
   requires(
     std::is_same_v<T, std::vector<typename T::value_type>> && std::is_enum_v<typename T::value_type>
   )
-[[nodiscard]] auto try_from_type_erased_setting(const std::vector<std::string>& v)
+[[nodiscard]] constexpr auto try_from_type_erased_setting(const std::vector<std::string>& v)
   -> std::optional<T>
 {
   const auto values =
@@ -199,7 +200,7 @@ namespace detail
 
 // An erased type is its own erased type, setting_type_erased_type_from relies on it
 template<underlying_setting_type_erased_type E>
-[[nodiscard]] auto to_type_erased_setting(const E& v) -> E
+[[nodiscard]] constexpr auto to_type_erased_setting(const E& v) -> E
 {
   return v;
 }
@@ -220,7 +221,7 @@ using setting_type_erased_type_from = std::conditional_t<
 /// \return \p v as T, std::nullopt if it names no value of the enum of T
 ///
 template<underlying_setting_type T>
-[[nodiscard]] auto try_from_type_erased_setting(const setting_type_erased_type_from<T>& v)
+[[nodiscard]] constexpr auto try_from_type_erased_setting(const setting_type_erased_type_from<T>& v)
   -> std::optional<T>
 {
   if constexpr(underlying_setting_type_erased_type<T>)

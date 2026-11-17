@@ -59,7 +59,7 @@ public: // Constants
 public: // Structors
   script_table() = default;
   // NOLINTNEXTLINE(misc-explicit-constructor) a table is written as a braced list of its fields
-  script_table(typename Fields::type... values)
+  constexpr script_table(typename Fields::type... values)
     requires(sizeof...(Fields) > 0);
 
 public: // Operators
@@ -70,15 +70,15 @@ public: // Accessors
   /// \return the value of the field \p Key
   ///
   template<util::string_literal Key>
-  [[nodiscard]] auto get() const -> const auto&;
+  [[nodiscard]] constexpr auto get() const -> const auto&;
   template<util::string_literal Key>
-  [[nodiscard]] auto get() -> auto&;
+  [[nodiscard]] constexpr auto get() -> auto&;
 
   ///
   /// \return the values of all fields, in the order of the fields
   ///
-  [[nodiscard]] auto values() const -> const values_type&;
-  [[nodiscard]] auto values() -> values_type&;
+  [[nodiscard]] constexpr auto values() const -> const values_type&;
+  [[nodiscard]] constexpr auto values() -> values_type&;
 
 private: // Implementation
   template<util::string_literal Key>
@@ -96,18 +96,18 @@ struct value_cast<script_table<Fields...>> final
   using script_table_type = script_table<Fields...>;
 
   // Functions
-  [[nodiscard]] static auto to(const script_table_type& v) -> value;
-  [[nodiscard]] static auto from(const value& v) -> std::optional<script_table_type>;
+  [[nodiscard]] static constexpr auto to(const script_table_type& v) -> value;
+  [[nodiscard]] static constexpr auto from(const value& v) -> std::optional<script_table_type>;
 
 private: // Implementation
   template<typename T>
-  [[nodiscard]] static auto assign(T& target, const value& v) -> bool;
+  [[nodiscard]] static constexpr auto assign(T& target, const value& v) -> bool;
 };
 
 ///
 ///
 template<script_field... Fields>
-script_table<Fields...>::script_table(typename Fields::type... values)
+constexpr script_table<Fields...>::script_table(typename Fields::type... values)
   requires(sizeof...(Fields) > 0)
   : values_{std::move(values)...}
 {
@@ -117,7 +117,7 @@ script_table<Fields...>::script_table(typename Fields::type... values)
 ///
 template<script_field... Fields>
 template<util::string_literal Key>
-auto script_table<Fields...>::get() const -> const auto&
+constexpr auto script_table<Fields...>::get() const -> const auto&
 {
   return std::get<index<Key>()>(values_);
 }
@@ -126,7 +126,7 @@ auto script_table<Fields...>::get() const -> const auto&
 ///
 template<script_field... Fields>
 template<util::string_literal Key>
-auto script_table<Fields...>::get() -> auto&
+constexpr auto script_table<Fields...>::get() -> auto&
 {
   return std::get<index<Key>()>(values_);
 }
@@ -134,7 +134,7 @@ auto script_table<Fields...>::get() -> auto&
 ///
 ///
 template<script_field... Fields>
-auto script_table<Fields...>::values() const -> const values_type&
+constexpr auto script_table<Fields...>::values() const -> const values_type&
 {
   return values_;
 }
@@ -142,7 +142,7 @@ auto script_table<Fields...>::values() const -> const values_type&
 ///
 ///
 template<script_field... Fields>
-auto script_table<Fields...>::values() -> values_type&
+constexpr auto script_table<Fields...>::values() -> values_type&
 {
   return values_;
 }
@@ -164,7 +164,7 @@ consteval auto script_table<Fields...>::index() -> std::size_t
 ///
 ///
 template<script_field... Fields>
-auto value_cast<script_table<Fields...>>::to(const script_table_type& v) -> value
+constexpr auto value_cast<script_table<Fields...>>::to(const script_table_type& v) -> value
 {
   auto result = table{};
   [&]<std::size_t... I>(std::index_sequence<I...>)
@@ -180,7 +180,8 @@ auto value_cast<script_table<Fields...>>::to(const script_table_type& v) -> valu
 ///
 ///
 template<script_field... Fields>
-auto value_cast<script_table<Fields...>>::from(const value& v) -> std::optional<script_table_type>
+constexpr auto value_cast<script_table<Fields...>>::from(const value& v)
+  -> std::optional<script_table_type>
 {
   // nil is an empty table, so a script may leave out a table of optional fields only
   const auto empty = table{};
@@ -210,7 +211,7 @@ auto value_cast<script_table<Fields...>>::from(const value& v) -> std::optional<
 ///
 template<script_field... Fields>
 template<typename T>
-auto value_cast<script_table<Fields...>>::assign(T& target, const value& v) -> bool
+constexpr auto value_cast<script_table<Fields...>>::assign(T& target, const value& v) -> bool
 {
   auto converted = from_value<T>(v);
   if(converted)
