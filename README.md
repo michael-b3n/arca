@@ -59,9 +59,12 @@ target_link_libraries(app PRIVATE arca::lua)
 ```
 
 The libraries are static and pass the third party libraries they use on to the link of the
-application. Those are the shared libraries of MSYS2, as is the C++ runtime of MinGW: an
-application ships their DLLs beside itself. `configure_embedded_scripts` of `tools/cmake` compiles
-Lua scripts into a library with `#embed`.
+application. By default those are the shared libraries of MSYS2, as is the C++ runtime of MinGW:
+an application ships their DLLs beside itself. For a single executable, build arca with
+`ARCA_STATIC_DEPENDENCIES=ON` and link the application with `-static`: the third party libraries
+are then their static ones, spdlog header only, and the executable loads DLLs of Windows only. An
+installed arca keeps that choice. Qt is the application's: a static ArcQml needs a static Qt.
+`configure_embedded_scripts` of `tools/cmake` compiles Lua scripts into a library with `#embed`.
 
 ## Development
 
@@ -73,8 +76,9 @@ cmake --build --preset gcc-release
 ctest --preset gcc-release
 ```
 
-The target `all_verify_interface_header_sets` compiles each public header on its own, the target
-`install` installs into `install/<config>`.
+`gcc-release-static` builds everything static into `build-static`, its tests also check that they
+load DLLs of Windows only. The target `all_verify_interface_header_sets` compiles each public
+header on its own, the target `install` installs into `install/<config>`.
 
 ## License
 

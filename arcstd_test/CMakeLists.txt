@@ -30,3 +30,17 @@ target_link_libraries(arcstd_private_test PRIVATE Catch2::Catch2WithMain arcstd_
 
 catch_discover_tests(arcstd_test)
 catch_discover_tests(arcstd_private_test)
+
+# Linked with -static, the tests load no DLL of the toolchain or of a third party library.
+if(ARCA_STATIC_DEPENDENCIES)
+  cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH ARCA_TOOLCHAIN_BIN)
+  foreach(test_executable IN ITEMS arcstd_test arcstd_private_test)
+    add_test(NAME ${test_executable}_loads_no_toolchain_dll
+      COMMAND ${CMAKE_COMMAND}
+        -DEXECUTABLE=$<TARGET_FILE:${test_executable}>
+        -DOBJDUMP=${CMAKE_OBJDUMP}
+        -DTOOLCHAIN_BIN=${ARCA_TOOLCHAIN_BIN}
+        -P ${arca_SOURCE_DIR}/tools/cmake/check_static_executable.cmake
+    )
+  endforeach()
+endif()

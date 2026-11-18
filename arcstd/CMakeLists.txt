@@ -3,16 +3,10 @@
 # links setting, cache and web link lua. core holds util, meta, math, signal, execution and system.
 # A library is arcstd_<name>, arca::<name> for projects, and arca::arcstd links all of them.
 #
-find_package(Boost REQUIRED COMPONENTS filesystem url)
-find_package(spdlog REQUIRED)
-find_package(libzip REQUIRED)
+# sol2 3.5 is made for Lua 5.1 to 5.4, arca-dependencies takes lua5.4: the unversioned MSYS2
+# package already ships 5.5.
+include(arca-dependencies)
 find_package(sol2 3.5 REQUIRED)
-
-find_package(PkgConfig REQUIRED)
-pkg_search_module(LIBCURL REQUIRED IMPORTED_TARGET libcurl)
-# sol2 3.5 is made for Lua 5.1 to 5.4, the unversioned MSYS2 package already ships 5.5.
-pkg_search_module(LUA REQUIRED IMPORTED_TARGET lua5.4)
-pkg_search_module(SQLITE REQUIRED IMPORTED_TARGET sqlite3)
 
 include(embedded_scripts)
 
@@ -77,14 +71,14 @@ add_arcstd_library(core
   PRIVATE_HEADERS execution/execution.hpp
   PUBLIC_LIBRARIES Boost::headers magic_enum::magic_enum stdc++exp
   PRIVATE_LIBRARIES
-    Boost::filesystem spdlog::spdlog $<BUILD_INTERFACE:beman::execution>
+    Boost::filesystem arca_external::spdlog $<BUILD_INTERFACE:beman::execution>
     $<$<PLATFORM_ID:Windows>:mswsock>
 )
 
 add_arcstd_library(io
   AREAS io
   DEPENDS core
-  PRIVATE_LIBRARIES libzip::zip $<BUILD_INTERFACE:rapidcsv::rapidcsv>
+  PRIVATE_LIBRARIES arca_external::zip $<BUILD_INTERFACE:rapidcsv::rapidcsv>
 )
 
 add_arcstd_library(setting
@@ -106,7 +100,7 @@ add_arcstd_library(lua
     lua/internal_scripts.hpp lua/names.hpp lua/sol_conversion.hpp lua/sol.hpp lua/state.hpp
     lua/state_owner.hpp
   DEPENDS setting
-  PRIVATE_LIBRARIES PkgConfig::LUA $<BUILD_INTERFACE:sol2::sol2>
+  PRIVATE_LIBRARIES arca_external::lua $<BUILD_INTERFACE:sol2::sol2>
   SOURCES ${CMAKE_CURRENT_BINARY_DIR}/lua/internal_scripts.cpp
 )
 
@@ -114,14 +108,14 @@ add_arcstd_library(cache
   AREAS cache
   PRIVATE_HEADERS cache/cache_database.hpp
   DEPENDS lua
-  PRIVATE_LIBRARIES PkgConfig::SQLITE
+  PRIVATE_LIBRARIES arca_external::sqlite
 )
 
 add_arcstd_library(web
   AREAS web
   PRIVATE_HEADERS web/web_request.hpp
   DEPENDS lua
-  PRIVATE_LIBRARIES Boost::url PkgConfig::LIBCURL
+  PRIVATE_LIBRARIES Boost::url arca_external::curl
 )
 
 add_library(arcstd INTERFACE)

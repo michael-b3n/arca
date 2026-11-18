@@ -22,6 +22,11 @@ jobs:
   build:
     runs-on: windows-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        # The default build, and a fully static one whose tests check that they load no DLL of MSYS2
+        preset: [gcc-release, gcc-release-static]
     steps:
       - name: Check out
         uses: actions/checkout@v7
@@ -31,4 +36,4 @@ jobs:
       - name: Build
         uses: ./.github/actions/build
         with:
-          preset: gcc-release
+          preset: ${{ matrix.preset }}

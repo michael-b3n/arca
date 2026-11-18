@@ -47,6 +47,9 @@ set(QT_VERSION_NUMBER 6.11 CACHE STRING "Lowest Qt version arcqml takes")
 
 option(ARCA_BUILD_TESTS "Build the tests of arca and arcstd_test_utils" ${PROJECT_IS_TOP_LEVEL})
 
+# For an application linked with -static: the third party libraries are taken as static libraries.
+option(ARCA_STATIC_DEPENDENCIES "Link the static libraries of the third party libraries" OFF)
+
 # For a project that finds arca with find_package(arca). One that includes it with
 # add_subdirectory uses it from the build.
 option(ARCA_INSTALL "Install arcstd as the CMake package arca" ${PROJECT_IS_TOP_LEVEL})
@@ -64,5 +67,9 @@ endif()
 
 if(ARCA_INSTALL)
   include(GNUInstallDirs)
-  install(FILES tools/cmake/arca-config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/arca)
+  configure_file(tools/cmake/arca-config.cmake.in arca-config.cmake @ONLY)
+  install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/arca-config.cmake tools/cmake/arca-dependencies.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/arca
+  )
 endif()
