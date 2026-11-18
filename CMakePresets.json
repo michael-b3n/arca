@@ -10,7 +10,12 @@
       "name": "base",
       "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build"
+      "binaryDir": "${sourceDir}/build",
+      "installDir": "${sourceDir}/install/${presetName}",
+      "cacheVariables": {
+        "ARCA_STATIC_DEPENDENCIES": "OFF",
+        "CMAKE_EXE_LINKER_FLAGS": ""
+      }
     },
     {
       "name": "clang",
@@ -31,52 +36,28 @@
     {
       "name": "debug",
       "hidden": true,
-      "installDir": "${sourceDir}/install/debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
     {
       "name": "release",
       "hidden": true,
-      "installDir": "${sourceDir}/install/release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
       "name": "static",
       "hidden": true,
-      "binaryDir": "${sourceDir}/build-static",
-      "installDir": "${sourceDir}/install/release-static",
       "cacheVariables": {
         "ARCA_STATIC_DEPENDENCIES": "ON",
         "CMAKE_EXE_LINKER_FLAGS": "-static"
       }
     },
-    {
-      "name": "clang-debug",
-      "displayName": "Clang Debug",
-      "inherits": ["base", "clang", "debug"]
-    },
-    {
-      "name": "clang-release",
-      "displayName": "Clang Release",
-      "inherits": ["base", "clang", "release"]
-    },
-    {
-      "name": "gcc-debug",
-      "displayName": "GCC Debug",
-      "inherits": ["base", "gcc", "debug"]
-    },
-    {
-      "name": "gcc-release",
-      "displayName": "GCC Release",
-      "inherits": ["base", "gcc", "release"]
-    },
+    { "name": "clang-debug", "displayName": "Clang Debug", "inherits": ["base", "clang", "debug"] },
+    { "name": "clang-release", "displayName": "Clang Release", "inherits": ["base", "clang", "release"] },
+    { "name": "gcc-debug", "displayName": "GCC Debug", "inherits": ["base", "gcc", "debug"] },
+    { "name": "gcc-release", "displayName": "GCC Release", "inherits": ["base", "gcc", "release"] },
     {
       "name": "gcc-release-static",
-      "displayName": "GCC Release, linked fully static",
+      "displayName": "GCC Release, fully static",
       "inherits": ["static", "base", "gcc", "release"]
     }
   ],

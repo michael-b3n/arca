@@ -76,9 +76,10 @@ cmake --build --preset gcc-release
 ctest --preset gcc-release
 ```
 
-`gcc-release-static` builds everything static into `build-static`, its tests also check that they
-load DLLs of Windows only. The target `all_verify_interface_header_sets` compiles each public
-header on its own, the target `install` installs into `install/<config>`.
+`gcc-release-static` links the tests fully static, they also check that they load DLLs of Windows
+only. All presets build into `build`, `--fresh` replaces the configuration of the previous one. The
+target `all_verify_interface_header_sets` compiles each public header on its own, the target
+`install` installs into `install/<preset>`.
 
 ## License
 

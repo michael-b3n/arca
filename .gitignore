@@ -1,6 +1,5 @@
 # Custom
 /build
-/build-static
 /install
 /CMakeUserPresets.json
 /.vscode

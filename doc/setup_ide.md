@@ -21,7 +21,7 @@
 
 ## Build
 
-`CMakePresets.json` holds a preset per compiler and build type: `clang-debug`, `clang-release`, `gcc-debug` and `gcc-release`. All build into `build`. CI uses `gcc-release`.
+`CMakePresets.json` holds a preset per compiler and build type: `clang-debug`, `clang-release`, `gcc-debug` and `gcc-release`, and `gcc-release-static`, which links the tests fully static. All build into `build` and install into `install/<preset>`. CI uses `gcc-release` and `gcc-release-static`.
 
 The presets expect the compilers and Ninja on the PATH, as in the `MSYS2 UCRT64` shell. In the root directory:
 
