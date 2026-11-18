@@ -85,11 +85,11 @@ public: // Structors
   explicit zip_file_reader(std::span<const std::byte> data, std::string_view password = "");
   ~zip_file_reader() noexcept;
   zip_file_reader(const zip_file_reader&) = delete;
-  zip_file_reader(zip_file_reader&&) noexcept;
+  zip_file_reader(zip_file_reader&&) noexcept = default;
 
 public: // Operators
   auto operator=(const zip_file_reader&) -> zip_file_reader& = delete;
-  auto operator=(zip_file_reader&&) noexcept -> zip_file_reader&;
+  auto operator=(zip_file_reader&&) noexcept -> zip_file_reader& = default;
 
 public: // Accessors
   ///

@@ -163,16 +163,6 @@ zip_file_reader::zip_file_reader(
 zip_file_reader::~zip_file_reader() noexcept = default;
 
 ///
-/// In the library and not in the class: the closer of the archive is no part of the interface.
-///
-zip_file_reader::zip_file_reader(zip_file_reader&&) noexcept = default;
-
-///
-/// \see zip_file_reader(zip_file_reader&&)
-///
-auto zip_file_reader::operator=(zip_file_reader&&) noexcept -> zip_file_reader& = default;
-
-///
 ///
 auto zip_file_reader::is_open() const -> bool
 {
