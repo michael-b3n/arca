@@ -11,10 +11,10 @@ binds these to a Qt Quick interface: settings, scripts and logs, plus controls, 
 The general helpers below them (type traits, math, string and enum utilities) serve applications
 and games alike. Code that belongs to one application stays there: arca knows no domain.
 
-## Libraries
+## Targets
 
-Each area of `arcstd` is a folder, a namespace and a library. A library links the ones it builds
-on, so a project takes only what it uses:
+Each area of `arcstd` is a folder, a namespace and a static library. A library links the ones it
+builds on, so a project takes only what it uses:
 
 ```
 core ─┬─ io
@@ -31,7 +31,6 @@ core ─┬─ io
 | `arca::cache` | `cache` | `cache_store`, text values of the scripts beyond the run, `cache.get` in Lua | SQLite |
 | `arca::web` | `web` | `web_fetcher`, web pages for the scripts, `web.fetch` in Lua | libcurl, Boost.URL |
 | `arca::arcstd` | all | all libraries above | |
-| `ArcQmlplugin` | `arcqml` | QML module `ArcQml` | Qt |
 
 Headers are included as `<arcstd/<area>/...>`. A helper names the types it hands out as aliases,
 e.g. `setting_store::validator_type<T>`. An application calls `execution::shutdown_thread_pool()`
@@ -39,8 +38,20 @@ last, once its objects that launch work are gone.
 
 Only the Boost headers and magic_enum reach the public headers, the other third party libraries
 stay private. Private headers lie beside the public ones, are listed in `arcstd/CMakeLists.txt`
-and refuse to be included by a project. `arcstd_test_utils` holds test helpers, also for the tests
-of projects built on arca.
+and refuse to be included by a project.
+
+The other targets, not installed, only with `add_subdirectory`:
+
+| Target | Builds | Links |
+|---|---|---|
+| `ArcQml` | static library of the QML module `ArcQml` from `arcqml`: its C++ types, controls, styles and shapes, for code that uses them | `arca::lua`, Qt Quick |
+| `ArcQmlplugin` | static plugin of the module, an application links it so QML finds `import ArcQml` | `ArcQml` |
+| `arcstd_test_utils` | test helpers of `arcstd_test/test_utils`, also for the tests of projects built on arca, e.g. `"test_utils/temp_folder.hpp"` | Catch2, `arca::arcstd` |
+| `arcstd_test` | tests of the public headers, built like a project on arca | `arcstd_test_utils` |
+| `arcstd_private_test` | tests of the internals in `arcstd_test/private`, with the private headers | `arcstd_internals` |
+
+The tests and `arcstd_test_utils` are built with `ARCA_BUILD_TESTS`, on by default when arca is the
+top level project, as is `ARCA_INSTALL`, which installs the libraries as the package `arca`.
 
 ## Use in a project
 
@@ -64,6 +75,11 @@ an application ships their DLLs beside itself. For a single executable, build ar
 `ARCA_STATIC_DEPENDENCIES=ON` and link the application with `-static`: the third party libraries
 are then their static ones, spdlog header only, and the executable loads DLLs of Windows only. An
 installed arca keeps that choice. Qt is the application's: a static ArcQml needs a static Qt.
+
+A static C++ runtime alone (`-static-libgcc -static-libstdc++`) pays only if the application loads
+no other C++ DLL. Qt, spdlog and the like bring the runtime as DLL anyway, and next to them an own
+copy of the runtime and its unwinder lets exceptions between the two end the program.
+
 `configure_embedded_scripts` of `tools/cmake` compiles Lua scripts into a library with `#embed`.
 
 ## Development
