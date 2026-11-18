@@ -20,18 +20,12 @@
     {
       "name": "clang",
       "hidden": true,
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
-      }
+      "cacheVariables": { "CMAKE_CXX_COMPILER": "clang++" }
     },
     {
       "name": "gcc",
       "hidden": true,
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++"
-      }
+      "cacheVariables": { "CMAKE_CXX_COMPILER": "g++" }
     },
     {
       "name": "debug",
@@ -57,7 +51,7 @@
     { "name": "gcc-release", "displayName": "GCC Release", "inherits": ["base", "gcc", "release"] },
     {
       "name": "gcc-release-static",
-      "displayName": "GCC Release, fully static",
+      "displayName": "GCC Release Static",
       "inherits": ["static", "base", "gcc", "release"]
     }
   ],
