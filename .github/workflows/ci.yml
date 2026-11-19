@@ -37,3 +37,34 @@ jobs:
         uses: ./.github/actions/build
         with:
           preset: ${{ matrix.preset }}
+
+  # The lines of arcstd the tests run, Codecov shows them in the badge of the README
+  coverage:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      # Codecov takes the OIDC token of the run instead of a secret
+      id-token: write
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          preset: gcc-coverage
+
+      - name: Report coverage
+        shell: msys2 {0}
+        run: gcovr --print-summary --cobertura coverage.xml
+
+      # A pull request of a fork gets no OIDC token, its upload fails without failing the run
+      - name: Upload coverage
+        uses: codecov/codecov-action@v7
+        with:
+          files: coverage.xml
+          disable_search: true
+          use_oidc: true

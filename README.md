@@ -1,6 +1,7 @@
 # arca
 
 [![CI](https://github.com/michael-b3n/arca/actions/workflows/ci.yml/badge.svg)](https://github.com/michael-b3n/arca/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/michael-b3n/arca/graph/badge.svg)](https://codecov.io/gh/michael-b3n/arca)
 
 arca is a foundation for scriptable desktop applications in C++26. It holds what such an
 application needs besides its own domain: settings that are validated and kept in a settings file,
@@ -96,6 +97,10 @@ ctest --preset gcc-release
 only. All presets build into `build`, `--fresh` replaces the configuration of the previous one. The
 target `all_verify_interface_header_sets` compiles each public header on its own, the target
 `install` installs into `install/<preset>`.
+
+`gcc-coverage` builds arcstd and its tests with the coverage instrumentation of GCC, ArcQml is left
+out. After its tests, `gcovr` in the repository root reports the lines of arcstd they run, as set
+in `gcovr.cfg`. CI sends the report to Codecov, which shows it in the badge above.
 
 ## License
 
