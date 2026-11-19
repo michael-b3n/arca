@@ -66,10 +66,15 @@ if(ARCA_COVERAGE)
 endif()
 
 add_subdirectory(arcstd)
-# A coverage build leaves ArcQml out: it has no tests, and its debug build takes very long.
+# A coverage build leaves ArcQml out: its coverage is not measured, and its debug build takes very
+# long.
 if(NOT ARCA_COVERAGE)
   add_subdirectory(arcqml)
 endif()
 if(ARCA_BUILD_TESTS)
   add_subdirectory(arcstd_test)
+  # The Qt of MSYS2 comes as DLLs only, a static build has no test of ArcQml.
+  if(TARGET ArcQml AND NOT ARCA_STATIC_DEPENDENCIES)
+    add_subdirectory(arcqml_test)
+  endif()
 endif()

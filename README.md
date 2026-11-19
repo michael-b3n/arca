@@ -50,6 +50,7 @@ The other targets, not installed, only with `add_subdirectory`:
 | `arcstd_test_utils` | test helpers of `arcstd_test/test_utils`, also for the tests of projects built on arca, e.g. `"test_utils/temp_folder.hpp"` | Catch2, `arca::arcstd` |
 | `arcstd_test` | tests of the public headers, built like a project on arca | `arcstd_test_utils` |
 | `arcstd_private_test` | tests of the internals in `arcstd_test/private`, with the private headers | `arcstd_internals` |
+| `arcqml_test` | tests of the C++ types of ArcQml that need no window, under a `QCoreApplication`; not in the static and coverage builds | `arcstd_test_utils`, `ArcQml` |
 
 The tests and `arcstd_test_utils` are built with `ARCA_BUILD_TESTS`, on by default when arca is the
 top level project, as is `ARCA_INSTALL`, which installs the libraries as the package `arca`.
@@ -94,9 +95,10 @@ ctest --preset gcc-release
 ```
 
 `gcc-release-static` links the tests fully static, they also check that they load DLLs of Windows
-only. All presets build into `build`, `--fresh` replaces the configuration of the previous one. The
-target `all_verify_interface_header_sets` compiles each public header on its own, the target
-`install` installs into `install/<preset>`.
+only; it leaves `arcqml_test` out, the Qt of MSYS2 has DLLs only. All presets build into `build`,
+`--fresh` replaces the configuration of the previous one. The target
+`all_verify_interface_header_sets` compiles each public header on its own, the target `install`
+installs into `install/<preset>`.
 
 `gcc-coverage` builds arcstd and its tests with the coverage instrumentation of GCC, ArcQml is left
 out. After its tests, `gcovr` in the repository root reports the lines of arcstd they run, as set
