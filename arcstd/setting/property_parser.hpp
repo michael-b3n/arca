@@ -153,10 +153,7 @@ auto property_parser::read(const property_path_type& path, const property_tree_t
   const auto optional_value = tree.get_optional<std::string>(path);
   if(optional_value.has_value())
   {
-    if(const auto v = util::to_enum<T>(optional_value.value()); v.has_value())
-    {
-      return v.value();
-    }
+    return util::to_enum<T>(optional_value.value());
   }
   return std::nullopt;
 }
