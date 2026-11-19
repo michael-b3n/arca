@@ -36,7 +36,9 @@ TEST_CASE("signal_signature extraction", "[signal]")
   using sig4 = signal_type<std::string && (const std::vector<int>&)>;
   using signature4 = signal_signature<sig4>;
   static_assert(std::is_same_v<typename signature4::return_type, std::string&&>);
-  static_assert(std::is_same_v<typename signature4::args_tuple, std::tuple<const std::vector<int>&>>);
+  static_assert(
+    std::is_same_v<typename signature4::args_tuple, std::tuple<const std::vector<int>&>>
+  );
 }
 
 TEST_CASE("to_functional", "[signal]")
@@ -45,13 +47,17 @@ TEST_CASE("to_functional", "[signal]")
   using func1 = to_functional<sig1, std::function>::type;
   using func1_extended = to_functional<sig1, std::function>::type_extended;
   static_assert(std::is_same_v<func1, std::function<void(int, float)>>);
-  static_assert(std::is_same_v<func1_extended, std::function<void(const connection_type&, int, float)>>);
+  static_assert(
+    std::is_same_v<func1_extended, std::function<void(const connection_type&, int, float)>>
+  );
 
   using sig2 = signal_type<int(double)>;
   using func2 = to_functional<sig2, std::move_only_function>::type;
   using func2_extended = to_functional<sig2, std::move_only_function>::type_extended;
   static_assert(std::is_same_v<func2, std::move_only_function<int(double)>>);
-  static_assert(std::is_same_v<func2_extended, std::move_only_function<int(const connection_type&, double)>>);
+  static_assert(
+    std::is_same_v<func2_extended, std::move_only_function<int(const connection_type&, double)>>
+  );
 }
 
 TEST_CASE("signal_type connect and emit", "[signal]")
@@ -73,8 +79,8 @@ TEST_CASE("signal_type multiple slots", "[signal]")
   auto sig = signal_type<void()>{};
   auto count = 0;
 
-  const auto con1 = sig.connect([&count]() { ++count; });
-  const auto con2 = sig.connect([&count]() { ++count; });
+  const auto con1 = sig.connect([&count] { ++count; });
+  const auto con2 = sig.connect([&count] { ++count; });
 
   sig();
   CHECK(count == 2);
@@ -89,7 +95,7 @@ TEST_CASE("scoped_connection disconnects on destruction", "[signal]")
   auto count = 0;
 
   {
-    const auto scoped = scoped_connection_type{sig.connect([&count]() { ++count; })};
+    const auto scoped = scoped_connection_type{sig.connect([&count] { ++count; })};
     sig();
     CHECK(count == 1);
   }
@@ -103,7 +109,7 @@ TEST_CASE("connection_type manual disconnect", "[signal]")
   auto sig = signal_type<void()>{};
   auto count = 0;
 
-  auto con = sig.connect([&count]() { ++count; });
+  const auto con = sig.connect([&count] { ++count; });
   sig();
   CHECK(count == 1);
 
@@ -117,7 +123,7 @@ TEST_CASE("connection_block_type temporarily blocks signal", "[signal]")
   auto sig = signal_type<void()>{};
   auto count = 0;
 
-  const auto con = sig.connect([&count]() { ++count; });
+  const auto con = sig.connect([&count] { ++count; });
 
   sig();
   CHECK(count == 1);
@@ -139,8 +145,8 @@ TEST_CASE("connection_store stores and disconnects connections", "[signal]")
 
   {
     auto store = connection_store{};
-    store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
-    store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
+    store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
+    store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
 
     sig();
     CHECK(count == 2);
@@ -156,8 +162,8 @@ TEST_CASE("connection_store clear disconnects all", "[signal]")
   auto count = 0;
 
   auto store = connection_store{};
-  store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
-  store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
+  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
+  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
 
   sig();
   CHECK(count == 2);
@@ -173,7 +179,7 @@ TEST_CASE("connection_store add after clear", "[signal]")
   auto count = 0;
 
   auto store = connection_store{};
-  store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
+  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
 
   sig();
   CHECK(count == 1);
@@ -182,7 +188,7 @@ TEST_CASE("connection_store add after clear", "[signal]")
   sig();
   CHECK(count == 1);
 
-  store.store(scoped_connection_type{sig.connect([&count]() { ++count; })});
+  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
   sig();
   CHECK(count == 2);
 }

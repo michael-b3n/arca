@@ -1,13 +1,22 @@
 #pragma once
 
-#include <atomic>
+#include <cstdint>
 #include <format>
 
 namespace arcstd::util
 {
+namespace detail
+{
 
 ///
-/// Unique ID type.
+/// \return the next value of the counter all unique IDs share
+///
+[[nodiscard]] auto next_uid_value() -> std::uint64_t;
+
+} // namespace detail
+
+///
+/// ID unique among all IDs of the program, of a type of its own per \p Tag.
 ///
 template<typename Tag>
 class uid final
@@ -22,10 +31,9 @@ public: // Typedefs
   using tag_type = Tag;
   using underlying_type = decltype(value_);
 
-public: // Static helpers
+public: // Static interface
   ///
-  /// Get new typesafe unique ID.
-  /// \return new typesafe unique ID
+  /// \return an ID no other one has
   ///
   [[nodiscard]] static auto new_uid() -> uid<tag_type>;
 
@@ -36,18 +44,15 @@ public: // Operators
   constexpr auto operator<=>(const uid&) const = default;
 
 private: // Structors
-  constexpr uid(underlying_type value);
+  constexpr explicit uid(underlying_type value);
 };
 
 ///
-/// Get new typesafe unique ID.
-/// \return new typesafe unique ID
 ///
 template<typename Tag>
 auto uid<Tag>::new_uid() -> uid<tag_type>
 {
-  static std::atomic_uint64_t counter{0};
-  return {++counter};
+  return uid{detail::next_uid_value()};
 }
 
 ///

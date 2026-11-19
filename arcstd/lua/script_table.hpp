@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arcstd/lua/value.hpp"
 #include "arcstd/lua/value_cast.hpp"
 #include "arcstd/util/exception.hpp"
 #include "arcstd/util/string_literal.hpp"
@@ -13,6 +14,7 @@
 #include <string_view>
 #include <tuple>
 #include <utility>
+#include <variant>
 
 namespace arcstd::lua
 {
@@ -51,39 +53,32 @@ class script_table final
   // Variables
   values_type values_;
 
+public: // Constants
+  static constexpr auto keys = std::array<std::string_view, sizeof...(Fields)>{Fields::key...};
+
 public: // Structors
   script_table() = default;
-  script_table(typename Fields::type... values)
+  // NOLINTNEXTLINE(misc-explicit-constructor) a table is written as a braced list of its fields
+  constexpr script_table(typename Fields::type... values)
     requires(sizeof...(Fields) > 0);
 
 public: // Operators
   auto operator==(const script_table& other) const -> bool = default;
-
-public: // Constants
-  static constexpr auto keys = std::array<std::string_view, sizeof...(Fields)>{Fields::key...};
 
 public: // Accessors
   ///
   /// \return the value of the field \p Key
   ///
   template<util::string_literal Key>
-  [[nodiscard]] auto get() const -> const auto&;
-
-  ///
-  /// \return the value of the field \p Key
-  ///
+  [[nodiscard]] constexpr auto get() const -> const auto&;
   template<util::string_literal Key>
-  [[nodiscard]] auto get() -> auto&;
+  [[nodiscard]] constexpr auto get() -> auto&;
 
   ///
-  /// \return const references of the values of all fields
+  /// \return the values of all fields, in the order of the fields
   ///
-  [[nodiscard]] auto values() const -> const values_type&;
-
-  ///
-  /// \return references to the values of all fields
-  ///
-  [[nodiscard]] auto values() -> values_type&;
+  [[nodiscard]] constexpr auto values() const -> const values_type&;
+  [[nodiscard]] constexpr auto values() -> values_type&;
 
 private: // Implementation
   template<util::string_literal Key>
@@ -91,30 +86,28 @@ private: // Implementation
 };
 
 ///
-/// A table with the keys of the fields. Reading, nil is an empty table and a key of no field makes it none.
+/// A table with the keys of the fields. Reading, nil is an empty table and a key of no field makes
+/// it none.
 ///
 template<script_field... Fields>
 struct value_cast<script_table<Fields...>> final
 {
   // Typedefs
-  using table_type = script_table<Fields...>;
-
-  // Constants
-  static constexpr auto valid = true;
+  using script_table_type = script_table<Fields...>;
 
   // Functions
-  [[nodiscard]] static auto to(sol::state_view lua, const table_type& v) -> sol::object;
-  [[nodiscard]] static auto from(const sol::object& v) -> std::optional<table_type>;
+  [[nodiscard]] static constexpr auto to(const script_table_type& v) -> value;
+  [[nodiscard]] static constexpr auto from(const value& v) -> std::optional<script_table_type>;
 
 private: // Implementation
   template<typename T>
-  [[nodiscard]] static auto assign(T& target, const sol::object& v) -> bool;
+  [[nodiscard]] static constexpr auto assign(T& target, const value& v) -> bool;
 };
 
 ///
 ///
 template<script_field... Fields>
-script_table<Fields...>::script_table(typename Fields::type... values)
+constexpr script_table<Fields...>::script_table(typename Fields::type... values)
   requires(sizeof...(Fields) > 0)
   : values_{std::move(values)...}
 {
@@ -124,7 +117,7 @@ script_table<Fields...>::script_table(typename Fields::type... values)
 ///
 template<script_field... Fields>
 template<util::string_literal Key>
-auto script_table<Fields...>::get() const -> const auto&
+constexpr auto script_table<Fields...>::get() const -> const auto&
 {
   return std::get<index<Key>()>(values_);
 }
@@ -133,7 +126,7 @@ auto script_table<Fields...>::get() const -> const auto&
 ///
 template<script_field... Fields>
 template<util::string_literal Key>
-auto script_table<Fields...>::get() -> auto&
+constexpr auto script_table<Fields...>::get() -> auto&
 {
   return std::get<index<Key>()>(values_);
 }
@@ -141,7 +134,7 @@ auto script_table<Fields...>::get() -> auto&
 ///
 ///
 template<script_field... Fields>
-auto script_table<Fields...>::values() const -> const values_type&
+constexpr auto script_table<Fields...>::values() const -> const values_type&
 {
   return values_;
 }
@@ -149,7 +142,7 @@ auto script_table<Fields...>::values() const -> const values_type&
 ///
 ///
 template<script_field... Fields>
-auto script_table<Fields...>::values() -> values_type&
+constexpr auto script_table<Fields...>::values() -> values_type&
 {
   return values_;
 }
@@ -171,54 +164,61 @@ consteval auto script_table<Fields...>::index() -> std::size_t
 ///
 ///
 template<script_field... Fields>
-auto value_cast<script_table<Fields...>>::to(sol::state_view lua, const table_type& v) -> sol::object
+constexpr auto value_cast<script_table<Fields...>>::to(const script_table_type& v) -> value
 {
-  auto table = lua.create_table(0, static_cast<int>(sizeof...(Fields)));
+  auto result = table{};
   [&]<std::size_t... I>(std::index_sequence<I...>)
   {
-    ((table[std::string{Fields::key}] = value_cast<typename Fields::type>::to(lua, std::get<I>(v.values()))), ...);
+    (result.entries.emplace_back(
+       value{std::string{Fields::key}}, to_value(std::get<I>(v.values()))
+     ),
+     ...);
   }(std::index_sequence_for<Fields...>{});
-  return table;
+  return value{std::move(result)};
 }
 
 ///
 ///
 template<script_field... Fields>
-auto value_cast<script_table<Fields...>>::from(const sol::object& v) -> std::optional<table_type>
+constexpr auto value_cast<script_table<Fields...>>::from(const value& v)
+  -> std::optional<script_table_type>
 {
-  auto lua = sol::state_view{v.lua_state()};
-  const auto nil = v.get_type() == sol::type::lua_nil;
-  if(!nil && v.get_type() != sol::type::table)
+  // nil is an empty table, so a script may leave out a table of optional fields only
+  const auto empty = table{};
+  const auto* const held = std::holds_alternative<nil>(v) ? &empty : std::get_if<table>(&v);
+  if(held == nullptr)
   {
     return std::nullopt;
   }
-  const auto table = nil ? lua.create_table() : v.as<sol::table>();
-  const auto known = std::ranges::all_of(
-    detail::entries(table),
-    [](const auto& entry)
-    {
-      const auto name = value_cast<std::string>::from(entry.first);
-      return name && std::ranges::contains(table_type::keys, std::string_view{*name});
-    }
-  );
-  auto result = table_type{};
-  const auto read = [&]<std::size_t... I>(std::index_sequence<I...>)
-  { return (assign(std::get<I>(result.values()), table.template get<sol::object>(std::string{Fields::key})) && ...); };
-  return known && read(std::index_sequence_for<Fields...>{}) ? std::optional{std::move(result)} : std::nullopt;
+  const auto is_field = [](const table::entry& entry)
+  {
+    const auto key = std::get_if<std::string>(&entry.key);
+    return key && std::ranges::contains(script_table_type::keys, std::string_view{*key});
+  };
+  if(!std::ranges::all_of(held->entries, is_field))
+  {
+    return std::nullopt;
+  }
+  auto result = script_table_type{};
+  const auto assigned = [&]<std::size_t... I>(std::index_sequence<I...>)
+  {
+    return (assign(std::get<I>(result.values()), held->field(Fields::key)) && ...);
+  }(std::index_sequence_for<Fields...>{});
+  return assigned ? std::optional{std::move(result)} : std::nullopt;
 }
 
 ///
 ///
 template<script_field... Fields>
 template<typename T>
-auto value_cast<script_table<Fields...>>::assign(T& target, const sol::object& v) -> bool
+constexpr auto value_cast<script_table<Fields...>>::assign(T& target, const value& v) -> bool
 {
-  auto value = value_cast<T>::from(v);
-  if(value)
+  auto converted = from_value<T>(v);
+  if(converted)
   {
-    target = std::move(*value);
+    target = std::move(*converted);
   }
-  return value.has_value();
+  return converted.has_value();
 }
 
 } // namespace arcstd::lua

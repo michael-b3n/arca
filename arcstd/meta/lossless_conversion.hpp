@@ -25,19 +25,21 @@ struct is_lossless_conversion : std::false_type
 /// \tparam T To type
 ///
 template<typename F, typename T>
-  requires(std::is_arithmetic_v<F> && std::is_same_v<std::remove_cvref_t<F>, std::remove_cvref_t<T>>)
+  requires(
+    std::is_arithmetic_v<F> && std::is_same_v<std::remove_cvref_t<F>, std::remove_cvref_t<T>>
+  )
 struct is_lossless_conversion<F, T> : std::true_type
 {
   using from_type = F;
   using to_type = T;
 };
 
-#define ARCSTD_REGISTER_LOSSLESS_CONVERSION(F, T)                                                                              \
-  template<>                                                                                                                   \
-  struct is_lossless_conversion<F, T> : std::true_type                                                                         \
-  {                                                                                                                            \
-    using from_type = F;                                                                                                       \
-    using to_type = T;                                                                                                         \
+#define ARCSTD_REGISTER_LOSSLESS_CONVERSION(F, T)                                                  \
+  template<>                                                                                       \
+  struct is_lossless_conversion<F, T> : std::true_type                                             \
+  {                                                                                                \
+    using from_type = F;                                                                           \
+    using to_type = T;                                                                             \
   };
 
 ARCSTD_REGISTER_LOSSLESS_CONVERSION(bool, std::int8_t);
@@ -139,7 +141,9 @@ struct lossless_common_type<T> final
 /// \see lossless_common_type
 ///
 template<typename T1, typename T2, typename... T>
-  requires(std::is_arithmetic_v<T1> && std::is_same_v<std::remove_cvref_t<T1>, std::remove_cvref_t<T2>>)
+  requires(
+    std::is_arithmetic_v<T1> && std::is_same_v<std::remove_cvref_t<T1>, std::remove_cvref_t<T2>>
+  )
 struct lossless_common_type<T1, T2, T...> final
 {
   using type = typename lossless_common_type<std::remove_cvref_t<T1>, T...>::type;
@@ -208,7 +212,8 @@ private: // Typedefs
         is_lossless_conversion_v<I1, std::uint32_t> && is_lossless_conversion_v<I2, std::uint32_t>,
         std::uint32_t,
         std::conditional_t<
-          is_lossless_conversion_v<I1, std::uint64_t> && is_lossless_conversion_v<I2, std::uint64_t>,
+          is_lossless_conversion_v<I1, std::uint64_t> &&
+            is_lossless_conversion_v<I2, std::uint64_t>,
           std::uint64_t,
           void>>>>;
 
@@ -251,7 +256,10 @@ public: // Typedefs
     std::conditional_t<
       is_lossless_conversion_v<T1, T2>,
       std::remove_cvref_t<T2>,
-      std::conditional_t<is_lossless_conversion_v<T2, T1>, std::remove_cvref_t<T1>, detail::integral_common_type_t<T1, T2>>>,
+      std::conditional_t<
+        is_lossless_conversion_v<T2, T1>,
+        std::remove_cvref_t<T1>,
+        detail::integral_common_type_t<T1, T2>>>,
     T...>::type;
 };
 

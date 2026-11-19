@@ -41,8 +41,11 @@ struct value_range final
   /// \tparam T2 Type that is lossless convertible to unsigned type of ValueType
   /// \return value range
   ///
-  template<meta::lossless_convertible<ValueType> T1, meta::lossless_convertible<meta::conditional_unsigned_t<ValueType>> T2>
-  [[nodiscard]] static constexpr auto create_from_begin_and_size(T1 begin, T2 size) -> value_range<ValueType>;
+  template<
+    meta::lossless_convertible<ValueType> T1,
+    meta::lossless_convertible<meta::conditional_unsigned_t<ValueType>> T2>
+  [[nodiscard]] static constexpr auto create_from_begin_and_size(T1 begin, T2 size)
+    -> value_range<ValueType>;
 
   // Structors
   ///
@@ -57,6 +60,7 @@ struct value_range final
   /// Copy constructor accepting value ranges that are lossless convertible to this range.
   ///
   template<meta::lossless_convertible<ValueType> T1>
+  // NOLINTNEXTLINE(misc-explicit-constructor) a lossless conversion, as of the value types
   constexpr value_range(const value_range<T1>& other);
 
   // Operators
@@ -66,8 +70,11 @@ struct value_range final
 ///
 ///
 template<arithmetic_type ValueType>
-template<meta::lossless_convertible<ValueType> T1, meta::lossless_convertible<meta::conditional_unsigned_t<ValueType>> T2>
-constexpr auto value_range<ValueType>::create_from_begin_and_size(T1 begin, T2 size) -> value_range<ValueType>
+template<
+  meta::lossless_convertible<ValueType> T1,
+  meta::lossless_convertible<meta::conditional_unsigned_t<ValueType>> T2>
+constexpr auto value_range<ValueType>::create_from_begin_and_size(T1 begin, T2 size)
+  -> value_range<ValueType>
 {
   const auto b = static_cast<value_type>(begin);
   auto e = arithmetic::expected_type<value_type>{std::unexpected{arithmetic::error_code::overflow}};
@@ -80,7 +87,8 @@ constexpr auto value_range<ValueType>::create_from_begin_and_size(T1 begin, T2 s
     else
     {
       using unsigned_type = std::make_unsigned_t<value_type>;
-      static constexpr auto max_value_utype = static_cast<unsigned_type>(std::numeric_limits<value_type>::max());
+      static constexpr auto max_value_utype =
+        static_cast<unsigned_type>(std::numeric_limits<value_type>::max());
       const auto s = static_cast<unsigned_type>(size);
       if(s <= max_value_utype)
       {
@@ -129,7 +137,10 @@ constexpr value_range<ValueType>::value_range(T1 begin_, T2 end_)
   : begin{std::min(static_cast<value_type>(begin_), static_cast<value_type>(end_))}
   , end{std::max(static_cast<value_type>(begin_), static_cast<value_type>(end_))}
 {
-  if(!arithmetic::subtract(end, begin).has_value() || !arithmetic::add(begin, static_cast<value_type>(1)).has_value())
+  if(
+    !arithmetic::subtract(end, begin).has_value() ||
+    !arithmetic::add(begin, static_cast<value_type>(1)).has_value()
+  )
   {
     throw util::exception("invalid value_range arguments");
   }
@@ -165,7 +176,8 @@ template<arithmetic_type T>
 
 ///
 /// Get the size (defined as `size = end - begin` where `end > begin`) of a `value_range`.
-/// \return size of `value_range` (type std::size_t for integer types, type double for floating point types)
+/// \return size of `value_range` (type std::size_t for integer types, type double for floating
+/// point types)
 ///
 template<arithmetic_type T>
 [[nodiscard]] constexpr auto size(const value_range<T>& range) -> auto
@@ -185,7 +197,8 @@ template<arithmetic_type T>
 /// \return true, if `subrange` is fully contained in `range`
 ///
 template<arithmetic_type T1, arithmetic_type T2>
-[[nodiscard]] constexpr auto contains(const value_range<T1>& range, const value_range<T2>& subrange) -> bool
+[[nodiscard]] constexpr auto contains(const value_range<T1>& range, const value_range<T2>& subrange)
+  -> bool
   requires(similar_arithmetic_types<T1, T2> && meta::has_lossless_common_type<T1, T2>)
 {
   using type = meta::lossless_common_type_t<T1, T2>;
@@ -227,7 +240,8 @@ template<arithmetic_type T1, arithmetic_type T2>
 /// \return true, if two ranges overlap, false otherwise
 ///
 template<arithmetic_type T1, arithmetic_type T2>
-[[nodiscard]] constexpr auto overlaps(const value_range<T1>& first, const value_range<T2>& second) -> bool
+[[nodiscard]] constexpr auto overlaps(const value_range<T1>& first, const value_range<T2>& second)
+  -> bool
   requires(similar_arithmetic_types<T1, T2> && meta::has_lossless_common_type<T1, T2>)
 {
   using type = meta::lossless_common_type_t<T1, T2>;
@@ -252,7 +266,8 @@ template<arithmetic_type T1, arithmetic_type T2>
 
 ///
 /// Get the range identifying an overlap between two ranges.
-/// \return optional range describing overlap of `first` and `second`, std::nullopt if no overlap is present
+/// \return optional range describing overlap of `first` and `second`, std::nullopt if no overlap is
+/// present
 ///
 template<arithmetic_type T1, arithmetic_type T2>
 [[nodiscard]] constexpr auto overlap(const value_range<T1>& first, const value_range<T2>& second)
@@ -275,7 +290,8 @@ template<arithmetic_type T1, arithmetic_type T2>
 /// \return true if adjacent, false otherwise
 ///
 template<arithmetic_type T1, arithmetic_type T2>
-[[nodiscard]] constexpr auto adjacent(const value_range<T1>& first, const value_range<T2>& second) -> bool
+[[nodiscard]] constexpr auto adjacent(const value_range<T1>& first, const value_range<T2>& second)
+  -> bool
   requires(similar_arithmetic_types<T1, T2> && meta::has_lossless_common_type<T1, T2>)
 {
   using type = meta::lossless_common_type_t<T1, T2>;

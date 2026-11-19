@@ -1,7 +1,7 @@
 #pragma once
 
-#include "arcstd/txt/find_uint.hpp"
 #include "arcstd/util/exception.hpp"
+#include "arcstd/util/find_uint.hpp"
 #include "arcstd/util/ranges.hpp"
 
 #include <algorithm>
@@ -17,30 +17,30 @@
 namespace arcstd::util::string
 {
 
-///
-/// Concept to check if T is string view type.
-///
 template<typename T>
 concept string_view_type = std::is_convertible_v<T, std::string_view>;
 
 ///
-/// Create string view array from string literal args.
-/// \return string view array
+/// \return \p args as an array of std::string_view
 ///
 template<string_view_type... S>
-[[nodiscard]] constexpr auto to_string_view_array(S&&... args) -> std::array<std::string_view, sizeof...(S)>
+[[nodiscard]] constexpr auto to_string_view_array(S&&... args)
+  -> std::array<std::string_view, sizeof...(S)>
 {
   return std::array{std::string_view{std::forward<decltype(args)>(args)}...};
 }
 
 ///
-/// Split string_view by delimiter and return vector of string parts.
-/// \return vector of string parts
+/// \return the parts of \p data between the \p delimiter
 ///
-[[nodiscard]] constexpr auto split(const std::string_view data, const auto delimiter) -> std::vector<std::string>
-  requires(std::convertible_to<decltype(delimiter), std::string_view> || std::convertible_to<decltype(delimiter), char>)
+[[nodiscard]] constexpr auto split(const std::string_view data, const auto delimiter)
+  -> std::vector<std::string>
+  requires(
+    std::convertible_to<decltype(delimiter), std::string_view> ||
+    std::convertible_to<decltype(delimiter), char>
+  )
 {
-  const auto delimiter_size = [&]() -> std::size_t
+  const auto delimiter_size = [&] -> std::size_t
   {
     if constexpr(std::convertible_to<decltype(delimiter), std::string_view>)
     {
@@ -56,25 +56,28 @@ template<string_view_type... S>
 
   std::ranges::for_each(
     util::ranges::index_view(data) |
-      std::views::take_while([&]([[maybe_unused]] const auto /*i*/) { return current_index != std::string_view::npos; }),
+      std::views::take_while([&]([[maybe_unused]] const auto /*i*/)
+                             { return current_index != std::string_view::npos; }),
     [&]([[maybe_unused]] const auto)
     {
-      const auto pos = data.substr(current_index).find(delimiter);
-      result.emplace_back(data.substr(current_index, pos));
-      current_index = pos != std::string_view::npos ? current_index + pos + delimiter_size : std::string_view::npos;
+      const auto length = data.substr(current_index).find(delimiter);
+      result.emplace_back(data.substr(current_index, length));
+      current_index = length != std::string_view::npos ? current_index + length + delimiter_size
+                                                       : std::string_view::npos;
     }
   );
   return result;
 }
 
 ///
-/// Join string parts with delimiter and return the joined string.
-/// \return Joined string
+/// \return \p parts joined with \p delimiter between them
 ///
-[[nodiscard]] constexpr auto join(const std::ranges::range auto& parts, const auto delimiter) -> std::string
+[[nodiscard]] constexpr auto join(const std::ranges::range auto& parts, const auto delimiter)
+  -> std::string
   requires(
     std::convertible_to<std::ranges::range_value_t<decltype(parts)>, std::string_view> &&
-    (std::convertible_to<decltype(delimiter), std::string_view> || std::convertible_to<decltype(delimiter), char>)
+    (std::convertible_to<decltype(delimiter), std::string_view> ||
+     std::convertible_to<decltype(delimiter), char>)
   )
 {
   if(parts.empty())
@@ -90,44 +93,48 @@ template<string_view_type... S>
 }
 
 ///
-/// Check if string_view starts with prefix.
-/// \return true if string_view starts with prefix, false otherwise
+/// \return true if \p data starts with \p prefix
 ///
-[[nodiscard]] constexpr auto starts_with(const std::string_view data, const std::string_view prefix) -> bool
+[[nodiscard]] constexpr auto starts_with(const std::string_view data, const std::string_view prefix)
+  -> bool
 {
   if(prefix.empty())
   {
     throw util::exception{"prefix cannot be empty"};
   }
-  return prefix.size() <= data.size() && std::equal(std::cbegin(prefix), std::cend(prefix), std::cbegin(data));
+  return prefix.size() <= data.size() &&
+         std::equal(std::cbegin(prefix), std::cend(prefix), std::cbegin(data));
 }
 
 ///
-/// Check if string_view ends with postfix.
-/// \return true if string_view ends with postfix, false otherwise
+/// \return true if \p data ends with \p postfix
 ///
-[[nodiscard]] constexpr auto ends_with(const std::string_view data, const std::string_view postfix) -> bool
+[[nodiscard]] constexpr auto ends_with(const std::string_view data, const std::string_view postfix)
+  -> bool
 {
   if(postfix.empty())
   {
     throw util::exception{"postfix cannot be empty"};
   }
   return postfix.size() <= data.size() &&
-         std::equal(std::cbegin(postfix), std::cend(postfix), std::prev(std::cend(data), postfix.size()));
+         std::equal(
+           std::cbegin(postfix),
+           std::cend(postfix),
+           std::prev(std::cend(data), static_cast<std::ptrdiff_t>(postfix.size()))
+         );
 }
 
 ///
-/// Check if string_view starts with prefix.
-/// \return true if string_view starts with char, false otherwise
+/// \return true if \p data starts with \p prefix_char
 ///
-[[nodiscard]] constexpr auto starts_with(const std::string_view data, const char prefix_char) -> bool
+[[nodiscard]] constexpr auto starts_with(const std::string_view data, const char prefix_char)
+  -> bool
 {
   return !data.empty() && data.front() == prefix_char;
 }
 
 ///
-/// Check if string_view ends with postfix.
-/// \return true if string_view ends with char, false otherwise
+/// \return true if \p data ends with \p postfix_char
 ///
 [[nodiscard]] constexpr auto ends_with(const std::string_view data, const char postfix_char) -> bool
 {
@@ -135,12 +142,12 @@ template<string_view_type... S>
 }
 
 ///
-/// Check if string_view ends with a formatted number (e.g., " (1)", " [2], or other").
-/// In \p format '{}' stands for the number, e.g. " ({})" or " [{}]".
-/// \return true if string_view ends with a formatted number, false otherwise
+/// \return true if \p data ends with a number in \p format,
+/// where "{}" stands for the number, e.g. " ({})" or " [{}]"
 ///
-[[nodiscard]] constexpr auto ends_with_formatted_uint(const std::string_view data, const std::string_view format = "")
-  -> std::optional<std::uint32_t>
+[[nodiscard]] constexpr auto ends_with_formatted_uint(
+  const std::string_view data, const std::string_view format = ""
+) -> std::optional<std::uint32_t>
 {
   static constexpr std::string_view placeholder = "{}";
   const auto placeholder_pos = format.rfind(placeholder);
@@ -162,7 +169,8 @@ template<string_view_type... S>
     {
       const auto data_without_suffix = data.substr(0, suffix_pos);
       static constexpr auto is_digit = [](const unsigned char c) { return std::isdigit(c); };
-      auto reverse = data_without_suffix | std::views::reverse | std::views::take_while(is_digit);
+      const auto reverse =
+        data_without_suffix | std::views::reverse | std::views::take_while(is_digit);
       const auto digit_count = std::ranges::count(reverse, std::size_t{0});
       return digit_count == 0 ? std::string_view::npos : suffix_pos - digit_count;
     }
@@ -174,11 +182,14 @@ template<string_view_type... S>
   if(prefix_pos != std::string_view::npos && prefix_pos < suffix_pos)
   {
     const auto number_start = prefix_pos + format_prefix.size();
-    if(number_start < data.size() && suffix_pos != std::string_view::npos && suffix_pos > number_start)
+    if(
+      number_start < data.size() && suffix_pos != std::string_view::npos &&
+      suffix_pos > number_start
+    )
     {
       const auto number_size = suffix_pos - number_start;
       if(
-        const auto result = txt::find_uint(data.substr(number_start, number_size));
+        const auto result = find_uint(data.substr(number_start, number_size));
         result.has_value() && result->post_value_offset == number_size
       )
       {

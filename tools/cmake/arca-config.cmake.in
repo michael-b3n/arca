@@ -1,0 +1,17 @@
+#
+# Package config of arca, installed next to the targets of arcstd. It provides the static libraries
+# arca::core, arca::io, arca::setting, arca::lua, arca::cache and arca::web, and arca::arcstd with
+# all of them. They link the third party libraries they use, so those are found here, static ones
+# if arca was built with ARCA_STATIC_DEPENDENCIES.
+#
+include(CMakeFindDependencyMacro)
+
+set(ARCA_STATIC_DEPENDENCIES @ARCA_STATIC_DEPENDENCIES@)
+set(ARCA_FIND_AS_DEPENDENCY ON)
+include("${CMAKE_CURRENT_LIST_DIR}/arca-dependencies.cmake")
+unset(ARCA_FIND_AS_DEPENDENCY)
+if(DEFINED arca_FOUND AND NOT arca_FOUND)
+  return()
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/arca-targets.cmake")

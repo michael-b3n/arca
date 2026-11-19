@@ -36,8 +36,12 @@ TEST_CASE("pack is_packable", "[meta]")
 
 TEST_CASE("pack unpack", "[meta]")
 {
-  static_assert(std::is_same_v<unpack_t<test_pack, std::tuple<int, double>>, test_pack<int, double>>);
-  static_assert(std::is_same_v<unpack_t<std::tuple, test_pack<int, double>>, std::tuple<int, double>>);
+  static_assert(
+    std::is_same_v<unpack_t<test_pack, std::tuple<int, double>>, test_pack<int, double>>
+  );
+  static_assert(
+    std::is_same_v<unpack_t<std::tuple, test_pack<int, double>>, std::tuple<int, double>>
+  );
   static_assert(std::is_same_v<unpack_t<std::variant, test_pack<int>>, std::variant<int>>);
   static_assert(std::is_same_v<unpack_t<test_pack, test_pack<>>, test_pack<>>);
 }
@@ -46,7 +50,9 @@ TEST_CASE("pack add_to_pack", "[meta]")
 {
   static_assert(std::is_same_v<add_to_pack_t<int, test_pack<>>, test_pack<int>>);
   static_assert(std::is_same_v<add_to_pack_t<int, test_pack<double>>, test_pack<int, double>>);
-  static_assert(std::is_same_v<add_to_pack_t<int, std::tuple<double, char>>, std::tuple<int, double, char>>);
+  static_assert(
+    std::is_same_v<add_to_pack_t<int, std::tuple<double, char>>, std::tuple<int, double, char>>
+  );
   // Adding a type already contained does not deduplicate.
   static_assert(std::is_same_v<add_to_pack_t<int, test_pack<int>>, test_pack<int, int>>);
 }
@@ -55,22 +61,30 @@ TEST_CASE("pack remove_from_pack", "[meta]")
 {
   static_assert(std::is_same_v<remove_from_pack_t<test_pack<int>>, test_pack<>>);
   static_assert(std::is_same_v<remove_from_pack_t<test_pack<int, double>>, test_pack<double>>);
-  static_assert(std::is_same_v<remove_from_pack_t<std::tuple<int, double, char>>, std::tuple<double, char>>);
+  static_assert(
+    std::is_same_v<remove_from_pack_t<std::tuple<int, double, char>>, std::tuple<double, char>>
+  );
   // Removing is the inverse of adding from the left side.
-  static_assert(std::is_same_v<remove_from_pack_t<add_to_pack_t<char, test_pack<int>>>, test_pack<int>>);
+  static_assert(
+    std::is_same_v<remove_from_pack_t<add_to_pack_t<char, test_pack<int>>>, test_pack<int>>
+  );
 }
 
 TEST_CASE("pack combine_pack", "[meta]")
 {
   static_assert(std::is_same_v<combine_pack_t<test_pack<int>>, test_pack<int>>);
-  static_assert(std::is_same_v<combine_pack_t<test_pack<int>, test_pack<double>>, test_pack<int, double>>);
+  static_assert(
+    std::is_same_v<combine_pack_t<test_pack<int>, test_pack<double>>, test_pack<int, double>>
+  );
   static_assert(std::is_same_v<combine_pack_t<test_pack<>, test_pack<double>>, test_pack<double>>);
   static_assert(std::is_same_v<combine_pack_t<test_pack<int>, test_pack<>>, test_pack<int>>);
-  static_assert(
-    std::is_same_v<combine_pack_t<test_pack<int>, test_pack<double>, test_pack<char>>, test_pack<int, double, char>>
-  );
+  static_assert(std::is_same_v<
+                combine_pack_t<test_pack<int>, test_pack<double>, test_pack<char>>,
+                test_pack<int, double, char>>);
   // The resulting pack type is the one of the first pack.
-  static_assert(std::is_same_v<combine_pack_t<std::tuple<int>, test_pack<double>>, std::tuple<int, double>>);
+  static_assert(
+    std::is_same_v<combine_pack_t<std::tuple<int>, test_pack<double>>, std::tuple<int, double>>
+  );
 }
 
 TEST_CASE("pack split_pack", "[meta]")
@@ -82,7 +96,9 @@ TEST_CASE("pack split_pack", "[meta]")
   static_assert(std::is_same_v<split_pack<pack_type, 4>::first_type, pack_type>);
   static_assert(std::is_same_v<split_pack<pack_type, 4>::second_type, test_pack<>>);
   static_assert(std::is_same_v<split_pack<pack_type, 1>::first_type, test_pack<int>>);
-  static_assert(std::is_same_v<split_pack<pack_type, 1>::second_type, test_pack<double, char, float>>);
+  static_assert(
+    std::is_same_v<split_pack<pack_type, 1>::second_type, test_pack<double, char, float>>
+  );
   static_assert(std::is_same_v<split_pack<pack_type, 2>::first_type, test_pack<int, double>>);
   static_assert(std::is_same_v<split_pack<pack_type, 2>::second_type, test_pack<char, float>>);
   static_assert(std::is_same_v<split_pack<pack_type, 3>::first_type, test_pack<int, double, char>>);

@@ -16,7 +16,8 @@ namespace arcqml
 
 ///
 /// QML LocalPath singleton.
-/// Converts between the paths the settings hold and the urls the QML layer names files and folders by.
+/// Converts between the paths the settings hold and the urls the QML layer names files and folders
+/// by.
 ///
 class LocalPath final : public QObject
 {
@@ -24,12 +25,13 @@ class LocalPath final : public QObject
   QML_ELEMENT
   QML_SINGLETON
 
-public: // Static
+public: // Static interface
   ///
   /// \return the local paths of \p urls as a file dialog reports them,
   /// one naming nothing on this machine is logged and left out
   ///
-  [[nodiscard]] static auto toLocalPaths(const QList<QUrl>& urls) -> std::vector<std::filesystem::path>;
+  [[nodiscard]] static auto toLocalPaths(const QList<QUrl>& urls)
+    -> std::vector<std::filesystem::path>;
 
 public: // Structors
   explicit LocalPath(arcstd::util::non_owning_ptr<QObject> parent = nullptr);

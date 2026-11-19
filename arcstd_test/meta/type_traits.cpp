@@ -33,7 +33,9 @@ TEST_CASE("remove_wrapper", "[meta]")
   static_assert(std::is_same_v<remove_wrapper_t<std::optional<int>>, int>);
   // Defaulted template arguments, such as the allocator of std::vector, are ignored.
   static_assert(std::is_same_v<remove_wrapper_t<std::vector<int>>, int>);
-  static_assert(std::is_same_v<remove_wrapper_t<std::optional<std::optional<int>>>, std::optional<int>>);
+  static_assert(
+    std::is_same_v<remove_wrapper_t<std::optional<std::optional<int>>>, std::optional<int>>
+  );
   // Non wrapped types are returned unchanged.
   static_assert(std::is_same_v<remove_wrapper_t<int>, int>);
   static_assert(std::is_same_v<remove_wrapper_t<type_traits_test_struct>, type_traits_test_struct>);
@@ -67,7 +69,9 @@ TEST_CASE("conditional_unsigned", "[meta]")
   static_assert(std::is_same_v<conditional_unsigned_t<double>, double>);
   // Const and volatile indicators are removed.
   static_assert(std::is_same_v<conditional_unsigned_t<const std::int32_t>, const std::uint32_t>);
-  static_assert(std::is_same_v<conditional_unsigned_t<volatile std::int32_t>, volatile std::uint32_t>);
+  static_assert(
+    std::is_same_v<conditional_unsigned_t<volatile std::int32_t>, volatile std::uint32_t>
+  );
   static_assert(std::is_same_v<conditional_unsigned_t<const double>, const double>);
 }
 

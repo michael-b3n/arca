@@ -20,7 +20,11 @@ struct for_each<P<A>, T>
   using type = P<T<A>>;
 };
 
-template<template<typename...> typename P, typename A, template<typename...> typename T, typename... Args>
+template<
+  template<typename...> typename P,
+  typename A,
+  template<typename...> typename T,
+  typename... Args>
 struct for_each<P<A, Args...>, T>
 {
   using type = add_to_pack_t<T<A>, typename for_each<P<Args...>, T>::type>;

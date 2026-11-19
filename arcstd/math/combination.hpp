@@ -10,8 +10,8 @@ namespace arcstd::math
 {
 
 ///
-/// Generate all combinations of elements from a nested vector and apply a function to each combination.
-/// The generation stops as soon as \p func returns false.
+/// Generate all combinations of elements from a nested vector and apply a function to each
+/// combination. The generation stops as soon as \p func returns false.
 ///
 /// \code
 /// const auto nested = std::vector<std::vector<int>>{{1, 2}, {3, 4, 5}};
@@ -33,7 +33,7 @@ namespace arcstd::math
 ///
 template<typename T, typename F>
   requires(std::is_invocable_r_v<bool, F, const std::vector<T>&>)
-auto for_each_combination(const std::vector<std::vector<T>>& nested, F&& func) -> void
+constexpr auto for_each_combination(const std::vector<std::vector<T>>& nested, F func) -> void
 {
   if(nested.empty())
   {
@@ -57,8 +57,8 @@ auto for_each_combination(const std::vector<std::vector<T>>& nested, F&& func) -
     return [m = multiplier / size, size = size](const std::uint64_t i) { return (i / m) % size; };
   };
 
-  const auto indexers =
-    util::ranges::index_view(nested) | std::views::transform(generate_indexer) | std::ranges::to<std::vector>();
+  const auto indexers = util::ranges::index_view(nested) | std::views::transform(generate_indexer) |
+                        std::ranges::to<std::vector>();
 
   auto args = std::vector<T>(nested.size());
 
@@ -70,7 +70,8 @@ auto for_each_combination(const std::vector<std::vector<T>>& nested, F&& func) -
     [&](const auto i)
     {
       std::ranges::for_each(
-        util::ranges::index_view(nested), [&](const auto j) { args.at(j) = nested.at(j).at(indexers.at(j)(i)); }
+        util::ranges::index_view(nested),
+        [&](const auto j) { args.at(j) = nested.at(j).at(indexers.at(j)(i)); }
       );
       continue_flag = func(args);
     }

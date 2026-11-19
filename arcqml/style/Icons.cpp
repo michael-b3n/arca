@@ -10,7 +10,8 @@ namespace detail
 auto toIconUrl(std::string_view name) -> QString
 {
   static constexpr auto prefix = std::string_view{"qrc:/qt/qml/ArcQml/res/"};
-  return QString::fromLatin1(prefix.data(), prefix.size()).append(QLatin1StringView(name.data(), name.size()));
+  return QString::fromLatin1(prefix.data(), static_cast<qsizetype>(prefix.size()))
+    .append(QLatin1StringView(name.data(), static_cast<qsizetype>(name.size())));
 }
 
 } // namespace detail

@@ -1,58 +1,28 @@
-cmake_minimum_required(VERSION 4.3)
+file(GLOB_RECURSE ARCQML_CPP_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS "*.cpp")
+file(GLOB_RECURSE ARCQML_HPP_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS "*.hpp")
+file(GLOB_RECURSE ARCQML_QML_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS "*.qml")
+file(GLOB_RECURSE ARCQML_SVG_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS "res/*.svg")
 
-project(ArcQml)
-
-#
-# Define target sources, headers and qml files.
-#
-file(GLOB_RECURSE ${PROJECT_NAME}_CPP_FILES_RELATIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
-file(GLOB_RECURSE ${PROJECT_NAME}_HPP_FILES_RELATIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.hpp")
-file(GLOB_RECURSE ${PROJECT_NAME}_QML_FILES_RELATIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.qml")
-file(GLOB_RECURSE ${PROJECT_NAME}_SVG_FILES_RELATIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/res/*.svg")
-
-#
-# Setup Qt6 and library
-#
 set(QT_FORCE_CMP0156_TO_VALUE NEW)
+find_package(Qt6 6.11 REQUIRED COMPONENTS Gui Quick QuickControls2)
+qt_standard_project_setup(REQUIRES 6.11)
 
-find_package(${QT_VERSION_NAME} ${QT_VERSION_NUMBER} REQUIRED COMPONENTS Quick QuickControls2)
-qt_standard_project_setup(REQUIRES ${QT_VERSION_NUMBER})
-
-#
-# Create QML module library with plugin
-#
-qt_add_library(${PROJECT_NAME} STATIC)
-
-qt_add_qml_module(
-  ${PROJECT_NAME}
-  URI "ArcQml"
-  OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ArcQml"
-  QML_FILES
-  ${${PROJECT_NAME}_QML_FILES_RELATIVE}
-  SOURCES
-  ${${PROJECT_NAME}_CPP_FILES_RELATIVE}
-  ${${PROJECT_NAME}_HPP_FILES_RELATIVE}
-  RESOURCES
-  ${${PROJECT_NAME}_SVG_FILES_RELATIVE}
+qt_add_library(ArcQml STATIC)
+qt_add_qml_module(ArcQml
+  URI ArcQml
+  OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ArcQml
+  QML_FILES ${ARCQML_QML_FILES}
+  SOURCES ${ARCQML_CPP_FILES} ${ARCQML_HPP_FILES}
+  RESOURCES ${ARCQML_SVG_FILES}
 )
 
-#
-# Link dependencies
-#
-target_link_libraries(${PROJECT_NAME}
-  PUBLIC arcstd
-  PRIVATE ${QT_VERSION_NAME}::Quick ${QT_VERSION_NAME}::QuickControls2 ${QT_VERSION_NAME}::Gui
+target_link_libraries(ArcQml
+  PUBLIC arca::lua
+  PRIVATE Qt6::Gui Qt6::Quick Qt6::QuickControls2
 )
 
-#
-# Add target include dirs (automatically includes all immediate subdirectories).
-#
-file(GLOB ${PROJECT_NAME}_SUBDIR_CANDIDATES LIST_DIRECTORIES true CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*")
-
-foreach(entry ${${PROJECT_NAME}_SUBDIR_CANDIDATES})
-  if(IS_DIRECTORY ${entry})
-    list(APPEND ${PROJECT_NAME}_SUBDIRS ${entry})
-  endif()
-endforeach()
-
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${${PROJECT_NAME}_SUBDIRS})
+# Its headers are included as "arcqml/...", from the root of arca. The type registrations Qt
+# generates include them by file name, so each folder is an include path of the module too.
+file(GLOB ARCQML_SUBDIRS LIST_DIRECTORIES true CONFIGURE_DEPENDS "*")
+list(FILTER ARCQML_SUBDIRS EXCLUDE REGEX "\\.[^/]*$")
+target_include_directories(ArcQml PUBLIC ${PROJECT_SOURCE_DIR} PRIVATE ${ARCQML_SUBDIRS})

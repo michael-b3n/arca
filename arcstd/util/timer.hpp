@@ -9,7 +9,7 @@ namespace arcstd::util
 {
 
 ///
-/// Timer class used for measuring time durations.
+/// Measures the time since its construction.
 ///
 class timer final
 {
@@ -21,14 +21,13 @@ public: // Structors
 
 public: // Accessors
   ///
-  /// Get current duration from constructed timepoint to timepoint of the call of this function.
-  /// \return current duration
+  /// \return the time since the construction
   ///
   [[nodiscard]] auto current_duration() const -> std::chrono::milliseconds;
 };
 
 ///
-/// Scoped timer logging duration on destruction.
+/// Logs the time of its life when destroyed, with the function of \p source_location.
 ///
 class scoped_timer_logger final
 {
@@ -37,14 +36,22 @@ class scoped_timer_logger final
   const timer timer_;
 
 public: // Structors
-  scoped_timer_logger(std::source_location&& source_location = std::source_location::current());
+  explicit scoped_timer_logger(
+    std::source_location source_location = std::source_location::current()
+  );
   ~scoped_timer_logger();
+
+  scoped_timer_logger(const scoped_timer_logger&) = delete;
+  scoped_timer_logger(scoped_timer_logger&&) = delete;
+  auto operator=(const scoped_timer_logger&) -> scoped_timer_logger& = delete;
+  auto operator=(scoped_timer_logger&&) -> scoped_timer_logger& = delete;
 };
 
 } // namespace arcstd::util
 
 ///
-/// Scoped timer logging macro.
+/// Log the time until the end of the scope.
 ///
-#define SCOPED_TIMER_LOG()                                                                                                     \
-  [[maybe_unused]] const auto BOOST_PP_CAT(__scoped_timer_logger_instance, __LINE__) = ::arcstd::util::scoped_timer_logger();
+#define SCOPED_TIMER_LOG()                                                                         \
+  [[maybe_unused]] const auto BOOST_PP_CAT(__scoped_timer_logger_instance, __LINE__) =             \
+    ::arcstd::util::scoped_timer_logger();

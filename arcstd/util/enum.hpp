@@ -10,16 +10,11 @@
 namespace arcstd::util
 {
 
-///
-/// Concept to check if E is enum.
-///
 template<typename E>
 concept enum_type = std::is_enum_v<E>;
 
 ///
-/// Converts enum to integral.
-/// \tparam E enum type
-/// \return integral value corresponding to enum value
+/// \return the underlying value of \p e
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto to_integral(const E e) -> std::underlying_type_t<E>
@@ -28,9 +23,7 @@ template<enum_type E>
 }
 
 ///
-/// Converts enum to string.
-/// \tparam E enum type
-/// \return string_view name corresponding to enum value
+/// \return the name of \p e, empty if it names no value
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto enum_name(const E e) -> std::string_view
@@ -39,42 +32,34 @@ template<enum_type E>
 }
 
 ///
-/// Get the count of enum values for a given enum type.
-/// \tparam E enum type
-/// \return count of enum values
+/// \return the number of named values of \p E
 ///
 template<enum_type E>
-consteval auto enum_count() -> std::size_t
+[[nodiscard]] consteval auto enum_count() -> std::size_t
 {
   return magic_enum::enum_count<E>();
 }
 
 ///
-/// Get all the enum names for a given enum type.
-/// \tparam E enum type
-/// \return array of enum value names
+/// \return the names of the values of \p E, in their order
 ///
 template<enum_type E>
-consteval auto enum_names() -> std::array<std::string_view, enum_count<E>()>
+[[nodiscard]] consteval auto enum_names() -> std::array<std::string_view, enum_count<E>()>
 {
   return magic_enum::enum_names<E>();
 }
 
 ///
-/// Get all the enum values for a given enum type.
-/// \tparam E enum type
-/// \return array of enum values
+/// \return the named values of \p E, in their order
 ///
 template<enum_type E>
-consteval auto enum_values() -> std::array<E, enum_count<E>()>
+[[nodiscard]] consteval auto enum_values() -> std::array<E, enum_count<E>()>
 {
   return magic_enum::enum_values<E>();
 }
 
 ///
-/// Converts integral to enum.
-/// \tparam E enum type
-/// \return enum type value
+/// \return the value of \p integral, named or not
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto to_enum(const std::underlying_type_t<E> integral) -> E
@@ -83,21 +68,17 @@ template<enum_type E>
 }
 
 ///
-/// Converts string view enum name to enum.
-/// \tparam E enum type
-/// \return optional enum type value, std::nullopt of name does not correspond to any enum value in specified enum type
+/// \return the value named \p name, std::nullopt if there is none
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto to_enum(const std::string_view name) -> std::optional<E>
 {
-  const auto value = magic_enum::enum_cast<E>(name);
-  return value ? *value : std::optional<E>{std::nullopt};
+  return magic_enum::enum_cast<E>(name);
 }
 
 ///
-/// Get next enum value.
-/// \tparam E enum type
-/// \return next enum value of param e
+/// \return the value after \p e, \see has_next
+/// \throws util::exception if the underlying type overflows
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto next(const E e) -> E
@@ -111,9 +92,7 @@ template<enum_type E>
 }
 
 ///
-/// Checks if next enum value exists.
-/// \tparam E enum type
-/// \return flag indicating if next enum value exists
+/// \return true if the value after \p e is named
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto has_next(const E e) -> bool
@@ -123,9 +102,8 @@ template<enum_type E>
 }
 
 ///
-/// Get previous enum value.
-/// \tparam E enum type
-/// \return previous enum value of param e
+/// \return the value before \p e, \see has_prev
+/// \throws util::exception if the underlying type overflows
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto prev(const E e) -> E
@@ -139,9 +117,7 @@ template<enum_type E>
 }
 
 ///
-/// Checks if previous enum value exists.
-/// \tparam E enum type
-/// \return flag indicating if previous enum value exists
+/// \return true if the value before \p e is named
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto has_prev(const E e) -> bool
@@ -151,9 +127,7 @@ template<enum_type E>
 }
 
 ///
-/// Checks if enum value of fenced enum type is valid.
-/// \tparam E fenced enum type
-/// \return true if valid, false otherwise
+/// \return true if \p e is a named value
 ///
 template<enum_type E>
 [[nodiscard]] constexpr auto valid(E e) -> bool

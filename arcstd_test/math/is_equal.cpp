@@ -37,7 +37,9 @@ TEST_CASE("is_equal same signedness integrals", "[math]")
   static_assert(is_equal(std::int8_t{-1}, std::int64_t{-1}));
   static_assert(is_equal(std::uint8_t{255}, std::uint64_t{255}));
   static_assert(!is_equal(std::uint8_t{255}, std::uint64_t{256}));
-  static_assert(is_equal(std::numeric_limits<std::int32_t>::lowest(), std::numeric_limits<std::int32_t>::lowest()));
+  static_assert(is_equal(
+    std::numeric_limits<std::int32_t>::lowest(), std::numeric_limits<std::int32_t>::lowest()
+  ));
 }
 
 TEST_CASE("is_equal mixed signedness integrals", "[math]")
@@ -62,7 +64,7 @@ TEST_CASE("is_equal integral with comparable type", "[math]")
   enum class scoped_enum : int
   {
     a = 1,
-    b = 2
+    b = 2,
   };
   // Scoped enums are not equality comparable with int, so only the char overloads apply here.
   static_assert(!std::equality_comparable_with<scoped_enum, int>);

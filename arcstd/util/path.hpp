@@ -12,7 +12,8 @@ namespace arcstd::util
 
 ///
 /// Path of sections separated by '.', e.g. the path of a setting, a Lua node or a script manifest.
-/// Empty sections are left out, so "a..b." is the path "a.b". Built from sections, each is read the same way.
+/// Empty sections are left out, so "a..b." is the path "a.b". Built from sections, each is read the
+/// same way.
 ///
 class path final
 {
@@ -27,9 +28,11 @@ class path final
 
 public: // Structors
   path() = default;
+  // NOLINTBEGIN(misc-explicit-constructor) a path is given as its string or its sections
   path(const util::string::string_view_type auto& p);
   path(const std::ranges::input_range auto& sections)
     requires(!util::string::string_view_type<decltype(sections)>);
+  // NOLINTEND(misc-explicit-constructor)
 
 public: // Operators
   auto operator<=>(const path& other) const = default;

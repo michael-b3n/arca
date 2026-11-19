@@ -10,7 +10,7 @@ namespace arcqml
 {
 
 ///
-/// QML logger. This class will provide backend logging functionality to QML.
+/// QML logger, QML logs through the log of arcstd.
 ///
 class BridgeLogger : public QObject
 {

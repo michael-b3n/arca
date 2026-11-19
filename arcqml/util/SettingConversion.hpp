@@ -1,7 +1,6 @@
 #pragma once
 
-#include <arcstd/framework/setting_validator.hpp>
-#include <arcstd/workflow/workflow_settings.hpp>
+#include <arcstd/setting/setting_store.hpp>
 
 #include <QString>
 #include <QVariant>
@@ -16,7 +15,8 @@ namespace arcqml
 ///
 /// Variant holding a non owning pointer to a type erased setting of any supported value type.
 ///
-using SettingVariantType = arcstd::workflow::workflow_settings::setting_type_erased_non_owning_ptr_variant_type;
+using SettingVariantType =
+  arcstd::setting::setting_store::setting_type_erased_non_owning_ptr_variant_type;
 
 ///
 /// Type trait that removes the optional or vector from a setting value type.
@@ -42,7 +42,8 @@ struct SettingValueType<std::vector<T>> final
 /// Value type of the setting a pointer of type \p T points to, without its optional or vector.
 ///
 template<typename T>
-using SettingRawValueType = typename SettingValueType<typename std::remove_pointer_t<T>::value_type>::type;
+using SettingRawValueType =
+  typename SettingValueType<typename std::remove_pointer_t<T>::value_type>::type;
 
 ///
 /// False for every \p T, for the static_assert of an if constexpr branch no type should reach.
@@ -54,10 +55,12 @@ inline constexpr bool alwaysFalse = false;
 /// Shared pointers to the validators a type erased setting holds, one per validator kind.
 ///
 template<typename T>
-using ValidatorRangeSptrType = arcstd::framework::setting_validator_range_type_erased<T>::sptr_type;
+using ValidatorRangeSptrType =
+  arcstd::setting::setting_store::validator_range_type_erased_type<T>::sptr_type;
 template<typename T>
-using ValidatorListSptrType = arcstd::framework::setting_validator_list_type_erased<T>::sptr_type;
-using ValidatorUnboundSptrType = arcstd::framework::setting_validator_unbound::sptr_type;
+using ValidatorListSptrType =
+  arcstd::setting::setting_store::validator_list_type_erased_type<T>::sptr_type;
+using ValidatorUnboundSptrType = arcstd::setting::setting_store::validator_unbound_type::sptr_type;
 
 ///
 /// \return the value of a QJSValue QML wraps \p variant in, \p variant itself if it is none
@@ -65,12 +68,12 @@ using ValidatorUnboundSptrType = arcstd::framework::setting_validator_unbound::s
 [[nodiscard]] auto tryNormalizeQVariant(const QVariant& variant) -> QVariant;
 
 ///
-/// Deduce the default value of a setting declared in QML from \p value, its alternative is the type of the setting:
-/// boolean, integral, floating point, string, or a color as "#AARRGGBB" string.
+/// Deduce the default value of a setting declared in QML from \p value, its alternative is the type
+/// of the setting: boolean, integral, floating point, string, or a color as "#AARRGGBB" string.
 /// \return default setting value, std::nullopt if the value type is not supported
 ///
 [[nodiscard]] auto toDefaultSettingValue(const QVariant& value)
-  -> std::optional<arcstd::framework::setting_type_erased_variant>;
+  -> std::optional<arcstd::setting::setting_store::setting_type_erased_variant_type>;
 
 ///
 /// Convert the value of a type erased setting to a QML value.
@@ -80,15 +83,16 @@ using ValidatorUnboundSptrType = arcstd::framework::setting_validator_unbound::s
 [[nodiscard]] auto toQmlValue(const SettingVariantType& setting) -> QVariant;
 
 ///
-/// Write a QML value to a type erased setting, which validates it, so its value may differ from the one written.
+/// Write a QML value to a type erased setting, which validates it, so its value may differ from the
+/// one written.
 /// \throws util::exception if the QML value does not match the value type of the setting
 /// \return true if the value was set, false otherwise
 ///
 [[nodiscard]] auto setQmlValue(const SettingVariantType& setting, const QVariant& value) -> bool;
 
 ///
-/// Postfix displayed behind the value of a type erased setting, e.g. its unit. A duration without one of its own
-/// takes the unit of its period, \see toQmlValue.
+/// Postfix displayed behind the value of a type erased setting, e.g. its unit. A duration without
+/// one of its own takes the unit of its period, \see toQmlValue.
 /// \return postfix to display behind the value, empty if the setting has none
 ///
 [[nodiscard]] auto toQmlPostfix(const SettingVariantType& setting) -> QString;

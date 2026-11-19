@@ -34,16 +34,14 @@ int SimpleListModel::rowCount(const QModelIndex& parent) const
 ///
 QVariant SimpleListModel::data(const QModelIndex& index, const int role) const
 {
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return {};
   }
-  const auto& entry = entries_.at(static_cast<std::size_t>(index.row()));
-  switch(role)
-  {
-  case ValueRole: return entry;
-  default: return {};
-  }
+  return role == ValueRole ? entries_.at(static_cast<std::size_t>(index.row())) : QVariant{};
 }
 
 ///
@@ -59,20 +57,20 @@ QHash<int, QByteArray> SimpleListModel::roleNames() const
 ///
 bool SimpleListModel::setData(const QModelIndex& index, const QVariant& value, const int role)
 {
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return false;
   }
-  switch(role)
+  if(role != ValueRole)
   {
-  case ValueRole:
-  {
-    entries_.at(static_cast<std::size_t>(index.row())) = value;
-    emit dataChanged(index, index, {role});
-    return true;
+    return false;
   }
-  default: return false;
-  }
+  entries_.at(static_cast<std::size_t>(index.row())) = value;
+  emit dataChanged(index, index, {role});
+  return true;
 }
 
 ///
@@ -97,20 +95,26 @@ int SimpleListModel::indexOfValue(const QVariant& value) const
   { return variant.isValid() && !variant.isNull() ? variant.toString() : QString{}; };
 
   const auto text = asText(value);
-  const auto found = std::ranges::find_if(entries_, [&](const auto& entry) { return asText(entry) == text; });
-  return found != std::ranges::cend(entries_) ? static_cast<int>(std::ranges::distance(std::cbegin(entries_), found)) : -1;
+  const auto found =
+    std::ranges::find_if(entries_, [&](const auto& entry) { return asText(entry) == text; });
+  return found != std::ranges::cend(entries_)
+           ? static_cast<int>(std::ranges::distance(std::cbegin(entries_), found))
+           : -1;
 }
 
 ///
 ///
 bool SimpleListModel::remove(const QModelIndex& index)
 {
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return false;
   }
   beginRemoveRows(QModelIndex(), index.row(), index.row());
-  entries_.erase(std::next(std::begin(entries_), static_cast<std::size_t>(index.row())));
+  entries_.erase(std::next(std::begin(entries_), index.row()));
   endRemoveRows();
   return true;
 }
@@ -190,7 +194,8 @@ bool SimpleListModel::replace(const QVariant& entries)
     if(entries_.size() > static_cast<std::size_t>(std::numeric_limits<int>::max()))
     {
       LOG_WARN("replace incomplete: entries count exceeds max int");
-      const auto begin = std::next(std::begin(entries_), static_cast<std::size_t>(std::numeric_limits<int>::max()));
+      const auto begin =
+        std::next(std::begin(entries_), static_cast<std::size_t>(std::numeric_limits<int>::max()));
       entries_.erase(begin, std::end(entries_));
     }
     endResetModel();

@@ -1,7 +1,5 @@
 #include "arcqml/util/SettingConversion.hpp"
 
-#include <arcstd/framework/setting_type_erased.hpp>
-#include <arcstd/framework/setting_validator.hpp>
 #include <arcstd/meta/chrono.hpp>
 #include <arcstd/meta/type_traits.hpp>
 #include <arcstd/util/exception.hpp>
@@ -31,7 +29,7 @@ namespace
 
 // Typedefs
 template<typename T>
-using setting_ptr = arcstd::util::non_owning_ptr<arcstd::framework::setting_type_erased<T>>;
+using setting_ptr = arcstd::setting::setting_store::setting_type_erased_non_owning_ptr_type<T>;
 
 ///
 /// Protected numeric cast between integers.
@@ -60,9 +58,11 @@ auto throw_type_mismatch_error(const auto setting, const auto& value) -> bool
 {
   using s_type = typename std::remove_pointer_t<std::remove_const_t<decltype(setting)>>::value_type;
   using v_type = std::remove_cvref_t<decltype(value)>;
-  throw arcstd::util::exception{
-    std::format(R"(type mismatch: setting_type="{}", value_type="{}")", typeid(s_type).name(), typeid(v_type).name())
-  };
+  throw arcstd::util::exception{std::format(
+    R"(type mismatch: setting_type="{}", value_type="{}")",
+    typeid(s_type).name(),
+    typeid(v_type).name()
+  )};
   return false;
 }
 
@@ -163,7 +163,10 @@ constexpr auto durationPostfix() -> QLatin1StringView
 ///
 auto setValueConvertible(const auto setting, const auto& value) -> bool
 {
-  if constexpr(std::is_convertible_v<std::remove_cvref_t<decltype(value)>, SettingRawValueType<decltype(setting)>>)
+  if constexpr(
+    std::
+      is_convertible_v<std::remove_cvref_t<decltype(value)>, SettingRawValueType<decltype(setting)>>
+  )
   {
     return setting->value(value);
   }
@@ -180,15 +183,21 @@ auto setValueConvertible(const auto setting, const auto& value) -> bool
 auto setValueConvertibleVec(const auto setting, const auto& value) -> bool
 {
   using vector_value_type = arcstd::meta::remove_wrapper_t<decltype(value)>;
-  static_assert(std::is_same_v<std::vector<vector_value_type>, std::remove_cvref_t<decltype(value)>>);
+  static_assert(
+    std::is_same_v<std::vector<vector_value_type>, std::remove_cvref_t<decltype(value)>>
+  );
   if constexpr(std::is_same_v<vector_value_type, SettingRawValueType<decltype(setting)>>)
   {
     return setting->value(value);
   }
-  else if constexpr(std::is_convertible_v<vector_value_type, SettingRawValueType<decltype(setting)>>)
+  else if constexpr(
+    std::is_convertible_v<vector_value_type, SettingRawValueType<decltype(setting)>>
+  )
   {
     return setting->value(
-      value | std::views::transform([&](const auto& v) { return static_cast<SettingRawValueType<decltype(setting)>>(v); }) |
+      value |
+      std::views::transform([&](const auto& v)
+                            { return static_cast<SettingRawValueType<decltype(setting)>>(v); }) |
       std::ranges::to<std::vector>()
     );
   }
@@ -208,6 +217,7 @@ auto setValueInteger(const auto setting, const auto& value) -> bool
   if constexpr(std::integral<std::remove_cvref_t<decltype(value)>>)
   {
     const auto v = integer_cast<SettingRawValueType<decltype(setting)>>(value);
+    // NOLINTNEXTLINE(bugprone-optional-value-conversion) a value out of range is rejected, it does not clear the setting
     return v ? setting->value(*v) : false;
   }
   else
@@ -224,7 +234,9 @@ auto setValueIntegerVec(const auto setting, const auto& value) -> bool
 {
   static_assert(std::integral<SettingRawValueType<decltype(setting)>>);
   using vector_value_type = arcstd::meta::remove_wrapper_t<decltype(value)>;
-  static_assert(std::is_same_v<std::vector<vector_value_type>, std::remove_cvref_t<decltype(value)>>);
+  static_assert(
+    std::is_same_v<std::vector<vector_value_type>, std::remove_cvref_t<decltype(value)>>
+  );
   if constexpr(std::is_same_v<vector_value_type, SettingRawValueType<decltype(setting)>>)
   {
     return setting->value(value);
@@ -286,7 +298,9 @@ auto setValueDurationVec(const auto setting, const auto& value) -> bool
   using duration_type = SettingRawValueType<decltype(setting)>;
   using vector_value_type = arcstd::meta::remove_wrapper_t<decltype(value)>;
   static_assert(arcstd::meta::is_duration_v<duration_type>);
-  static_assert(std::is_same_v<std::vector<vector_value_type>, std::remove_cvref_t<decltype(value)>>);
+  static_assert(
+    std::is_same_v<std::vector<vector_value_type>, std::remove_cvref_t<decltype(value)>>
+  );
   if constexpr(std::integral<vector_value_type>)
   {
     auto dest = std::vector<duration_type>{};
@@ -332,7 +346,8 @@ auto tryNormalizeQVariant(const QVariant& variant) -> QVariant
 
 ///
 ///
-auto toDefaultSettingValue(const QVariant& value) -> std::optional<arcstd::framework::setting_type_erased_variant>
+auto toDefaultSettingValue(const QVariant& value)
+  -> std::optional<arcstd::setting::setting_store::setting_type_erased_variant_type>
 {
   const auto v = tryNormalizeQVariant(value);
   switch(v.metaType().id())
@@ -446,13 +461,16 @@ auto toQmlValidatorValues(const SettingVariantType& setting) -> QList<QVariant>
       return arcstd::util::visit_lambdas(
         s->validator,
         []([[maybe_unused]] const ValidatorUnboundSptrType&) { return QList<QVariant>{}; },
-        []([[maybe_unused]] const ValidatorRangeSptrType<value_type>&) { return QList<QVariant>{}; },
+        []([[maybe_unused]] const ValidatorRangeSptrType<value_type>&)
+        { return QList<QVariant>{}; },
         [](const ValidatorListSptrType<value_type>& v)
         {
           const auto available = v->available();
           QList<QVariant> result;
           result.reserve(static_cast<int>(available.size()));
-          std::ranges::for_each(available, [&](const auto& item) { result.push_back(toVariant(item)); });
+          std::ranges::for_each(
+            available, [&](const auto& item) { result.push_back(toVariant(item)); }
+          );
           return result;
         }
       );

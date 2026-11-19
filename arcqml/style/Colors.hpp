@@ -32,9 +32,13 @@ class Colors final : public QObject
   Q_PROPERTY(QColor greenDarker MEMBER greenDarker_ CONSTANT)
   Q_PROPERTY(QColor red MEMBER red_ CONSTANT)
 
-  Q_PROPERTY(QColor backgroundTransparent MEMBER backgroundTransparent_ NOTIFY backgroundTransparentChanged)
+  Q_PROPERTY(
+    QColor backgroundTransparent MEMBER backgroundTransparent_ NOTIFY backgroundTransparentChanged
+  )
   Q_PROPERTY(QColor backgroundSolid MEMBER backgroundSolid_ NOTIFY backgroundSolidChanged)
-  Q_PROPERTY(QColor backgroundSolidDarker MEMBER backgroundSolidDarker_ NOTIFY backgroundSolidDarkerChanged)
+  Q_PROPERTY(
+    QColor backgroundSolidDarker MEMBER backgroundSolidDarker_ NOTIFY backgroundSolidDarkerChanged
+  )
   Q_PROPERTY(QColor border MEMBER border_ NOTIFY borderChanged)
   Q_PROPERTY(QColor borderDarker MEMBER borderDarker_ NOTIFY borderDarkerChanged)
   Q_PROPERTY(QColor selection MEMBER selection_ NOTIFY selectionChanged)

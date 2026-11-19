@@ -10,20 +10,20 @@ namespace arcstd::util
 {
 
 ///
-/// Exception base class.
+/// Exception of arcstd, it keeps where it was thrown and the stack trace.
 ///
 class exception : public std::runtime_error
 {
 public: // Structors
-  exception(
+  explicit exception(
     const std::string& error,
     const std::source_location& loc = std::source_location::current(),
-    const std::stacktrace& stacktrace = std::stacktrace::current()
+    std::stacktrace stacktrace = std::stacktrace::current()
   );
 
 public: // Accessors
-  [[nodiscard]] inline auto where() const -> const std::source_location& { return location_; }
-  [[nodiscard]] inline auto stack() const -> const std::stacktrace& { return stacktrace_; }
+  [[nodiscard]] auto where() const -> const std::source_location&;
+  [[nodiscard]] auto stack() const -> const std::stacktrace&;
 
 protected: // Variables
   const std::source_location location_;
@@ -31,9 +31,8 @@ protected: // Variables
 };
 
 ///
-/// Generate a report string for the current exception,
-/// including type, message, location, and stacktrace if available.
-/// \return A formatted string with exception details
+/// \return the report of the exception being handled: its message and, of an util::exception, its
+/// location and stack trace
 ///
 [[nodiscard]] auto exception_report() -> std::string;
 
@@ -45,21 +44,28 @@ template<>
 struct std::formatter<arcstd::util::exception> : std::formatter<std::string>
 {
   auto format(const arcstd::util::exception& ex, std::format_context& ctx) const
-  {
-    const auto* msg = ex.what();
-    decltype(auto) loc = ex.where();
-    decltype(auto) stack = ex.stack();
-    return formatter<std::string>::format(
-      std::format(
-        "{}\n  file: {}:{}:{}\n  function: {}\n  stack: {}",
-        msg,
-        loc.file_name(),
-        loc.line(),
-        loc.column(),
-        loc.function_name(),
-        stack
-      ),
-      ctx
-    );
-  }
+    -> std::format_context::iterator;
 };
+
+///
+///
+inline auto std::formatter<arcstd::util::exception>::format(
+  const arcstd::util::exception& ex, std::format_context& ctx
+) const -> std::format_context::iterator
+{
+  const auto* msg = ex.what();
+  decltype(auto) loc = ex.where();
+  decltype(auto) stack = ex.stack();
+  return formatter<std::string>::format(
+    std::format(
+      "{}\n  file: {}:{}:{}\n  function: {}\n  stack: {}",
+      msg,
+      loc.file_name(),
+      loc.line(),
+      loc.column(),
+      loc.function_name(),
+      stack
+    ),
+    ctx
+  );
+}

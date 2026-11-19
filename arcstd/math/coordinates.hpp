@@ -22,18 +22,20 @@ class coordinates final
 public: // Typedefs
   using value_type = ValueType;
 
-public: // Static functions
+public: // Static interface
   ///
   /// Get the distance between two coordinates.
   /// \return distance between `first` and `second`
   ///
-  [[nodiscard]] static constexpr auto distance(const coordinates& first, const coordinates& second) -> double;
+  [[nodiscard]] static constexpr auto distance(const coordinates& first, const coordinates& second)
+    -> double;
 
 public: // Structors
   template<typename... T>
+  // NOLINTNEXTLINE(misc-explicit-constructor) coordinates are written as a braced list
   constexpr coordinates(T... coords)
     requires(sizeof...(T) == D);
-  constexpr coordinates(std::array<value_type, D> coordinates);
+  constexpr explicit coordinates(std::array<value_type, D> coordinates);
 
 public: // Accessors
   ///
@@ -65,8 +67,10 @@ public: // Accessors
 
 public: // Operators
   constexpr auto operator==(const coordinates<value_type, D>&) const -> bool = default;
-  constexpr auto operator+(const coordinates<value_type, D>& rhs) const -> coordinates<value_type, D>;
-  constexpr auto operator-(const coordinates<value_type, D>& rhs) const -> coordinates<value_type, D>;
+  constexpr auto operator+(const coordinates<value_type, D>& rhs) const
+    -> coordinates<value_type, D>;
+  constexpr auto operator-(const coordinates<value_type, D>& rhs) const
+    -> coordinates<value_type, D>;
 };
 
 ///
@@ -89,13 +93,22 @@ using coordinates_3d = coordinates<T, 3>;
 ///
 ///
 template<typename ValueType, std::size_t D>
-constexpr auto coordinates<ValueType, D>::distance(const coordinates& first, const coordinates& second) -> double
+constexpr auto coordinates<ValueType, D>::distance(
+  const coordinates& first, const coordinates& second
+) -> double
 {
   const auto create_distances = [&]<std::size_t... I>([[maybe_unused]] std::index_sequence<I...>)
-  { return std::array{static_cast<double>(first.axis_value(I)) - static_cast<double>(second.axis_value(I))...}; };
+  {
+    return std::array{
+      static_cast<double>(first.axis_value(I)) - static_cast<double>(second.axis_value(I))...
+    };
+  };
   const auto distances = create_distances(std::make_index_sequence<D>());
-  const auto distance_squared =
-    std::ranges::fold_left(distances, 0.0, [](const double first, const double second) { return first + std::pow(second, 2); });
+  const auto distance_squared = std::ranges::fold_left(
+    distances,
+    0.0,
+    [](const double first, const double second) { return first + std::pow(second, 2); }
+  );
   return std::sqrt(distance_squared);
 }
 
@@ -155,7 +168,8 @@ constexpr auto coordinates<ValueType, D>::axis_value(const std::size_t dim) cons
 ///
 ///
 template<typename ValueType, std::size_t D>
-constexpr auto coordinates<ValueType, D>::operator+(const coordinates<value_type, D>& rhs) const -> coordinates<value_type, D>
+constexpr auto coordinates<ValueType, D>::operator+(const coordinates<value_type, D>& rhs) const
+  -> coordinates<value_type, D>
 {
   std::array<value_type, D> coords{};
   std::ranges::transform(coordinates_, rhs.coordinates_, coords.begin(), std::plus{});
@@ -165,7 +179,8 @@ constexpr auto coordinates<ValueType, D>::operator+(const coordinates<value_type
 ///
 ///
 template<typename ValueType, std::size_t D>
-constexpr auto coordinates<ValueType, D>::operator-(const coordinates<value_type, D>& rhs) const -> coordinates<value_type, D>
+constexpr auto coordinates<ValueType, D>::operator-(const coordinates<value_type, D>& rhs) const
+  -> coordinates<value_type, D>
 {
   std::array<value_type, D> coords{};
   std::ranges::transform(coordinates_, rhs.coordinates_, coords.begin(), std::minus{});

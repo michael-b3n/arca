@@ -2,7 +2,8 @@
 
 #include "arcqml/util/SettingConversion.hpp"
 
-#include <arcstd/framework/queued_connections.hpp>
+#include <arcstd/setting/setting_store.hpp>
+#include <arcstd/signal/queued_connections.hpp>
 #include <arcstd/util/non_owning_ptr.hpp>
 
 #include <QObject>
@@ -18,11 +19,12 @@ namespace arcqml
 {
 
 ///
-/// QML setting binding, binds `value` to the setting at a path in both directions. A missing setting is created
-/// from the default value, so QML declares settings of its own. Created by BridgeSettings only:
+/// QML setting binding, binds `value` to the setting at a path in both directions. A missing
+/// setting is created from the default value, so QML declares settings of its own. Created by
+/// BridgeSettings only:
 /// \code
-///   readonly property SettingBinding accentColor: BridgeSettings.binding("ui.color.accent", "#1e301e")
-///   color: accentColor.value
+///   readonly property SettingBinding accent: BridgeSettings.binding("ui.color.accent", "#1e301e")
+///   color: accent.value
 /// \endcode
 /// \see BridgeSettings
 ///
@@ -50,7 +52,7 @@ class SettingBinding final : public QObject
   const QVariant defaultValue_;
   const Validator validator_;
   std::optional<SettingVariantType> setting_;
-  arcstd::framework::queued_connections connections_;
+  arcstd::signal::queued_connections connections_;
 
 public: // Structors
   ///
@@ -58,9 +60,14 @@ public: // Structors
   /// setting of that path exists yet. A binding that cannot be established reports the
   /// default value as value and rejects any write.
   ///
-  explicit SettingBinding(QString path, QVariant defaultValue, arcstd::util::non_owning_ptr<QObject> parent = nullptr);
   explicit SettingBinding(
-    QString path, QVariant defaultValue, QVariantList available, arcstd::util::non_owning_ptr<QObject> parent = nullptr
+    QString path, QVariant defaultValue, arcstd::util::non_owning_ptr<QObject> parent = nullptr
+  );
+  explicit SettingBinding(
+    QString path,
+    QVariant defaultValue,
+    QVariantList available,
+    arcstd::util::non_owning_ptr<QObject> parent = nullptr
   );
   explicit SettingBinding(
     QString path,
@@ -103,7 +110,12 @@ signals:
   void valueChanged();
 
 private: // Structors
-  SettingBinding(QString path, QVariant defaultValue, Validator validator, arcstd::util::non_owning_ptr<QObject> parent);
+  SettingBinding(
+    QString path,
+    QVariant defaultValue,
+    Validator validator,
+    arcstd::util::non_owning_ptr<QObject> parent
+  );
 
 private: // Implementation
   ///
@@ -117,7 +129,7 @@ private: // Implementation
   /// \return the validator of a new setting of type \p T
   ///
   template<typename T>
-  [[nodiscard]] auto settingValidator() const -> arcstd::framework::setting_validator<T>;
+  [[nodiscard]] auto settingValidator() const -> arcstd::setting::setting_store::validator_type<T>;
 };
 
 } // namespace arcqml

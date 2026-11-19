@@ -9,7 +9,7 @@ namespace arcstd::signal
 {
 
 ///
-/// Connection store that stores connections to signals and disconnects them when destroyed.
+/// Keeps connections and disconnects them when destroyed.
 ///
 class connection_store final
 {
@@ -23,12 +23,12 @@ public: // Structors
 
 public: // Modifiers
   ///
-  /// Add connection to connection store.
+  /// Keep \p con until clear or destruction.
   ///
   auto store(scoped_connection_type con) -> void;
 
   ///
-  /// Clear connection store and disconnect all connections.
+  /// Disconnect all connections.
   ///
   auto clear() -> void;
 };

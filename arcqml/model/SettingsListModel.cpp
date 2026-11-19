@@ -1,9 +1,8 @@
 #include "arcqml/model/SettingsListModel.hpp"
 #include "arcqml/util/SettingConversion.hpp"
 
-#include <arcstd/framework/setting.hpp>
-#include <arcstd/framework/setting_validator.hpp>
 #include <arcstd/math/arithmetic.hpp>
+#include <arcstd/meta/contains.hpp>
 #include <arcstd/util/contains.hpp>
 #include <arcstd/util/exception.hpp>
 #include <arcstd/util/log.hpp>
@@ -15,6 +14,7 @@
 #include <optional>
 #include <ranges>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 
 namespace arcqml
@@ -23,7 +23,8 @@ namespace
 {
 
 ///
-/// Check if the setting of \p path is internal: state the application manages itself, e.g. a window position.
+/// Check if the setting of \p path is internal: state the application manages itself, e.g. a window
+/// position.
 /// \return true if the setting is internal
 ///
 auto isInternalSetting(const std::string_view path) -> bool
@@ -39,7 +40,8 @@ auto isInternalSetting(const std::string_view path) -> bool
 auto toCategories(const std::string& path) -> QStringList
 {
   return arcstd::util::path{path}.sections() |
-         std::views::transform([](const auto& segment) { return QString::fromStdString(segment); }) |
+         std::views::transform([](const auto& segment)
+                               { return QString::fromStdString(segment); }) |
          std::ranges::to<QStringList>();
 }
 
@@ -52,15 +54,10 @@ constexpr auto getValueType(const auto& setting) -> SettingsListModel::ValueType
   using value_type = SettingRawValueType<std::remove_cvref_t<decltype(setting)>>;
   // clang-format off
   if constexpr(std::is_same_v<value_type, bool>) { return SettingsListModel::ValueType::BoolValueType; }
-  else if constexpr(std::is_same_v<value_type, std::int32_t>) { return SettingsListModel::ValueType::IntValueType; }
-  else if constexpr(std::is_same_v<value_type, std::int64_t>) { return SettingsListModel::ValueType::IntValueType; }
-  else if constexpr(std::is_same_v<value_type, std::uint32_t>) { return SettingsListModel::ValueType::IntValueType; }
-  else if constexpr(std::is_same_v<value_type, std::uint64_t>) { return SettingsListModel::ValueType::IntValueType; }
+  else if constexpr(arcstd::meta::contains_v<std::tuple<std::int32_t, std::int64_t, std::uint32_t, std::uint64_t>, value_type>) { return SettingsListModel::ValueType::IntValueType; }
   else if constexpr(std::is_same_v<value_type, double>) { return SettingsListModel::ValueType::DoubleValueType; }
   else if constexpr(std::is_same_v<value_type, std::string>) { return SettingsListModel::ValueType::StringValueType; }
-  else if constexpr(std::is_same_v<value_type, std::chrono::milliseconds>) { return SettingsListModel::ValueType::TimeValueType; }
-  else if constexpr(std::is_same_v<value_type, std::chrono::seconds>) { return SettingsListModel::ValueType::TimeValueType; }
-  else if constexpr(std::is_same_v<value_type, std::chrono::minutes>) { return SettingsListModel::ValueType::TimeValueType; }
+  else if constexpr(arcstd::meta::contains_v<std::tuple<std::chrono::milliseconds, std::chrono::seconds, std::chrono::minutes>, value_type>) { return SettingsListModel::ValueType::TimeValueType; }
   else if constexpr(std::is_same_v<value_type, std::filesystem::path>) { return SettingsListModel::ValueType::PathValueType; }
   else { static_assert(alwaysFalse<value_type>, "Unsupported setting value type"); }
   // clang-format on
@@ -94,7 +91,8 @@ auto getValidatorType(const auto& setting) -> SettingsListModel::ValidatorType
   using value_type = std::remove_pointer_t<std::remove_cvref_t<decltype(setting)>>::value_type;
   return arcstd::util::visit_lambdas(
     setting->validator,
-    []([[maybe_unused]] const ValidatorUnboundSptrType&) { return SettingsListModel::ValidatorType::UnboundValidatorType; },
+    []([[maybe_unused]] const ValidatorUnboundSptrType&)
+    { return SettingsListModel::ValidatorType::UnboundValidatorType; },
     []([[maybe_unused]] const ValidatorRangeSptrType<value_type>&)
     { return SettingsListModel::ValidatorType::RangeValidatorType; },
     []([[maybe_unused]] const ValidatorListSptrType<value_type>&)
@@ -107,25 +105,31 @@ auto getValidatorType(const auto& setting) -> SettingsListModel::ValidatorType
 ///
 ///
 SettingsListModel::SettingsListModel(
-  std::shared_ptr<arcstd::workflow::workflow_settings> workflowSettings, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::setting::setting_store> settingStore,
+  const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QAbstractListModel{parent}
-  , workflowSettings_{std::move(workflowSettings)}
+  , settingStore_{std::move(settingStore)}
 {
-  const auto settings = workflowSettings_->type_erased_settings();
+  const auto settings = settingStore_->type_erased_settings();
   std::ranges::for_each(
-    settings | std::views::filter([](const auto& settingData) { return !isInternalSetting(settingData.path); }),
+    settings | std::views::filter([](const auto& settingData)
+                                  { return !isInternalSetting(settingData.path); }),
     [&](const auto& settingData)
-    { std::visit([&](const auto setting) { addSetting(settingData.path, setting); }, settingData.setting); }
+    {
+      std::visit(
+        [&](const auto setting) { addSetting(settingData.path, setting); }, settingData.setting
+      );
+    }
   );
 
   // Settings may also be created after this model was constructed, e.g. by the QML layer.
-  workflowSettings_->connect_queued(
-    &arcstd::workflow::workflow_settings_signals::setting_created,
+  settingStore_->connect_queued(
+    &arcstd::setting::setting_store_signals::setting_created,
     [this](const std::string& path)
     {
       LOG_DEBUG("notify setting created: path=\"{}\"", path)
-      QMetaObject::invokeMethod(this, [this, path]() { appendSetting(path); }, Qt::QueuedConnection);
+      QMetaObject::invokeMethod(this, [this, path] { appendSetting(path); }, Qt::QueuedConnection);
     },
     connections_
   );
@@ -150,7 +154,10 @@ int SettingsListModel::rowCount(const QModelIndex& parent) const
 ///
 QVariant SettingsListModel::data(const QModelIndex& index, const int role) const
 {
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return {};
   }
@@ -193,7 +200,10 @@ bool SettingsListModel::setData(const QModelIndex& index, const QVariant& value,
   {
     return false; // all other roles are immutable and cannot be set
   }
-  if(!index.isValid() || index.row() < 0 || static_cast<decltype(entries_.size())>(index.row()) >= entries_.size())
+  if(
+    !index.isValid() || index.row() < 0 ||
+    static_cast<decltype(entries_.size())>(index.row()) >= entries_.size()
+  )
   {
     return false;
   }
@@ -203,8 +213,8 @@ bool SettingsListModel::setData(const QModelIndex& index, const QVariant& value,
     const auto isValueSet = setQmlValue(entry.setting, value);
     if(!isValueSet)
     {
-      // Not set, so the UI shows the value of the setting again. A setting that changed anyway, e.g. to a
-      // validated value, reports it itself and the signal is emitted twice.
+      // Not set, so the UI shows the value of the setting again. A setting that changed anyway,
+      // e.g. to a validated value, reports it itself and the signal is emitted twice.
       emit dataChanged(index, index, {role});
     }
     LOG_DEBUG("write setting: path=\"{}\", row={}", entry.path, index.row());
@@ -236,11 +246,14 @@ void SettingsListModel::disconnect()
 ///
 void SettingsListModel::appendSetting(const std::string& path)
 {
-  if(isInternalSetting(path) || arcstd::util::contains(entries_, [&path](const auto& entry) { return entry.path == path; }))
+  if(
+    isInternalSetting(path) ||
+    arcstd::util::contains(entries_, [&path](const auto& entry) { return entry.path == path; })
+  )
   {
     return;
   }
-  const auto settingData = workflowSettings_->type_erased_setting(path);
+  const auto settingData = settingStore_->type_erased_setting(path);
   if(!settingData)
   {
     LOG_ERROR("append setting failed: setting not found: path=\"{}\"", path);
@@ -262,23 +275,29 @@ void SettingsListModel::appendSetting(const std::string& path)
 void SettingsListModel::addSetting(const std::string& path, const auto& setting)
 {
   addEntry(path, setting);
-  const auto rowIndex = arcstd::math::arithmetic::subtract(entries_.size(), decltype(entries_.size()){1}).value();
+  const auto rowIndex =
+    arcstd::math::arithmetic::subtract(entries_.size(), decltype(entries_.size()){1}).value();
   setting->signal_adapter.connect_queued(
-    &arcstd::framework::setting_signals::value_changed,
-    [this, path, rowIndex]()
+    &arcstd::setting::setting_store::setting_signals_type::value_changed,
+    [this, path, rowIndex]
     {
       LOG_DEBUG("notify setting value changed: path=\"{}\", row={}", path, rowIndex)
       QMetaObject::invokeMethod(
         this,
-        [this, rowIndex]() { emit dataChanged(index(rowIndex), index(rowIndex), {Role::ValueRole}); },
+        [this, rowIndex]
+        {
+          emit dataChanged(
+            index(static_cast<int>(rowIndex)), index(static_cast<int>(rowIndex)), {Role::ValueRole}
+          );
+        },
         Qt::QueuedConnection
       );
     },
     connections_
   );
   setting->signal_adapter.connect_queued(
-    &arcstd::framework::setting_signals::validator_changed,
-    [this, setting, path, rowIndex]()
+    &arcstd::setting::setting_store::setting_signals_type::validator_changed,
+    [this, setting, path, rowIndex]
     {
       using value_type = std::remove_pointer_t<std::remove_cvref_t<decltype(setting)>>::value_type;
       arcstd::util::visit_lambdas(
@@ -290,7 +309,14 @@ void SettingsListModel::addSetting(const std::string& path, const auto& setting)
           LOG_DEBUG("notify setting validator changed: path=\"{}\", row={}", path, rowIndex)
           QMetaObject::invokeMethod(
             this,
-            [this, rowIndex]() { emit dataChanged(index(rowIndex), index(rowIndex), {Role::ListValidatorDataRole}); },
+            [this, rowIndex]
+            {
+              emit dataChanged(
+                index(static_cast<int>(rowIndex)),
+                index(static_cast<int>(rowIndex)),
+                {Role::ListValidatorDataRole}
+              );
+            },
             Qt::QueuedConnection
           );
         }
@@ -309,7 +335,7 @@ void SettingsListModel::addEntry(std::string path, const auto& setting)
     LOG_ERROR("max entries count exceeded: path=\"{}\" not added", path);
     return;
   }
-  auto categories = toCategories(path);
+  const auto categories = toCategories(path);
   entries_.emplace_back(
     Entry{
       .path = std::move(path),

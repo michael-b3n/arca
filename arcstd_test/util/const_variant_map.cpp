@@ -37,7 +37,9 @@ TEST_CASE("const_variant_map typedefs", "[util]")
   using map_type = decltype(make_test_map());
 
   static_assert(map_type::size == 3);
-  static_assert(std::is_same_v<map_type::key_variant_type, std::variant<int, std::string_view, char>>);
+  static_assert(
+    std::is_same_v<map_type::key_variant_type, std::variant<int, std::string_view, char>>
+  );
   // Duplicated value types are collapsed into a single variant alternative.
   static_assert(std::is_same_v<map_type::value_variant_type, std::variant<int, double>>);
 }
@@ -74,7 +76,9 @@ TEST_CASE("const_variant_map visit", "[util]")
   CHECK(map.visit(1, [&](const auto& value) { visited = static_cast<double>(value); }));
   CHECK(visited == 1.5);
 
-  CHECK(map.visit(std::string_view{"key"}, [&](const auto& value) { visited = static_cast<double>(value); }));
+  CHECK(map.visit(
+    std::string_view{"key"}, [&](const auto& value) { visited = static_cast<double>(value); }
+  ));
   CHECK(visited == 7.0);
 
   // An unknown key leaves the callable uncalled.

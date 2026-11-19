@@ -1,35 +1,32 @@
 #pragma once
 
-#include "arcstd/execution/execution.hpp"
-
+#include <functional>
+#include <memory>
 #include <mutex>
 
 namespace arcstd::execution
 {
 
 ///
-/// Scope holding launched work, \see launch. Destruction requests a stop and
-/// waits for the work, so the work may refer to whatever outlives the scope.
+/// Scope of launched work, \see launch. Destroyed, it requests a stop and waits for the work, so
+/// the work may refer to whatever outlives the scope.
 ///
 class scope final
 {
+  // Friends
+  friend auto launch(std::move_only_function<void()> work, scope& scope) -> void;
+
+  // Typedefs
+  struct impl;
+
   // Variables
+  const std::unique_ptr<impl> impl_;
   mutable std::mutex mtx_;
   bool stopped_{false};
-  ex::counting_scope scope_;
-
-public: // Typedefs
-  using token_type = ex::counting_scope::token;
 
 public: // Structors
-  scope() = default;
+  scope();
   ~scope() noexcept;
-
-public: // Accessors
-  ///
-  /// \return token work is launched with
-  ///
-  [[nodiscard]] auto token() noexcept -> token_type;
 
 public: // Modifiers
   ///

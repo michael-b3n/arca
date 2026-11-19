@@ -12,7 +12,9 @@ namespace arcstd::util
 TEST_CASE("path", "[util]")
 {
   CHECK(path{"ocr"}.sections() == std::vector<std::string>{"ocr"});
-  CHECK(path{"ocr.engine.language"}.sections() == std::vector<std::string>{"ocr", "engine", "language"});
+  CHECK(
+    path{"ocr.engine.language"}.sections() == std::vector<std::string>{"ocr", "engine", "language"}
+  );
   CHECK(path{std::string{"a.b"}}.string() == "a.b");
   // Empty sections are left out, so a malformed path is read like the path it was meant to be
   CHECK(path{".ocr..language."} == path{"ocr.language"});

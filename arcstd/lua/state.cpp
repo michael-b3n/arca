@@ -1,15 +1,41 @@
 #include "arcstd/lua/state.hpp"
+#include "arcstd/lua/sol_conversion.hpp"
+#include "arcstd/util/exception.hpp"
 #include "arcstd/util/log.hpp"
 
 #include <algorithm>
 #include <format>
+#include <memory>
 #include <optional>
 #include <ranges>
+#include <span>
 #include <string>
 #include <utility>
+#include <variant>
 
 namespace arcstd::lua
 {
+namespace
+{
+
+///
+/// \return \p function for as long as \p registered lives, called after that it throws: the script
+/// gets the error
+///
+[[nodiscard]] auto guarded(function function, std::weak_ptr<const void> registered) -> lua::function
+{
+  return [function = std::move(function),
+          registered = std::move(registered)](const std::span<const value> arguments)
+  {
+    if(registered.expired())
+    {
+      throw util::exception{"the function is not registered anymore"};
+    }
+    return function(arguments);
+  };
+}
+
+} // namespace
 
 ///
 ///
@@ -35,13 +61,51 @@ auto state::operator->() const -> sol::state*
 
 ///
 ///
-auto state::run_script(const std::string_view name, const std::string_view code) -> std::optional<sol::object>
+auto state::register_function(const util::path& p, function function) -> registration
+{
+  auto parent = free_parent(p);
+  if(!parent)
+  {
+    return {};
+  }
+  auto registered = std::make_shared<const std::monostate>();
+  parent->set_function(p.sections().back(), to_sol(guarded(std::move(function), registered)));
+  return registration{data_, p, std::move(registered)};
+}
+
+///
+///
+auto state::register_functions(const util::path& p, function_table functions) -> registration
+{
+  auto parent = free_parent(p);
+  if(!parent)
+  {
+    return {};
+  }
+  auto registered = std::make_shared<const std::monostate>();
+  auto node = parent->create_named(p.sections().back());
+  std::ranges::for_each(
+    functions,
+    [&](auto& entry)
+    { node.set_function(entry.first, to_sol(guarded(std::move(entry.second), registered))); }
+  );
+  return registration{data_, p, std::move(registered)};
+}
+
+///
+///
+auto state::run_script(const std::string_view name, const std::string_view code)
+  -> std::optional<sol::object>
 {
   auto& lua = data_->lua;
   const auto environment = sol::environment{lua, sol::create, data_->sandbox};
   return run(
     [&]
-    { return lua.safe_script(code, environment, sol::script_pass_on_error, std::format("@{}", name), sol::load_mode::text); }
+    {
+      return lua.safe_script(
+        code, environment, sol::script_pass_on_error, std::format("@{}", name), sol::load_mode::text
+      );
+    }
   );
 }
 
@@ -55,7 +119,8 @@ auto state::free_parent(const util::path& p) -> std::optional<sol::table>
     LOG_ERROR("lua registration failed: path is empty");
     return std::nullopt;
   }
-  // The table of the last section, missing ones on the way are created. None if the way leads through no table.
+  // The table of the last section, missing ones on the way are created. None if the way leads
+  // through no table.
   auto parent = std::ranges::fold_left(
     sections | std::views::take(sections.size() - 1),
     std::optional{data_->interface},
@@ -70,7 +135,8 @@ auto state::free_parent(const util::path& p) -> std::optional<sol::table>
       {
         return node->create_named(section);
       }
-      return child.get_type() == sol::type::table ? std::optional{child.as<sol::table>()} : std::nullopt;
+      return child.get_type() == sol::type::table ? std::optional{child.as<sol::table>()}
+                                                  : std::nullopt;
     }
   );
   if(!parent || (*parent)[sections.back()].valid())
@@ -83,7 +149,8 @@ auto state::free_parent(const util::path& p) -> std::optional<sol::table>
 
 ///
 ///
-auto state::run(const std::function<sol::protected_function_result()>& code) -> std::optional<sol::object>
+auto state::run(const std::function<sol::protected_function_result()>& code)
+  -> std::optional<sol::object>
 {
   if(data_->shutdown_flag)
   {
@@ -97,7 +164,8 @@ auto state::run(const std::function<sol::protected_function_result()>& code) -> 
     LOG_ERROR("lua script failed: {}", error.what());
     return std::nullopt;
   }
-  return result.return_count() > 0 ? result.get<sol::object>() : sol::make_object(data_->lua, sol::lua_nil);
+  return result.return_count() > 0 ? result.get<sol::object>()
+                                   : sol::make_object(data_->lua, sol::lua_nil);
 }
 
 } // namespace arcstd::lua

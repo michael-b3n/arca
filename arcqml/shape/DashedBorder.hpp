@@ -8,8 +8,9 @@ namespace arcqml
 {
 
 ///
-/// QML DashedBorder, the dash pattern letting one segment travel along the border of a rounded rectangle.
-/// Qt measures dashes in stroke widths, so the pattern and the offset of a full turn are in that unit.
+/// QML DashedBorder, the dash pattern letting one segment travel along the border of a rounded
+/// rectangle. Qt measures dashes in stroke widths, so the pattern and the offset of a full turn are
+/// in that unit.
 ///
 class DashedBorder : public QObject
 {

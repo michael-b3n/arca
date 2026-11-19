@@ -1,8 +1,8 @@
 #pragma once
 
-#include <arcstd/framework/queued_connections.hpp>
+#include <arcstd/setting/setting_store.hpp>
+#include <arcstd/signal/queued_connections.hpp>
 #include <arcstd/util/non_owning_ptr.hpp>
-#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <QAbstractListModel>
 #include <QList>
@@ -39,7 +39,7 @@ public: // Typedefs
     DoubleValueType,
     StringValueType,
     TimeValueType,
-    PathValueType
+    PathValueType,
   };
   Q_ENUM(ValueType)
 
@@ -78,13 +78,13 @@ private: // Typedefs
     WrapperType wrapperType;
     ValidatorType validatorType;
     QString postfix;
-    arcstd::workflow::workflow_settings::setting_type_erased_non_owning_ptr_variant_type setting;
+    arcstd::setting::setting_store::setting_type_erased_non_owning_ptr_variant_type setting;
   };
 
   // Variables
-  std::shared_ptr<arcstd::workflow::workflow_settings> workflowSettings_;
+  std::shared_ptr<arcstd::setting::setting_store> settingStore_;
   std::vector<Entry> entries_;
-  arcstd::framework::queued_connections connections_;
+  arcstd::signal::queued_connections connections_;
 
 public: // Typedefs
   enum Role
@@ -101,13 +101,13 @@ public: // Typedefs
     /// One past the last role of this model. Proxy models begin the roles they add here, so
     /// that a role added above cannot silently take a value one of them already uses.
     ///
-    EndRole
+    EndRole,
   };
   Q_ENUM(Role)
 
 public: // Structors
   explicit SettingsListModel(
-    std::shared_ptr<arcstd::workflow::workflow_settings> workflowSettings,
+    std::shared_ptr<arcstd::setting::setting_store> settingStore,
     arcstd::util::non_owning_ptr<QObject> parent = nullptr
   );
   ~SettingsListModel() noexcept override;
@@ -121,8 +121,7 @@ public: // Overrides
 
 public: // Modifiers
   ///
-  /// Disconnect all signal connections.
-  /// This will stop the frontend backend communication.
+  /// Disconnect from the setting store, the model follows no change from now on.
   ///
   void disconnect();
 

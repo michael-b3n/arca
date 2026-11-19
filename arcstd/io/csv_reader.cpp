@@ -3,9 +3,9 @@
 #include "arcstd/util/log.hpp"
 #include "arcstd/util/ranges.hpp"
 
-#include <algorithm>
 #include <rapidcsv.h>
 
+#include <algorithm>
 #include <format>
 #include <sstream>
 
@@ -15,52 +15,58 @@ namespace
 {
 
 ///
-/// Create rapidcsv label params from the csv reader params.
-/// \return rapidcsv label params
+/// \return the label params of \p p
 ///
-auto to_label_params(const csv_reader::params& p) -> rapidcsv::LabelParams
+[[nodiscard]] auto to_label_params(const csv_reader::params& p) -> rapidcsv::LabelParams
 {
-  // The second parameter denotes the column holding the row labels, which is not supported.
+  // No column of row labels, csv_reader has none
   return rapidcsv::LabelParams{p.header ? 0 : -1, -1};
 }
 
 ///
-/// Create rapidcsv separator params from the csv reader params.
-/// \return rapidcsv separator params
+/// \return the separator params of \p p
 ///
-auto to_separator_params(const csv_reader::params& p) -> rapidcsv::SeparatorParams
+[[nodiscard]] auto to_separator_params(const csv_reader::params& p) -> rapidcsv::SeparatorParams
 {
   return rapidcsv::SeparatorParams{p.separator, p.trim};
 }
 
 ///
-/// Create rapidcsv line reader params from the csv reader params.
-/// \return rapidcsv line reader params
+/// \return the line reader params of \p p
 ///
-auto to_line_reader_params(const csv_reader::params& p) -> rapidcsv::LineReaderParams
+[[nodiscard]] auto to_line_reader_params(const csv_reader::params& p) -> rapidcsv::LineReaderParams
 {
-  return rapidcsv::LineReaderParams{p.skip_comment_lines, csv_reader::comment_prefix, p.skip_empty_lines};
+  return rapidcsv::LineReaderParams{
+    p.skip_comment_lines, csv_reader::comment_prefix, p.skip_empty_lines
+  };
 }
 
-} // anonymous namespace
+} // namespace
 
 ///
 ///
 csv_reader::csv_reader(const std::span<const std::byte> data, const params& p)
 {
   auto stream = std::istringstream{
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast) bytes read as chars, a char may alias any byte
     std::string{reinterpret_cast<const char*>(data.data()), data.size()},
     std::ios::binary
   };
   try
   {
     document_ = std::make_unique<rapidcsv::Document>(
-      stream, to_label_params(p), to_separator_params(p), rapidcsv::ConverterParams{}, to_line_reader_params(p)
+      stream,
+      to_label_params(p),
+      to_separator_params(p),
+      rapidcsv::ConverterParams{},
+      to_line_reader_params(p)
     );
   }
   catch(const std::exception& e)
   {
-    throw util::exception{std::format("parse csv data failed: size={}, what=\"{}\"", data.size(), e.what())};
+    throw util::exception{
+      std::format("parse csv data failed: size={}, what=\"{}\"", data.size(), e.what())
+    };
   }
 }
 
@@ -71,12 +77,18 @@ csv_reader::csv_reader(const std::filesystem::path& csv_path, const params& p)
   try
   {
     document_ = std::make_unique<rapidcsv::Document>(
-      csv_path.string(), to_label_params(p), to_separator_params(p), rapidcsv::ConverterParams{}, to_line_reader_params(p)
+      csv_path.string(),
+      to_label_params(p),
+      to_separator_params(p),
+      rapidcsv::ConverterParams{},
+      to_line_reader_params(p)
     );
   }
   catch(const std::exception& e)
   {
-    throw util::exception{std::format(R"(read csv file failed: path="{}", what="{}")", csv_path.string(), e.what())};
+    throw util::exception{
+      std::format(R"(read csv file failed: path="{}", what="{}")", csv_path.string(), e.what())
+    };
   }
 }
 
@@ -127,7 +139,8 @@ auto csv_reader::column_index(const std::string_view name) const -> std::optiona
 
 ///
 ///
-auto csv_reader::cell(const std::size_t column, const std::size_t row) const -> std::optional<std::string>
+auto csv_reader::cell(const std::size_t column, const std::size_t row) const
+  -> std::optional<std::string>
 {
   if(column >= column_count() || row >= row_count())
   {
@@ -140,14 +153,17 @@ auto csv_reader::cell(const std::size_t column, const std::size_t row) const -> 
   catch(...)
   {
     // The cell is not part of the document, e.g. if the row holds less cells than the header row.
-    LOG_DEBUG("read csv cell failed: column={}, row={}, what=\"{}\"", column, row, util::exception_report());
+    LOG_DEBUG(
+      "read csv cell failed: column={}, row={}, what=\"{}\"", column, row, util::exception_report()
+    );
     return std::nullopt;
   }
 }
 
 ///
 ///
-auto csv_reader::cell(const std::string_view column, const std::size_t row) const -> std::optional<std::string>
+auto csv_reader::cell(const std::string_view column, const std::size_t row) const
+  -> std::optional<std::string>
 {
   const auto index = column_index(column);
   return index ? cell(*index, row) : std::nullopt;
@@ -166,7 +182,8 @@ auto csv_reader::row(const std::size_t row) const -> std::vector<std::string>
   result.reserve(columns);
   std::ranges::for_each(
     util::ranges::index_view_to(columns),
-    [this, &row, &result](const auto column) { result.emplace_back(cell(column, row).value_or(std::string{})); }
+    [this, &row, &result](const auto column)
+    { result.emplace_back(cell(column, row).value_or(std::string{})); }
   );
   return result;
 }
@@ -185,7 +202,8 @@ auto csv_reader::column(const std::string_view column) const -> std::vector<std:
   result.reserve(rows);
   std::ranges::for_each(
     util::ranges::index_view_to(rows),
-    [this, &index, &result](const auto row) { result.emplace_back(cell(*index, row).value_or(std::string{})); }
+    [this, &index, &result](const auto row)
+    { result.emplace_back(cell(*index, row).value_or(std::string{})); }
   );
   return result;
 }

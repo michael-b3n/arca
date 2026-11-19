@@ -16,7 +16,7 @@ template<typename T>
   requires(!meta::is_templated_v<T>)
 struct rtti_name_impl final
 {
-  static constexpr std::string_view value = []()
+  static constexpr std::string_view value = []
   {
     static constexpr std::string_view end_pattern = ">::";
     static constexpr std::string_view middle_pattern = "::";
@@ -35,9 +35,10 @@ struct rtti_name_impl final
     static_assert(end_pattern_pos != std::string_view::npos);
 
     static constexpr auto potential_begin_pos = name.rfind(middle_pattern, end_pattern_pos);
-    static constexpr auto start_pos = potential_begin_pos == std::string_view::npos || potential_begin_pos < begin_pattern_pos
-                                        ? begin_pattern_pos
-                                        : potential_begin_pos + middle_pattern.size();
+    static constexpr auto start_pos =
+      potential_begin_pos == std::string_view::npos || potential_begin_pos < begin_pattern_pos
+        ? begin_pattern_pos
+        : potential_begin_pos + middle_pattern.size();
     static_assert(start_pos < end_pattern_pos);
     return name.substr(start_pos, end_pattern_pos - start_pos);
   }();

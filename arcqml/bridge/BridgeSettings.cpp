@@ -1,8 +1,8 @@
 #include "arcqml/bridge/BridgeSettings.hpp"
 #include "arcqml/bridge/SettingBinding.hpp"
 
+#include <arcstd/setting/setting_store.hpp>
 #include <arcstd/util/log.hpp>
-#include <arcstd/workflow/workflow_settings.hpp>
 
 #include <memory>
 #include <utility>
@@ -14,6 +14,7 @@ namespace
 
 // Instance the QML layer operates on. It is registered by the constructor of the
 // application owned instance and reset when that instance is destroyed.
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables) the one instance, set and reset by it
 arcstd::util::non_owning_ptr<BridgeSettings> instance_{nullptr};
 
 } // anonymous namespace
@@ -45,10 +46,11 @@ BridgeSettings* BridgeSettings::create([[maybe_unused]] QQmlEngine* qmlEngine, Q
 ///
 ///
 BridgeSettings::BridgeSettings(
-  std::shared_ptr<arcstd::workflow::workflow_settings> workflowSettings, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::setting::setting_store> settingStore,
+  const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QObject{parent}
-  , workflowSettings_{std::move(workflowSettings)}
+  , settingStore_{std::move(settingStore)}
 {
   if(instance_ != nullptr)
   {
@@ -70,47 +72,62 @@ BridgeSettings::~BridgeSettings() noexcept
 
 ///
 ///
-const std::shared_ptr<arcstd::workflow::workflow_settings>& BridgeSettings::workflowSettings() const
+const std::shared_ptr<arcstd::setting::setting_store>& BridgeSettings::settingStore() const
 {
-  return workflowSettings_;
+  return settingStore_;
 }
 
 ///
 ///
 bool BridgeSettings::contains(const QString& path) const
 {
-  return workflowSettings_ && workflowSettings_->type_erased_setting(path.toStdString()).has_value();
+  return settingStore_ && settingStore_->type_erased_setting(path.toStdString()).has_value();
 }
 
 ///
 ///
 SettingBinding* BridgeSettings::binding(const QString& path, const QVariant& defaultValue)
 {
-  return bindingOf(path, defaultValue, [&]() { return std::make_unique<SettingBinding>(path, defaultValue); });
-}
-
-///
-///
-SettingBinding* BridgeSettings::binding(const QString& path, const QVariant& defaultValue, const QVariantList& available)
-{
-  return bindingOf(path, defaultValue, [&]() { return std::make_unique<SettingBinding>(path, defaultValue, available); });
+  return bindingOf(
+    path, defaultValue, [&] { return std::make_unique<SettingBinding>(path, defaultValue); }
+  );
 }
 
 ///
 ///
 SettingBinding* BridgeSettings::binding(
-  const QString& path, const QVariant& defaultValue, const QVariant& minimum, const QVariant& maximum
+  const QString& path, const QVariant& defaultValue, const QVariantList& available
 )
 {
   return bindingOf(
-    path, defaultValue, [&]() { return std::make_unique<SettingBinding>(path, defaultValue, minimum, maximum); }
+    path,
+    defaultValue,
+    [&] { return std::make_unique<SettingBinding>(path, defaultValue, available); }
+  );
+}
+
+///
+///
+SettingBinding* BridgeSettings::binding(
+  const QString& path,
+  const QVariant& defaultValue,
+  const QVariant& minimum,
+  const QVariant& maximum
+)
+{
+  return bindingOf(
+    path,
+    defaultValue,
+    [&] { return std::make_unique<SettingBinding>(path, defaultValue, minimum, maximum); }
   );
 }
 
 ///
 ///
 SettingBinding* BridgeSettings::bindingOf(
-  const QString& path, const QVariant& defaultValue, const std::function<std::unique_ptr<SettingBinding>()>& create
+  const QString& path,
+  const QVariant& defaultValue,
+  const std::function<std::unique_ptr<SettingBinding>()>& create
 )
 {
   if(path.isEmpty())
@@ -122,7 +139,9 @@ SettingBinding* BridgeSettings::bindingOf(
   {
     if(it->second->defaultValue() != defaultValue)
     {
-      LOG_WARN("setting binding exists with a different default value: path=\"{}\"", path.toStdString());
+      LOG_WARN(
+        "setting binding exists with a different default value: path=\"{}\"", path.toStdString()
+      );
     }
     return it->second.get();
   }

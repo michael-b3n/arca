@@ -54,7 +54,9 @@ TEST_CASE("visit_lambdas returns a reference when the lambdas do", "[util]")
 {
   auto v = std::variant<int, double>{1};
   auto& ref = visit_lambdas(
-    v, [](int& e) -> int& { return e; }, [](double&) -> int& { throw std::logic_error{"unexpected alternative"}; }
+    v,
+    [](int& e) -> int& { return e; },
+    [](double&) -> int& { throw std::logic_error{"unexpected alternative"}; }
   );
   ref = 42;
   CHECK(std::get<int>(v) == 42);

@@ -1,5 +1,7 @@
 #include "arcstd/util/exception.hpp"
 
+#include <utility>
+
 namespace arcstd::util
 {
 
@@ -32,11 +34,27 @@ auto exception_report() -> std::string
 
 ///
 ///
-exception::exception(const std::string& error, const std::source_location& loc, const std::stacktrace& stacktrace)
+exception::exception(
+  const std::string& error, const std::source_location& loc, std::stacktrace stacktrace
+)
   : std::runtime_error{error}
   , location_{loc}
-  , stacktrace_{stacktrace}
+  , stacktrace_{std::move(stacktrace)}
 {
+}
+
+///
+///
+auto exception::where() const -> const std::source_location&
+{
+  return location_;
+}
+
+///
+///
+auto exception::stack() const -> const std::stacktrace&
+{
+  return stacktrace_;
 }
 
 } // namespace arcstd::util

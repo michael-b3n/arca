@@ -17,11 +17,13 @@ struct any_type final
 {
   any_type() = default;
   template<typename T>
+  // NOLINTNEXTLINE(misc-explicit-constructor) converts to any member, that is its purpose
   operator T&&()
   {
     return std::declval<T&&>();
   }
   template<typename T>
+  // NOLINTNEXTLINE(misc-explicit-constructor) converts to any member, that is its purpose
   operator T&()
   {
     return std::declval<T&>();
@@ -41,7 +43,8 @@ template<typename T, template<typename...> typename P, typename... Args>
 struct is_constructable_with<T, P<Args...>> : std::true_type
 {};
 template<typename T, std::size_t N>
-concept constructable_with = is_constructable_with<T, pack_n_types_t<std::tuple, any_type, N>>::value;
+concept constructable_with =
+  is_constructable_with<T, pack_n_types_t<std::tuple, any_type, N>>::value;
 
 template<std::size_t N>
 struct size_t_constant final
@@ -63,8 +66,10 @@ struct constructing_params_count_helper<T> final
 template<typename T, std::size_t I, std::size_t... Is>
 struct constructing_params_count_helper<T, I, Is...> final
 {
-  using type =
-    std::conditional_t<constructable_with<T, I>, size_t_constant<I>, typename constructing_params_count_helper<T, Is...>::type>;
+  using type = std::conditional_t<
+    constructable_with<T, I>,
+    size_t_constant<I>,
+    typename constructing_params_count_helper<T, Is...>::type>;
 };
 
 ///
@@ -80,121 +85,108 @@ struct constructing_params_count_helper<T, I, Is...> final
 /// Unfolder functions for different numbers of elements
 /// These functions are used to unfold objects into tuples.
 ///
-// unfolder helper for 20 elements
 [[nodiscard]] constexpr auto unfolder20(const auto& aggregate) -> auto
 {
-  auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20] = aggregate;
-  return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20);
+  auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20] =
+    aggregate;
+  return to_tuple(
+    t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20
+  );
 }
-// unfolder helper for 19 elements
 [[nodiscard]] constexpr auto unfolder19(const auto& aggregate) -> auto
 {
-  auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19] = aggregate;
-  return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19);
+  auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19] =
+    aggregate;
+  return to_tuple(
+    t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19
+  );
 }
-// unfolder helper for 18 elements
 [[nodiscard]] constexpr auto unfolder18(const auto& aggregate) -> auto
 {
-  auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18] = aggregate;
+  auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18] =
+    aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18);
 }
-// unfolder helper for 17 elements
 [[nodiscard]] constexpr auto unfolder17(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17);
 }
-// unfolder helper for 16 elements
 [[nodiscard]] constexpr auto unfolder16(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16);
 }
-// unfolder helper for 15 elements
 [[nodiscard]] constexpr auto unfolder15(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15);
 }
-// unfolder helper for 14 elements
 [[nodiscard]] constexpr auto unfolder14(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14);
 }
-// unfolder helper for 13 elements
 [[nodiscard]] constexpr auto unfolder13(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13);
 }
-// unfolder helper for 12 elements
 [[nodiscard]] constexpr auto unfolder12(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12);
 }
-// unfolder helper for 11 elements
 [[nodiscard]] constexpr auto unfolder11(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11);
 }
-// unfolder helper for 10 elements
 [[nodiscard]] constexpr auto unfolder10(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
 }
-// unfolder helper for 9 elements
 [[nodiscard]] constexpr auto unfolder9(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8, t9] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8, t9);
 }
-// unfolder helper for 8 elements
 [[nodiscard]] constexpr auto unfolder8(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7, t8] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7, t8);
 }
-// unfolder helper for 7 elements
 [[nodiscard]] constexpr auto unfolder7(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6, t7] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6, t7);
 }
-// unfolder helper for 6 elements
 [[nodiscard]] constexpr auto unfolder6(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5, t6] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5, t6);
 }
-// unfolder helper for 5 elements
 [[nodiscard]] constexpr auto unfolder5(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4, t5] = aggregate;
   return to_tuple(t1, t2, t3, t4, t5);
 }
-// unfolder helper for 4 elements
 [[nodiscard]] constexpr auto unfolder4(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3, t4] = aggregate;
   return to_tuple(t1, t2, t3, t4);
 }
-// unfolder helper for 3 elements
 [[nodiscard]] constexpr auto unfolder3(const auto& aggregate) -> auto
 {
   auto&& [t1, t2, t3] = aggregate;
   return to_tuple(t1, t2, t3);
 }
-// unfolder helper for 2 elements
 [[nodiscard]] constexpr auto unfolder2(const auto& aggregate) -> auto
 {
   auto&& [t1, t2] = aggregate;
   return to_tuple(t1, t2);
 }
-// unfolder helper for 1 element
 [[nodiscard]] constexpr auto unfolder1(const auto& aggregate) -> auto
 {
   auto&& [t1] = aggregate;
@@ -214,8 +206,13 @@ template<typename T, std::size_t Max = 128>
 consteval auto data_member_count() -> std::size_t
 {
   constexpr auto retval = [&]<std::size_t... I>(std::index_sequence<I...>)
-  { return detail::constructing_params_count_helper<T, (Max - I)...>::type::value; }(std::make_index_sequence<Max>{});
-  static_assert(retval != 0 || std::is_default_constructible_v<T>, "construction params count larger than specified max");
+  {
+    return detail::constructing_params_count_helper<T, (Max - I)...>::type::value;
+  }(std::make_index_sequence<Max>{});
+  static_assert(
+    retval != 0 || std::is_default_constructible_v<T>,
+    "construction params count larger than specified max"
+  );
   return retval;
 }
 
@@ -228,7 +225,7 @@ template<typename T>
   requires(std::is_aggregate_v<T>)
 [[nodiscard]] constexpr auto to_tuple(const T& a) -> auto
 {
-  constexpr auto count = data_member_count<T, 20>(); // max 20 elements supported
+  constexpr auto count = data_member_count<T, 20>();
   {
     // clang-format off
   if      constexpr(count == 20) { return detail::unfolder20(a); }
@@ -274,7 +271,8 @@ template<typename T>
 [[nodiscard]] constexpr auto from_tuple(auto tuple) -> T
 {
   return std::apply(
-    [](auto&&... args) { return T{std::forward<decltype(args)>(args)...}; }, std::forward<decltype(tuple)>(tuple)
+    [](auto&&... args) { return T{std::forward<decltype(args)>(args)...}; },
+    std::forward<decltype(tuple)>(tuple)
   );
 }
 

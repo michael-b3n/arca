@@ -1,9 +1,10 @@
 #pragma once
 
-#include "arcstd/framework/setting.hpp"
-#include "arcstd/framework/setting_common.hpp"
-#include "arcstd/lua/function_cast.hpp"
-#include "arcstd/lua/names.hpp"
+#ifndef ARCSTD_INTERNAL
+  #error "private header of arcstd"
+#endif
+
+#include "arcstd/lua/function.hpp"
 #include "arcstd/lua/registration.hpp"
 #include "arcstd/lua/sol.hpp"
 #include "arcstd/util/path.hpp"
@@ -15,7 +16,6 @@
 #include <optional>
 #include <string_view>
 #include <utility>
-#include <variant>
 
 namespace arcstd::lua
 {
@@ -40,8 +40,8 @@ struct state_data final
 } // namespace detail
 
 ///
-/// Locked Lua state, handed out by state_owner::lock. The lock is held as long as this object lives.
-/// Lua references taken from it (tables, functions, objects) must not outlive it.
+/// Locked Lua state, handed out by state_owner::lock. The lock is held as long as this object
+/// lives. Lua references taken from it (tables, functions, objects) must not outlive it.
 ///
 class state final
 {
@@ -51,9 +51,6 @@ class state final
   // Variables
   std::shared_ptr<detail::state_data> data_;
   std::unique_lock<std::recursive_mutex> lock_;
-
-private: // Structors
-  explicit state(std::shared_ptr<detail::state_data> data);
 
 public: // Structors
   state(const state&) = delete;
@@ -68,107 +65,51 @@ public: // Accessors
 
 public: // Operations
   ///
-  /// Register a function at \p p, the last section is its name, for as long as the registration is kept.
-  /// What the function reaches must live as long, \see registration. \p function takes and returns C++
-  /// values, what a script passes and gets is converted, \see function_cast.
+  /// Register \p function at \p p, the last section is its name, for as long as the registration is
+  /// kept. What it reaches must live as long. Once taken back, a script still holding the function
+  /// gets an error calling it.
   /// \return the registration, one of nothing if \p p can not be registered
   ///
-  template<function_castable F>
-  [[nodiscard]] auto register_function(const util::path& p, F&& function) -> registration;
+  [[nodiscard]] auto register_function(const util::path& p, function function) -> registration;
 
   ///
-  /// Register \p setting at \p p, as table with the functions get(), set(value) and postfix(), for as long as the
-  /// registration is kept. \p setting must live as long.
-  /// \return the registration, one of nothing if the path can not be registered
+  /// Register \p functions as table at \p p, for as long as the registration is kept, \see
+  /// register_function.
+  /// \return the registration, one of nothing if \p p can not be registered
   ///
-  template<framework::underlying_setting_type T>
-  [[nodiscard]] auto register_setting(const util::path& p, framework::setting<T>& setting) -> registration;
+  [[nodiscard]] auto register_functions(const util::path& p, function_table functions)
+    -> registration;
 
   ///
   /// Run a user script in an environment of its own, so its globals do not reach other scripts.
   /// Text only, Lua does not verify bytecode and a damaged one crashes past any error handling.
   /// \return what the script returns, nil if nothing, or std::nullopt if it failed
   ///
-  [[nodiscard]] auto run_script(std::string_view name, std::string_view code) -> std::optional<sol::object>;
+  [[nodiscard]] auto run_script(std::string_view name, std::string_view code)
+    -> std::optional<sol::object>;
 
   ///
   /// Call \p function with \p args.
   /// \return its first result, nil if none, or std::nullopt if it failed
   ///
   template<typename... Args>
-  [[nodiscard]] auto call(const sol::protected_function& function, Args&&... args) -> std::optional<sol::object>;
+  [[nodiscard]] auto call(const sol::protected_function& function, Args&&... args)
+    -> std::optional<sol::object>;
+
+private: // Structors
+  explicit state(std::shared_ptr<detail::state_data> data);
 
 private: // Implementation
   [[nodiscard]] auto free_parent(const util::path& p) -> std::optional<sol::table>;
-  [[nodiscard]] auto run(const std::function<sol::protected_function_result()>& code) -> std::optional<sol::object>;
+  [[nodiscard]] auto run(const std::function<sol::protected_function_result()>& code)
+    -> std::optional<sol::object>;
 };
 
 ///
 ///
-template<function_castable F>
-auto state::register_function(const util::path& p, F&& function) -> registration
-{
-  auto parent = free_parent(p);
-  if(!parent)
-  {
-    return {};
-  }
-  auto registered = std::make_shared<const std::monostate>();
-  parent->set_function(p.sections().back(), function_cast(std::forward<F>(function), registered));
-  return registration{data_, p, std::move(registered)};
-}
-
-///
-///
-template<framework::underlying_setting_type T>
-auto state::register_setting(const util::path& p, framework::setting<T>& setting) -> registration
-{
-  using erased_type = framework::setting_type_erased_type_from<T>;
-
-  auto parent = free_parent(p);
-  if(!parent)
-  {
-    return {};
-  }
-  auto registered = std::make_shared<const std::monostate>();
-  auto node = parent->create_named(p.sections().back());
-  ///
-  /// \lua <setting>.get()
-  /// \return the value of the setting
-  ///
-  node.set_function(
-    names::function_get,
-    function_cast(
-      [&setting]() -> erased_type { return framework::create_setting_value_converter<T, erased_type>()(setting.value()); },
-      registered
-    )
-  );
-  ///
-  /// \lua <setting>.set(value)
-  /// Changes the setting, like the user does in the settings.
-  /// \param value the new value
-  /// \return false if the setting rejected \p value or limited it to its range
-  ///
-  node.set_function(
-    names::function_set,
-    function_cast(
-      [&setting](const erased_type& value) -> bool
-      { return setting.value(framework::create_setting_value_converter<erased_type, T>()(value)); },
-      registered
-    )
-  );
-  ///
-  /// \lua <setting>.postfix()
-  /// \return the text shown after the value, e.g. its unit, or an empty text
-  ///
-  node.set_function(names::function_postfix, function_cast([&setting]() { return setting.postfix; }, registered));
-  return registration{data_, p, std::move(registered)};
-}
-
-///
-///
 template<typename... Args>
-auto state::call(const sol::protected_function& function, Args&&... args) -> std::optional<sol::object>
+auto state::call(const sol::protected_function& function, Args&&... args)
+  -> std::optional<sol::object>
 {
   return run([&] { return function(std::forward<Args>(args)...); });
 }

@@ -16,9 +16,10 @@ struct state_data;
 } // namespace detail
 
 ///
-/// Registration of functions and settings for scripts, kept by who registered them, \see state::register_function.
-/// Destroyed, it takes back what it registered and nothing else: the paths are free again and a script still holding
-/// a function gets an error calling it. It waits for the running script, which may be inside a function.
+/// Registration of functions and settings for scripts, kept by who registered them, \see
+/// state::register_function. Destroyed, it takes back what it registered and nothing else: the
+/// paths are free again and a script still holding a function gets an error calling it. It waits
+/// for the running script, which may be inside a function.
 ///
 class registration final
 {
@@ -59,7 +60,9 @@ public: // Operators
   explicit operator bool() const noexcept;
 
 private: // Structors
-  registration(std::weak_ptr<detail::state_data> data, util::path path, std::shared_ptr<const void> registered);
+  registration(
+    std::weak_ptr<detail::state_data> data, util::path path, std::shared_ptr<const void> registered
+  );
 
 private: // Implementation
   auto release() noexcept -> void;

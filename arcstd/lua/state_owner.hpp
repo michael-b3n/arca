@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef ARCSTD_INTERNAL
+  #error "private header of arcstd"
+#endif
+
 #include "arcstd/lua/state.hpp"
 
 #include <memory>
@@ -8,9 +12,10 @@ namespace arcstd::lua
 {
 
 ///
-/// Owner of a Lua state, shared by all of its copies. Each copy can be used on any thread, \see lock.
-/// The setup opens the libraries, creates the root table and runs the embedded init.lua.
+/// Owner of a Lua state, shared by all of its copies. Each copy can be used on any thread, \see
+/// lock. The setup opens the libraries, creates the root table and runs the embedded init.lua.
 ///
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions) a move is a copy, the moved from one keeps the state
 class state_owner final
 {
   // Variables
@@ -30,8 +35,9 @@ public: // Modifiers
   [[nodiscard]] auto lock() const -> state;
 
   ///
-  /// Shut the scripts down for good, from any thread and without the lock, e.g. before the app ends: the running
-  /// code fails at its next call, also if it catches the error, and code started later fails right away.
+  /// Shut the scripts down for good, from any thread and without the lock, e.g. before the app
+  /// ends: the running code fails at its next call, also if it catches the error, and code started
+  /// later fails right away.
   ///
   auto shutdown() const noexcept -> void;
 };

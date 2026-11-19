@@ -2,8 +2,8 @@
 #include "arcqml/util/LocalPath.hpp"
 
 #include <arcstd/execution/launch.hpp>
+#include <arcstd/lua/lua_engine.hpp>
 #include <arcstd/util/log.hpp>
-#include <arcstd/workflow/workflow_script.hpp>
 
 #include <QMetaObject>
 #include <QStringList>
@@ -21,18 +21,19 @@ namespace arcqml
 ///
 ///
 BridgeScript::BridgeScript(
-  std::shared_ptr<arcstd::workflow::workflow_script> workflowScript, const arcstd::util::non_owning_ptr<QObject> parent
+  std::shared_ptr<arcstd::lua::lua_engine> luaEngine,
+  const arcstd::util::non_owning_ptr<QObject> parent
 )
   : QObject{parent}
-  , workflowScript_{std::move(workflowScript)}
+  , luaEngine_{std::move(luaEngine)}
 {
-  workflowScript_->connect_queued(
-    &arcstd::workflow::workflow_script_sigs::scripts_loaded,
-    [this]()
+  luaEngine_->connect_queued(
+    &arcstd::lua::lua_engine_signals::scripts_loaded,
+    [this]
     {
       QMetaObject::invokeMethod(
         this,
-        [this]()
+        [this]
         {
           updateScripts();
           if(loading_)
@@ -87,10 +88,10 @@ void BridgeScript::load(std::vector<std::filesystem::path> files)
   emit loadingChanged();
   LOG_DEBUG("load scripts anew: files_to_import={}", files.size());
   // Starting the loading waits for the one before to end, scripts_loaded ends the loading here
-  auto importAndLoad = [this, files = std::move(files)]()
+  auto importAndLoad = [this, files = std::move(files)]
   {
-    std::ignore = workflowScript_->import_scripts(files);
-    workflowScript_->load_scripts();
+    std::ignore = luaEngine_->import_scripts(files);
+    luaEngine_->load_scripts();
   };
   arcstd::execution::launch(std::move(importAndLoad), scope_);
 }
@@ -101,16 +102,17 @@ void BridgeScript::updateScripts()
 {
   const auto toEntry = [](const auto& script)
   {
-    const auto functions = script.second.functions |
-                           std::views::transform([](const auto& id) { return QString::fromStdString(id.string()); }) |
-                           std::ranges::to<QStringList>();
+    const auto functions =
+      script.second.functions |
+      std::views::transform([](const auto& id) { return QString::fromStdString(id.string()); }) |
+      std::ranges::to<QStringList>();
     auto entry = QVariantMap{};
     entry.insert(QStringLiteral("name"), QString::fromStdString(script.first));
     entry.insert(QStringLiteral("description"), QString::fromStdString(script.second.description));
     entry.insert(QStringLiteral("functions"), functions);
     return QVariant{entry};
   };
-  const auto scripts = workflowScript_->scripts();
+  const auto scripts = luaEngine_->scripts();
   scripts_ = scripts | std::views::transform(toEntry) | std::ranges::to<QVariantList>();
   emit scriptsChanged();
 }

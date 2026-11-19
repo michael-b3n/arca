@@ -26,6 +26,7 @@ TEST_CASE("string_literal_takes_only_one_terminating_zero", "[util]")
   // Would not compile as template argument
   STATIC_REQUIRE_FALSE(string_literal<4>::terminated_once("a\0b"));
   STATIC_REQUIRE_FALSE(string_literal<3>::terminated_once("a\0"));
+  // NOLINTNEXTLINE(modernize-avoid-c-arrays) what string_literal takes
   static constexpr char unterminated[] = {'a', 'b'};
   STATIC_REQUIRE_FALSE(string_literal<2>::terminated_once(unterminated));
 }

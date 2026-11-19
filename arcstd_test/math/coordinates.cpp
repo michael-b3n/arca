@@ -78,7 +78,9 @@ TEST_CASE("coordinates distance", "[math]")
   CHECK(is_equal(coords_3d::distance(coordinates{0, 0, 0}, coordinates{2, 3, 6}), 7.0, 1e-9));
 
   using coords_2d_double = coordinates<double, 2>;
-  CHECK(is_equal(coords_2d_double::distance(coordinates{0.0, 0.0}, coordinates{0.0, 0.5}), 0.5, 1e-9));
+  CHECK(
+    is_equal(coords_2d_double::distance(coordinates{0.0, 0.0}, coordinates{0.0, 0.5}), 0.5, 1e-9)
+  );
 }
 
 TEST_CASE("coordinates formatter", "[math]")

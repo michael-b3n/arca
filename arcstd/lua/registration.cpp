@@ -56,9 +56,13 @@ registration::operator bool() const noexcept
 
 ///
 ///
-registration::registration(std::weak_ptr<detail::state_data> data, util::path path, std::shared_ptr<const void> registered)
+registration::registration(
+  std::weak_ptr<detail::state_data> data, util::path path, std::shared_ptr<const void> registered
+)
 {
-  entries_.push_back({.data = std::move(data), .path = std::move(path), .registered = std::move(registered)});
+  entries_.push_back(
+    {.data = std::move(data), .path = std::move(path), .registered = std::move(registered)}
+  );
 }
 
 ///
@@ -86,7 +90,9 @@ auto registration::release() noexcept -> void
           if(const auto result = remove(e.path.string()); !result.valid())
           {
             const sol::error error = result;
-            LOG_ERROR("lua registration not removed: path=\"{}\", {}", e.path.string(), error.what());
+            LOG_ERROR(
+              "lua registration not removed: path=\"{}\", {}", e.path.string(), error.what()
+            );
           }
         }
       }

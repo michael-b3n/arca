@@ -41,7 +41,7 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
   using flags = bitflags<test_flags>;
   using enum test_flags;
   {
-    constexpr auto test_set = []()
+    constexpr auto test_set = []
     {
       auto f = flags{};
       f.set(flag_a);
@@ -50,7 +50,7 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
     static_assert(test_set());
   }
   {
-    constexpr auto test_set_multiple = []()
+    constexpr auto test_set_multiple = []
     {
       auto f = flags{};
       f.set(flag_a);
@@ -61,7 +61,7 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
     static_assert(test_set_multiple());
   }
   {
-    constexpr auto test_reset = []()
+    constexpr auto test_reset = []
     {
       auto f = flags{flag_a, flag_b};
       f.reset(flag_a);
@@ -70,7 +70,7 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
     static_assert(test_reset());
   }
   {
-    constexpr auto test_reset_all_individual = []()
+    constexpr auto test_reset_all_individual = []
     {
       auto f = flags{flag_a, flag_b, flag_c};
       f.reset(flag_a);
@@ -81,7 +81,7 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
     static_assert(test_reset_all_individual());
   }
   {
-    constexpr auto test_reset_all = []()
+    constexpr auto test_reset_all = []
     {
       auto f = flags{flag_a, flag_b, flag_c};
       f.reset();
@@ -90,7 +90,7 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
     static_assert(test_reset_all());
   }
   {
-    constexpr auto test_reset_all_empty = []()
+    constexpr auto test_reset_all_empty = []
     {
       auto f = flags{};
       f.reset();
@@ -99,7 +99,7 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
     static_assert(test_reset_all_empty());
   }
   {
-    constexpr auto test_flip = []()
+    constexpr auto test_flip = []
     {
       auto f = flags{flag_a};
       f.flip(flag_a);
@@ -111,7 +111,7 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
     static_assert(test_flip());
   }
   {
-    constexpr auto test_flip_chaining = []()
+    constexpr auto test_flip_chaining = []
     {
       auto f = flags{};
       f.flip(flag_a).flip(flag_b);
@@ -120,16 +120,17 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
     static_assert(test_flip_chaining());
   }
   {
-    constexpr auto test_flip_all = []()
+    constexpr auto test_flip_all = []
     {
       auto f = flags{flag_a, flag_c};
       f.flip();
-      return !f.test(flag_a) && f.test(flag_b) && !f.test(flag_c) && f.test(flag_d) && f.test(flag_e);
+      return !f.test(flag_a) && f.test(flag_b) && !f.test(flag_c) && f.test(flag_d) &&
+             f.test(flag_e);
     };
     static_assert(test_flip_all());
   }
   {
-    constexpr auto test_flip_multiple = []()
+    constexpr auto test_flip_multiple = []
     {
       auto f = flags{};
       f.flip(flag_b);
@@ -199,7 +200,7 @@ TEST_CASE("bitflags all/any/none", "[util]")
   static_assert(!flags{flag_a, flag_b, flag_c, flag_d}.all());
   static_assert(!flags{}.all());
   {
-    constexpr auto test_none = []()
+    constexpr auto test_none = []
     {
       auto f = flags{flag_a};
       f.reset(flag_a);
@@ -229,17 +230,17 @@ TEST_CASE("bitflags operator|=", "[util]")
   using flags = bitflags<test_flags>;
   using enum test_flags;
   {
-    constexpr auto test_or_flags = []()
+    constexpr auto test_or_flags = []
     {
       auto f1 = flags{flag_a};
-      auto f2 = flags{flag_b};
+      const auto f2 = flags{flag_b};
       f1 |= f2;
       return f1.test(flag_a) && f1.test(flag_b);
     };
     static_assert(test_or_flags());
   }
   {
-    constexpr auto test_or_enum = []()
+    constexpr auto test_or_enum = []
     {
       auto f = flags{flag_a};
       f |= flag_b;
@@ -248,7 +249,7 @@ TEST_CASE("bitflags operator|=", "[util]")
     static_assert(test_or_enum());
   }
   {
-    constexpr auto test_or_multiple = []()
+    constexpr auto test_or_multiple = []
     {
       auto f = flags{};
       f |= flag_a;
@@ -265,17 +266,17 @@ TEST_CASE("bitflags operator&=", "[util]")
   using flags = bitflags<test_flags>;
   using enum test_flags;
   {
-    constexpr auto test_and_flags = []()
+    constexpr auto test_and_flags = []
     {
       auto f1 = flags{flag_a, flag_b};
-      auto f2 = flags{flag_a, flag_c};
+      const auto f2 = flags{flag_a, flag_c};
       f1 &= f2;
       return f1.test(flag_a) && !f1.test(flag_b) && !f1.test(flag_c);
     };
     static_assert(test_and_flags());
   }
   {
-    constexpr auto test_and_enum = []()
+    constexpr auto test_and_enum = []
     {
       auto f = flags{flag_a, flag_b};
       f &= flag_a;
@@ -284,7 +285,7 @@ TEST_CASE("bitflags operator&=", "[util]")
     static_assert(test_and_enum());
   }
   {
-    constexpr auto test_and_empty = []()
+    constexpr auto test_and_empty = []
     {
       auto f = flags{flag_a, flag_b};
       f &= flags{flag_c, flag_d};
@@ -300,17 +301,17 @@ TEST_CASE("bitflags operator^=", "[util]")
   using enum test_flags;
 
   {
-    constexpr auto test_xor_flags = []()
+    constexpr auto test_xor_flags = []
     {
       auto f1 = flags{flag_a, flag_b};
-      auto f2 = flags{flag_b, flag_c};
+      const auto f2 = flags{flag_b, flag_c};
       f1 ^= f2;
       return f1.test(flag_a) && !f1.test(flag_b) && f1.test(flag_c);
     };
     static_assert(test_xor_flags());
   }
   {
-    constexpr auto test_xor_enum = []()
+    constexpr auto test_xor_enum = []
     {
       auto f = flags{flag_a, flag_b};
       f ^= flag_b;
@@ -319,7 +320,7 @@ TEST_CASE("bitflags operator^=", "[util]")
     static_assert(test_xor_enum());
   }
   {
-    constexpr auto test_xor_toggle = []()
+    constexpr auto test_xor_toggle = []
     {
       auto f = flags{flag_a};
       f ^= flag_a;
@@ -337,31 +338,31 @@ TEST_CASE("bitflags operator~", "[util]")
   using flags = bitflags<test_flags>;
   using enum test_flags;
   {
-    constexpr auto test_not = []()
+    constexpr auto test_not = []
     {
-      auto f = flags{flag_a, flag_b};
-      auto inverted = ~f;
+      const auto f = flags{flag_a, flag_b};
+      const auto inverted = ~f;
       // After NOT, flag_a and flag_b should be cleared, others set
       return !inverted.test(flag_a) && !inverted.test(flag_b) && inverted.test(flag_c);
     };
     static_assert(test_not());
   }
   {
-    constexpr auto test_double_not = []()
+    constexpr auto test_double_not = []
     {
-      auto f = flags{flag_a};
-      auto inverted = ~f;
-      auto double_inverted = ~inverted;
+      const auto f = flags{flag_a};
+      const auto inverted = ~f;
+      const auto double_inverted = ~inverted;
       // Double negation should restore flag_a
       return double_inverted.test(flag_a);
     };
     static_assert(test_double_not());
   }
   {
-    constexpr auto test_not_empty = []()
+    constexpr auto test_not_empty = []
     {
-      auto f = flags{};
-      auto inverted = ~f;
+      const auto f = flags{};
+      const auto inverted = ~f;
       // All flags should be set after NOT on empty
       return inverted.test(flag_a) && inverted.test(flag_b) && inverted.test(flag_c);
     };
@@ -388,7 +389,7 @@ TEST_CASE("bitflags complex scenarios", "[util]")
   using flags = bitflags<test_flags>;
   using enum test_flags;
   {
-    constexpr auto test_build = []()
+    constexpr auto test_build = []
     {
       auto f = flags{};
       f.set(flag_a);
@@ -399,7 +400,7 @@ TEST_CASE("bitflags complex scenarios", "[util]")
     static_assert(test_build());
   }
   {
-    constexpr auto test_modify = []()
+    constexpr auto test_modify = []
     {
       auto f = flags{flag_a, flag_b, flag_c};
       f.reset(flag_b);
@@ -409,17 +410,17 @@ TEST_CASE("bitflags complex scenarios", "[util]")
     static_assert(test_modify());
   }
   {
-    constexpr auto test_combine = []()
+    constexpr auto test_combine = []
     {
       auto f1 = flags{flag_a, flag_b};
-      auto f2 = flags{flag_c, flag_d};
+      const auto f2 = flags{flag_c, flag_d};
       f1 |= f2;
       return f1.has_all(flags{flag_a, flag_b, flag_c, flag_d});
     };
     static_assert(test_combine());
   }
   {
-    constexpr auto test_filter = []()
+    constexpr auto test_filter = []
     {
       auto f = flags{flag_a, flag_b, flag_c, flag_d};
       f &= flags{flag_a, flag_c};
@@ -428,7 +429,7 @@ TEST_CASE("bitflags complex scenarios", "[util]")
     static_assert(test_filter());
   }
   {
-    constexpr auto test_xor_multi = []()
+    constexpr auto test_xor_multi = []
     {
       auto f = flags{flag_a, flag_c};
       f ^= flags{flag_b, flag_c};

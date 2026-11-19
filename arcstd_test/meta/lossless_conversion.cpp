@@ -39,7 +39,8 @@ TEST_CASE("is_lossless_conversion narrowing", "[meta]")
   static_assert(!is_lossless_conversion_v<std::int64_t, std::int32_t>);
   static_assert(!is_lossless_conversion_v<double, float>);
   static_assert(!is_lossless_conversion_v<double, std::int64_t>);
-  // A signed type never fits losslessly into an unsigned one and vice versa beyond the registered widenings.
+  // A signed type never fits losslessly into an unsigned one and vice versa beyond the registered
+  // widenings.
   static_assert(!is_lossless_conversion_v<std::int8_t, std::uint16_t>);
   static_assert(!is_lossless_conversion_v<std::uint32_t, std::int32_t>);
   // 32 bit integers do not survive a trip through float.
@@ -104,9 +105,13 @@ TEST_CASE("lossless_common_type mixed integral and floating point", "[meta]")
 
 TEST_CASE("lossless_common_type variadic", "[meta]")
 {
-  static_assert(std::is_same_v<lossless_common_type_t<std::int8_t, std::int16_t, std::int32_t>, std::int32_t>);
+  static_assert(
+    std::is_same_v<lossless_common_type_t<std::int8_t, std::int16_t, std::int32_t>, std::int32_t>
+  );
   static_assert(std::is_same_v<lossless_common_type_t<std::int8_t, std::int16_t, float>, float>);
-  static_assert(std::is_same_v<lossless_common_type_t<std::uint8_t, std::int8_t, std::int32_t>, std::int32_t>);
+  static_assert(
+    std::is_same_v<lossless_common_type_t<std::uint8_t, std::int8_t, std::int32_t>, std::int32_t>
+  );
 }
 
 TEST_CASE("has_lossless_common_type concept", "[meta]")

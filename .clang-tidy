@@ -20,9 +20,11 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   -bugprone-std-namespace-modification,
   -cert-dcl58-cpp,
+  -cppcoreguidelines-avoid-c-arrays,
   -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-avoid-do-while,
+  -cppcoreguidelines-explicit-constructor,
   -cppcoreguidelines-macro-usage,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
@@ -54,6 +56,8 @@ Checks: >
 #   - `bugprone-std-namespace-modification`: std::formatter specializations are intended.
 #   - `cppcoreguidelines-use-enum-class`: enums the QML layer reads are unscoped, QML exposes
 #     them by the name of the type alone.
+#   - `cppcoreguidelines-avoid-c-arrays`, `cppcoreguidelines-explicit-constructor`: aliases of
+#     `modernize-avoid-c-arrays` and `misc-explicit-constructor`, a NOLINT names the check once.
 #   - `readability-qualified-auto`: `auto*` spells out a raw pointer. An iterator stays `auto`,
 #     even where a library happens to implement it as a pointer.
 #
@@ -63,6 +67,11 @@ Checks: >
 #
 HeaderFilterRegex: '(arcstd|arcqml|arcstd_test)[/\].*\.hpp$'
 ExcludeHeaderFilterRegex: '(build|libs_external)[/\].*'
+
+#
+# Compile flags of GCC that clang does not know, e.g. from the flags of Qt.
+#
+RemovedArgs: ['-fno-keep-inline-dllexport']
 
 #
 # Findings are advisory, the build must not fail on them.
@@ -116,3 +125,22 @@ CheckOptions:
   #
   modernize-use-auto.MinTypeNameLength: "5"
   performance-unnecessary-value-param.AllowedTypes: "std::string_view;std::span"
+
+  #
+  # The last enumerator of a multi-line enum ends with a comma. A braced initializer of one element over several
+  # lines, e.g. a member with a lambda, gets none: the check can not tell the two apart.
+  #
+  readability-trailing-comma.MultiLineCommaPolicy: Ignore
+
+  #
+  # A class declaring only a defaulted destructor, e.g. a virtual one, keeps its implicit copy and move. A class
+  # whose members can not be copied or moved needs not to delete what the compiler deletes anyway.
+  #
+  cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
+  cppcoreguidelines-special-member-functions.AllowImplicitlyDeletedCopyOrMove: true
+  cppcoreguidelines-special-member-functions.AllowMissingMoveFunctionsWhenCopyIsDeleted: true
+
+  #
+  # Moving the members of an rvalue reference moves it, e.g. in a move constructor that holds a lock.
+  #
+  cppcoreguidelines-rvalue-reference-param-not-moved.AllowPartialMove: true

@@ -22,7 +22,7 @@ auto timer::current_duration() const -> std::chrono::milliseconds
 
 ///
 ///
-scoped_timer_logger::scoped_timer_logger(std::source_location&& source_location)
+scoped_timer_logger::scoped_timer_logger(std::source_location source_location)
   : source_location_{source_location}
 {
 }
@@ -32,7 +32,11 @@ scoped_timer_logger::scoped_timer_logger(std::source_location&& source_location)
 scoped_timer_logger::~scoped_timer_logger()
 {
   const auto duration = timer_.current_duration();
-  LOG_DEBUG("measured scoped time duration: {} ms | {}", duration.count(), util::filter_function_name(source_location_));
+  LOG_DEBUG(
+    "measured scoped time duration: {} ms | {}",
+    duration.count(),
+    util::filter_function_name(source_location_)
+  );
 }
 
 } // namespace arcstd::util

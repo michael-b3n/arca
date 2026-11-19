@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 4.3)
-project(magic_enum VERSION 0.9.6)
 
+project(magic_enum VERSION 0.9.6 LANGUAGES CXX)
+
+# A header set, so the include path holds in the build and once installed with arcstd. Until clang
+# has the reflection of C++26, arcstd/util/enum.hpp names the enums through magic_enum.
+file(GLOB MAGIC_ENUM_INC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/include/magic_enum/*.hpp")
 add_library(magic_enum INTERFACE)
-target_include_directories(magic_enum INTERFACE ${CMAKE_CURRENT_LIST_DIR}/include)
+target_sources(magic_enum INTERFACE FILE_SET HEADERS BASE_DIRS include FILES ${MAGIC_ENUM_INC_FILES})
 
 add_library(magic_enum::magic_enum ALIAS magic_enum)

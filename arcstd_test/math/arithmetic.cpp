@@ -36,49 +36,49 @@ TEST_CASE("Integer arithmetic", "[math]")
 
   // clang-format off
   // Addition
-  static_assert(all_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(T{1}, T{1}), T{2}); }));
-  static_assert(all_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(T{1}, min<T>), static_cast<T>(min<T> + T{1})); }));
-  static_assert(all_t::all_of([]<typename T>() { return arithmetic::add(T{1}, max<T>).error() == arithmetic::error_code::overflow; }));
-  static_assert(all_t::all_of([]<typename T>() { return arithmetic::add(max<T>, max<T>).error() == arithmetic::error_code::overflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(T{-1}, T{-1}), T{-2}); }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(T{-1}, max<T>), static_cast<T>(max<T> - T{1})); }));
-  static_assert(signed_t::all_of([]<typename T>() { return arithmetic::add(T{-1}, min<T>).error() == arithmetic::error_code::underflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return arithmetic::add(min<T>, min<T>).error() == arithmetic::error_code::underflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(max<T>, min<T>), T{-1}); }));
-  static_assert(unsigned_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(min<T>, max<T>), max<T>); }));
+  static_assert(all_t::all_of([]<typename T> { return is_equal(*arithmetic::add(T{1}, T{1}), T{2}); }));
+  static_assert(all_t::all_of([]<typename T> { return is_equal(*arithmetic::add(T{1}, min<T>), static_cast<T>(min<T> + T{1})); }));
+  static_assert(all_t::all_of([]<typename T> { return arithmetic::add(T{1}, max<T>).error() == arithmetic::error_code::overflow; }));
+  static_assert(all_t::all_of([]<typename T> { return arithmetic::add(max<T>, max<T>).error() == arithmetic::error_code::overflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::add(T{-1}, T{-1}), T{-2}); }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::add(T{-1}, max<T>), static_cast<T>(max<T> - T{1})); }));
+  static_assert(signed_t::all_of([]<typename T> { return arithmetic::add(T{-1}, min<T>).error() == arithmetic::error_code::underflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return arithmetic::add(min<T>, min<T>).error() == arithmetic::error_code::underflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::add(max<T>, min<T>), T{-1}); }));
+  static_assert(unsigned_t::all_of([]<typename T> { return is_equal(*arithmetic::add(min<T>, max<T>), max<T>); }));
 
   // Subtraction
-  static_assert(all_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(T{2}, T{1}), T{1}); }));
-  static_assert(all_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(max<T>, T{1}), static_cast<T>(max<T> - T{1})); }));
-  static_assert(all_t::all_of([]<typename T>() { return arithmetic::subtract(min<T>, T{1}).error() == arithmetic::error_code::underflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return arithmetic::subtract(T{1}, min<T>).error() == arithmetic::error_code::overflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(T{1}, T{2}), T{-1}); }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(T{1}, max<T>), static_cast<T>(min<T> + T{2})); }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(min<T>, T{-1}), static_cast<T>(min<T> + T{1})); }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(T{-1}, min<T>), max<T>); }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(T{-1}, max<T>), min<T>); }));
-  static_assert(signed_t::all_of([]<typename T>() { return arithmetic::subtract(max<T>, T{-1}).error() == arithmetic::error_code::overflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return arithmetic::subtract(min<T>, T{1}).error() == arithmetic::error_code::underflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return arithmetic::subtract(T{-1}, max<T>) == min<T>; }));
+  static_assert(all_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(T{2}, T{1}), T{1}); }));
+  static_assert(all_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(max<T>, T{1}), static_cast<T>(max<T> - T{1})); }));
+  static_assert(all_t::all_of([]<typename T> { return arithmetic::subtract(min<T>, T{1}).error() == arithmetic::error_code::underflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return arithmetic::subtract(T{1}, min<T>).error() == arithmetic::error_code::overflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(T{1}, T{2}), T{-1}); }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(T{1}, max<T>), static_cast<T>(min<T> + T{2})); }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(min<T>, T{-1}), static_cast<T>(min<T> + T{1})); }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(T{-1}, min<T>), max<T>); }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(T{-1}, max<T>), min<T>); }));
+  static_assert(signed_t::all_of([]<typename T> { return arithmetic::subtract(max<T>, T{-1}).error() == arithmetic::error_code::overflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return arithmetic::subtract(min<T>, T{1}).error() == arithmetic::error_code::underflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return arithmetic::subtract(T{-1}, max<T>) == min<T>; }));
 
   // Multiplication
-  static_assert(all_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{2}, T{2}), T{4}); }));
-  static_assert(all_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{1}, max<T>), max<T>); }));
-  static_assert(all_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{1}, min<T>), min<T>); }));
-  static_assert(all_t::all_of([]<typename T>() { return arithmetic::multiply(T{2}, max<T>).error() == arithmetic::error_code::overflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{-2}, T{2}), T{-4}); }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{2}, T{-2}), T{-4}); }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{-2}, T{-2}), T{4}); }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{-1}, max<T>), static_cast<T>(min<T> + T{1})); }));
-  static_assert(signed_t::all_of([]<typename T>() { return arithmetic::multiply(T{-1}, min<T>).error() == arithmetic::error_code::overflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return arithmetic::multiply(T{-2}, max<T>).error() == arithmetic::error_code::underflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return arithmetic::multiply(T{2}, min<T>).error() == arithmetic::error_code::underflow; }));
+  static_assert(all_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{2}, T{2}), T{4}); }));
+  static_assert(all_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{1}, max<T>), max<T>); }));
+  static_assert(all_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{1}, min<T>), min<T>); }));
+  static_assert(all_t::all_of([]<typename T> { return arithmetic::multiply(T{2}, max<T>).error() == arithmetic::error_code::overflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{-2}, T{2}), T{-4}); }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{2}, T{-2}), T{-4}); }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{-2}, T{-2}), T{4}); }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{-1}, max<T>), static_cast<T>(min<T> + T{1})); }));
+  static_assert(signed_t::all_of([]<typename T> { return arithmetic::multiply(T{-1}, min<T>).error() == arithmetic::error_code::overflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return arithmetic::multiply(T{-2}, max<T>).error() == arithmetic::error_code::underflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return arithmetic::multiply(T{2}, min<T>).error() == arithmetic::error_code::underflow; }));
 
   // Division
-  static_assert(all_t::all_of([]<typename T>() { return is_equal(*arithmetic::divide(T{3}, T{2}), T{1}); }));
-  static_assert(all_t::all_of([]<typename T>() { return is_equal(*arithmetic::divide(T{2}, T{3}), T{0}); }));
-  static_assert(all_t::all_of([]<typename T>() { return arithmetic::divide(T{1}, T{0}).error() == arithmetic::error_code::overflow; }));
-  static_assert(signed_t::all_of([]<typename T>() { return is_equal(*arithmetic::divide(T{3}, T{-2}), T{-1}); }));
+  static_assert(all_t::all_of([]<typename T> { return is_equal(*arithmetic::divide(T{3}, T{2}), T{1}); }));
+  static_assert(all_t::all_of([]<typename T> { return is_equal(*arithmetic::divide(T{2}, T{3}), T{0}); }));
+  static_assert(all_t::all_of([]<typename T> { return arithmetic::divide(T{1}, T{0}).error() == arithmetic::error_code::overflow; }));
+  static_assert(signed_t::all_of([]<typename T> { return is_equal(*arithmetic::divide(T{3}, T{-2}), T{-1}); }));
   // clang-format on
 }
 
@@ -90,34 +90,34 @@ TEST_CASE("Floating point arithmetic", "[math]")
 
   // clang-format off
   // Addition
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(T{1}, T{1}), T{2}); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(T{1}, T{-1}), T{0}); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(T{-1}, T{-1}), T{-2}); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::add(max<T>, T{1}), max<T>); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::add(T{1}, T{1}), T{2}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::add(T{1}, T{-1}), T{0}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::add(T{-1}, T{-1}), T{-2}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::add(max<T>, T{1}), max<T>); }));
   CHECK(fp_t::all_of([]<typename T>() { return arithmetic::add(max<T>, max<T>).error() == arithmetic::error_code::overflow; }));
   CHECK(fp_t::all_of([]<typename T>() { return arithmetic::add(min<T>, min<T>).error() == arithmetic::error_code::underflow; }));
 
   // Subtraction
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(T{2}, T{1}), T{1}); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(T{1}, T{2}), T{-1}); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(T{1}, T{1}), T{0}); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(min<T>, T{1}), min<T>); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::subtract(min<T>, min<T>), T{0}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(T{2}, T{1}), T{1}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(T{1}, T{2}), T{-1}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(T{1}, T{1}), T{0}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(min<T>, T{1}), min<T>); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::subtract(min<T>, min<T>), T{0}); }));
   CHECK(fp_t::all_of([]<typename T>() { return arithmetic::subtract(max<T>, min<T>).error() == arithmetic::error_code::overflow; }));
   CHECK(fp_t::all_of([]<typename T>() { return arithmetic::subtract(min<T>, max<T>).error() == arithmetic::error_code::underflow; }));
 
   // Multiplication
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{2}, T{2}), T{4}); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{1}, min<T>), min<T>); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{1}, max<T>), max<T>); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{0}, min<T>), T{0}); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::multiply(T{0}, max<T>), T{0}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{2}, T{2}), T{4}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{1}, min<T>), min<T>); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{1}, max<T>), max<T>); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{0}, min<T>), T{0}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::multiply(T{0}, max<T>), T{0}); }));
   CHECK(fp_t::all_of([]<typename T>() { return arithmetic::multiply(max<T>, T{2}).error() == arithmetic::error_code::overflow; }));
   CHECK(fp_t::all_of([]<typename T>() { return arithmetic::multiply(min<T>, T{2}).error() == arithmetic::error_code::underflow; }));
 
   // Division
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::divide(T{3}, T{2}), T{1.5}); }));
-  static_assert(fp_t::all_of([]<typename T>() { return is_equal(*arithmetic::divide(T{1}, T{2}), T{0.5}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::divide(T{3}, T{2}), T{1.5}); }));
+  static_assert(fp_t::all_of([]<typename T> { return is_equal(*arithmetic::divide(T{1}, T{2}), T{0.5}); }));
   CHECK(fp_t::all_of([]<typename T>() { return arithmetic::divide(T{0}, T{0}).error() == arithmetic::error_code::undefined; }));
   CHECK(fp_t::all_of([]<typename T>() { return arithmetic::divide(T{1}, T{0}).error() == arithmetic::error_code::overflow; }));
   CHECK(fp_t::all_of([]<typename T>() { return arithmetic::divide(T{-1}, T{0}).error() == arithmetic::error_code::underflow; }));
