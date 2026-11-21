@@ -18,13 +18,13 @@ template<typename T>
 struct wrapper final
 {};
 
-TEST_CASE("for_each on non pack type", "[meta]")
+TEST_CASE("for_each_on_a_non_pack_type", "[meta]")
 {
   static_assert(std::is_same_v<for_each_t<int, wrapper>, wrapper<int>>);
   static_assert(std::is_same_v<for_each_t<double, std::vector>, std::vector<double>>);
 }
 
-TEST_CASE("for_each on pack type", "[meta]")
+TEST_CASE("for_each_on_a_pack_type", "[meta]")
 {
   static_assert(
     std::is_same_v<for_each_t<for_each_test_pack<int>, wrapper>, for_each_test_pack<wrapper<int>>>
@@ -45,7 +45,7 @@ TEST_CASE("for_each on pack type", "[meta]")
                 for_each_test_pack<wrapper<wrapper<int>>>>);
 }
 
-TEST_CASE("for_each with standard templates", "[meta]")
+TEST_CASE("for_each_with_standard_templates", "[meta]")
 {
   static_assert(std::is_same_v<
                 for_each_t<for_each_test_pack<int, double>, std::vector>,

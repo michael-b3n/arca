@@ -1,11 +1,15 @@
+#include <arcstd/util/exception.hpp>
 #include <arcstd/util/string.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <string>
+#include <vector>
+
 namespace arcstd::util
 {
 
-TEST_CASE("split", "[util]")
+TEST_CASE("string_split", "[util]")
 {
   static_assert(string::split("", ",").empty());
   static_assert(string::split("a,b,c", ",") == std::vector<std::string>{"a", "b", "c"});
@@ -19,7 +23,7 @@ TEST_CASE("split", "[util]")
   );
 }
 
-TEST_CASE("join", "[util]")
+TEST_CASE("string_join", "[util]")
 {
   CHECK(string::join(std::array{"a", "b", "c"}, ",") == std::string_view{"a,b,c"});
   CHECK(string::join(std::array{"a", "", "c"}, ",") == std::string_view{"a,,c"});
@@ -30,7 +34,7 @@ TEST_CASE("join", "[util]")
   CHECK(string::join(std::array{"a", "b", "c", "d", "e"}, "|") == std::string_view{"a|b|c|d|e"});
 }
 
-TEST_CASE("starts_with", "[util]")
+TEST_CASE("string_starts_with", "[util]")
 {
   static_assert(string::starts_with("Hello, World!", "Hello"));
   static_assert(!string::starts_with("Hello, World!", "World"));
@@ -40,10 +44,10 @@ TEST_CASE("starts_with", "[util]")
   static_assert(!string::starts_with("Test", 't'));
   static_assert(!string::starts_with("", 'a'));
   static_assert(!string::starts_with("", "any"));
-  CHECK_THROWS(string::starts_with("Example", ""));
+  CHECK_THROWS_AS(string::starts_with("Example", ""), exception);
 }
 
-TEST_CASE("ends_with", "[util]")
+TEST_CASE("string_ends_with", "[util]")
 {
   static_assert(string::ends_with("Hello, World!", "World!"));
   static_assert(!string::ends_with("Hello, World!", "Hello"));
@@ -53,10 +57,10 @@ TEST_CASE("ends_with", "[util]")
   static_assert(!string::ends_with("Test", 'T'));
   static_assert(!string::ends_with("", 'a'));
   static_assert(!string::ends_with("", "any"));
-  CHECK_THROWS(string::ends_with("Example", ""));
+  CHECK_THROWS_AS(string::ends_with("Example", ""), exception);
 }
 
-TEST_CASE("ends_with_formatted_uint", "[util]")
+TEST_CASE("string_ends_with_formatted_uint", "[util]")
 {
   static_assert(string::ends_with_formatted_uint("", " ({})") == std::nullopt);
   static_assert(string::ends_with_formatted_uint("", "") == std::nullopt);

@@ -7,7 +7,7 @@
 namespace arcstd::meta
 {
 
-TEST_CASE("convert_if", "[meta]")
+TEST_CASE("convert_if_converts_on_a_condition", "[meta]")
 {
   static_assert(std::is_same_v<convert_if_t<true, int, double>, double>);
   static_assert(std::is_same_v<convert_if_t<false, int, double>, int>);

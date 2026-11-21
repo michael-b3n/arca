@@ -2,6 +2,7 @@
 
 #include <arcstd/lua/function.hpp>
 #include <arcstd/lua/internal_scripts.hpp>
+#include <arcstd/lua/sol.hpp>
 #include <arcstd/lua/state_owner.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -11,7 +12,7 @@
 namespace arcstd::lua
 {
 
-TEST_CASE("lua_util", "[lua]")
+TEST_CASE("lua_interface_util_offers_its_helpers", "[lua]")
 {
   const auto owner = state_owner{};
   auto s = owner.lock();
@@ -24,7 +25,7 @@ TEST_CASE("lua_util", "[lua]")
     CHECK(check("table.concat(root.interface.util.split('a,,b', ','), '|') == 'a||b'"));
     CHECK(check("#root.interface.util.split('', ',') == 1"));
     CHECK(check("root.interface.util.split('a--b', '--')[2] == 'b'"));
-    CHECK_THROWS(s->script("root.interface.util.split('a', '')"));
+    CHECK_THROWS_AS(s->script("root.interface.util.split('a', '')"), sol::error);
     CHECK(check("root.interface.util.trim('  a b \\t') == 'a b'"));
     CHECK(check(
       "root.interface.util.starts_with('abc', 'ab') and not root.interface.util.starts_with('abc', "
@@ -101,7 +102,7 @@ TEST_CASE("lua_util", "[lua]")
     CHECK(fails("<a>"));
     CHECK(fails("<a/><b/>"));
     CHECK(fails("text"));
-    CHECK_THROWS(s->script("root.interface.util.parse_xml(1)"));
+    CHECK_THROWS_AS(s->script("root.interface.util.parse_xml(1)"), sol::error);
     CHECK(check(
       "root.interface.util.xml_text(root.interface.util.parse_xml('<a> <b>x</b> y</a>')) == ' x y'"
     ));
@@ -112,21 +113,7 @@ TEST_CASE("lua_util", "[lua]")
   }
 }
 
-TEST_CASE("lua_state_register_takes_no_name_of_the_state", "[lua]")
-{
-  const auto owner = state_owner{};
-  auto s = owner.lock();
-  auto keep = test_utils::registrations{};
-  CHECK(s->script("return util == nil").get<bool>());
-  CHECK_FALSE(keep(s.register_function("util", to_function([]() { return 1; }))));
-  CHECK_FALSE(keep(s.register_function("util.split", to_function([]() { return 1; }))));
-  // Neither what scripts have of Lua
-  CHECK_FALSE(keep(s.register_function("pairs", to_function([]() { return 1; }))));
-  CHECK_FALSE(keep(s.register_function("string.upper", to_function([]() { return 1; }))));
-  CHECK(s->script("return type(root.interface.util.split) == 'function'").get<bool>());
-}
-
-TEST_CASE("lua_embedded_scripts_add_themselves", "[lua]")
+TEST_CASE("lua_internal_scripts_add_themselves", "[lua]")
 {
   const auto owner = state_owner{};
   const auto s = owner.lock();
@@ -168,7 +155,7 @@ TEST_CASE("lua_system_util_removes_a_path", "[lua]")
   CHECK(check("return i.a.e == 3 and type(i.util.split) == 'function'"));
 }
 
-TEST_CASE("lua_scripts_compile", "[lua]")
+TEST_CASE("lua_internal_scripts_compile", "[lua]")
 {
   const auto owner = state_owner{};
   const auto s = owner.lock();

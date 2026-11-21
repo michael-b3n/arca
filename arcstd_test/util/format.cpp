@@ -12,7 +12,7 @@
 namespace arcstd::util
 {
 
-TEST_CASE("format join", "[util]")
+TEST_CASE("format_join", "[util]")
 {
   CHECK(format::join(std::vector<int>{}, ",").empty());
   CHECK(format::join(std::vector{1}, ",") == "1");
@@ -24,7 +24,7 @@ TEST_CASE("format join", "[util]")
   CHECK(format::join(std::vector{1.5, 2.5}, ",") == "1.5,2.5");
 }
 
-TEST_CASE("format join on views", "[util]")
+TEST_CASE("format_join_of_a_view", "[util]")
 {
   // join takes its range by const reference, so only const iterable views work.
   const auto values = std::vector{1, 2, 3, 4};
@@ -33,7 +33,7 @@ TEST_CASE("format join on views", "[util]")
   CHECK(format::join(values | std::views::reverse, ",") == "4,3,2,1");
 }
 
-TEST_CASE("format to_string of optional", "[util]")
+TEST_CASE("format_to_string_of_an_optional", "[util]")
 {
   CHECK(format::to_string(std::optional<int>{}) == "nullopt");
   CHECK(format::to_string(std::optional<int>{1}) == "1");

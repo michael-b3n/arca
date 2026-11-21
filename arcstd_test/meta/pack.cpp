@@ -20,7 +20,7 @@ struct test_single final
 struct test_not_templated final
 {};
 
-TEST_CASE("pack is_packable", "[meta]")
+TEST_CASE("pack_is_packable", "[meta]")
 {
   static_assert(is_pack_v<test_pack<>>);
   static_assert(is_pack_v<test_pack<int>>);
@@ -34,7 +34,7 @@ TEST_CASE("pack is_packable", "[meta]")
   static_assert(!packaged<int>);
 }
 
-TEST_CASE("pack unpack", "[meta]")
+TEST_CASE("pack_unpack", "[meta]")
 {
   static_assert(
     std::is_same_v<unpack_t<test_pack, std::tuple<int, double>>, test_pack<int, double>>
@@ -46,7 +46,7 @@ TEST_CASE("pack unpack", "[meta]")
   static_assert(std::is_same_v<unpack_t<test_pack, test_pack<>>, test_pack<>>);
 }
 
-TEST_CASE("pack add_to_pack", "[meta]")
+TEST_CASE("pack_add_to_pack", "[meta]")
 {
   static_assert(std::is_same_v<add_to_pack_t<int, test_pack<>>, test_pack<int>>);
   static_assert(std::is_same_v<add_to_pack_t<int, test_pack<double>>, test_pack<int, double>>);
@@ -57,7 +57,7 @@ TEST_CASE("pack add_to_pack", "[meta]")
   static_assert(std::is_same_v<add_to_pack_t<int, test_pack<int>>, test_pack<int, int>>);
 }
 
-TEST_CASE("pack remove_from_pack", "[meta]")
+TEST_CASE("pack_remove_from_pack", "[meta]")
 {
   static_assert(std::is_same_v<remove_from_pack_t<test_pack<int>>, test_pack<>>);
   static_assert(std::is_same_v<remove_from_pack_t<test_pack<int, double>>, test_pack<double>>);
@@ -70,7 +70,7 @@ TEST_CASE("pack remove_from_pack", "[meta]")
   );
 }
 
-TEST_CASE("pack combine_pack", "[meta]")
+TEST_CASE("pack_combine_pack", "[meta]")
 {
   static_assert(std::is_same_v<combine_pack_t<test_pack<int>>, test_pack<int>>);
   static_assert(
@@ -87,7 +87,7 @@ TEST_CASE("pack combine_pack", "[meta]")
   );
 }
 
-TEST_CASE("pack split_pack", "[meta]")
+TEST_CASE("pack_split_pack", "[meta]")
 {
   using pack_type = test_pack<int, double, char, float>;
 
@@ -105,7 +105,7 @@ TEST_CASE("pack split_pack", "[meta]")
   static_assert(std::is_same_v<split_pack<pack_type, 3>::second_type, test_pack<float>>);
 }
 
-TEST_CASE("pack pack_n_types", "[meta]")
+TEST_CASE("pack_pack_n_types", "[meta]")
 {
   static_assert(std::is_same_v<pack_n_types_t<test_pack, int, 0>, test_pack<>>);
   static_assert(std::is_same_v<pack_n_types_t<test_pack, int, 1>, test_pack<int>>);
@@ -113,7 +113,7 @@ TEST_CASE("pack pack_n_types", "[meta]")
   static_assert(std::is_same_v<pack_n_types_t<std::tuple, double, 2>, std::tuple<double, double>>);
 }
 
-TEST_CASE("pack type_index", "[meta]")
+TEST_CASE("pack_type_index", "[meta]")
 {
   using pack_type = test_pack<int, double, char>;
 
@@ -127,7 +127,7 @@ TEST_CASE("pack type_index", "[meta]")
   static_assert(type_index_v<test_pack<int, double, int>, int> == 0);
 }
 
-TEST_CASE("pack pack_info", "[meta]")
+TEST_CASE("pack_pack_info", "[meta]")
 {
   static_assert(pack_info<test_pack<int>>::size == 1);
   static_assert(std::is_same_v<pack_info<test_pack<int>>::first_type, int>);

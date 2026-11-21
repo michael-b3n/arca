@@ -6,7 +6,7 @@
 namespace arcstd::util
 {
 
-TEST_CASE("identifier", "[util]")
+TEST_CASE("identifier_replaces_what_no_identifier_holds", "[util]")
 {
   CHECK(identifier{"bible_server2"}.string() == "bible_server2");
   CHECK(identifier{"a"} < identifier{"b"});

@@ -80,7 +80,8 @@ auto to_sol(sol::state_view lua, const value& v) -> sol::object
       {
         const auto sequence = held.length();
         auto result = lua.create_table(
-          numeric_cast<int>(sequence), numeric_cast<int>(held.entries.size() - sequence)
+          util::numeric_cast_rt<int>(sequence),
+          util::numeric_cast_rt<int>(held.entries.size() - sequence)
         );
         std::ranges::for_each(
           held.entries,

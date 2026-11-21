@@ -11,7 +11,7 @@
 namespace arcstd::math
 {
 
-TEST_CASE("coordinates construction", "[math]")
+TEST_CASE("coordinates_construction", "[math]")
 {
   static_assert(std::is_same_v<decltype(coordinates{1, 2}), coordinates<int, 2>>);
   static_assert(std::is_same_v<decltype(coordinates{1, 2, 3}), coordinates<int, 3>>);
@@ -31,7 +31,7 @@ TEST_CASE("coordinates construction", "[math]")
   static_assert(casted == coordinates{1, 2});
 }
 
-TEST_CASE("coordinates accessors", "[math]")
+TEST_CASE("coordinates_accessors", "[math]")
 {
   constexpr auto c1 = coordinates{1};
   static_assert(c1.x() == 1);
@@ -52,7 +52,7 @@ TEST_CASE("coordinates accessors", "[math]")
   CHECK_THROWS_AS(c3.axis_value(3), std::out_of_range);
 }
 
-TEST_CASE("coordinates operators", "[math]")
+TEST_CASE("coordinates_operators", "[math]")
 {
   static_assert(coordinates{1, 2} == coordinates{1, 2});
   static_assert(coordinates{1, 2} != coordinates{2, 1});
@@ -65,7 +65,7 @@ TEST_CASE("coordinates operators", "[math]")
   static_assert(coordinates{1, 2, 3} - coordinates{1, 1, 1} == coordinates{0, 1, 2});
 }
 
-TEST_CASE("coordinates distance", "[math]")
+TEST_CASE("coordinates_distance", "[math]")
 {
   using coords_2d = coordinates<int, 2>;
   CHECK(is_equal(coords_2d::distance(coordinates{0, 0}, coordinates{0, 0}), 0.0));
@@ -83,7 +83,7 @@ TEST_CASE("coordinates distance", "[math]")
   );
 }
 
-TEST_CASE("coordinates formatter", "[math]")
+TEST_CASE("coordinates_formatter", "[math]")
 {
   CHECK(std::format("{}", coordinates{1, 2}) == "(1,2)");
   CHECK(std::format("{}", coordinates{1, 2, 3}) == "(1,2,3)");

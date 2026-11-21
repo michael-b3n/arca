@@ -65,7 +65,7 @@ Checks: >
 #
 # Only diagnose the projects own headers, not the ones of Qt, boost or other external libraries.
 #
-HeaderFilterRegex: '(arcstd|arcqml|arcstd_test)[/\].*\.hpp$'
+HeaderFilterRegex: '(arcstd|arcqml|arcstd_test|arcqml_test)[/\].*\.hpp$'
 ExcludeHeaderFilterRegex: '(build|libs_external)[/\].*'
 
 #

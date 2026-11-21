@@ -11,7 +11,7 @@
 namespace arcstd::util
 {
 
-TEST_CASE("contains element", "[util]")
+TEST_CASE("contains_an_element", "[util]")
 {
   static constexpr auto values = std::array{1, 2, 3};
   static_assert(contains(values, 1));
@@ -30,7 +30,7 @@ TEST_CASE("contains element", "[util]")
   CHECK(contains(std::vector<std::string>{"a", "b"}, std::string{"b"}));
 }
 
-TEST_CASE("contains predicate", "[util]")
+TEST_CASE("contains_an_element_a_predicate_matches", "[util]")
 {
   static constexpr auto values = std::array{1, 2, 3};
   static_assert(contains(values, [](const auto e) { return e == 2; }));
@@ -40,7 +40,7 @@ TEST_CASE("contains predicate", "[util]")
   static_assert(!contains(none, [](const auto) { return true; }));
 }
 
-TEST_CASE("contains predicate on view", "[util]")
+TEST_CASE("contains_an_element_of_a_view_a_predicate_matches", "[util]")
 {
   static constexpr auto values = std::array{1, 2, 3, 4};
   const auto even = values | std::views::filter([](const auto e) { return e % 2 == 0; });

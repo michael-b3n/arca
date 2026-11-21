@@ -1,9 +1,11 @@
+#include <arcstd/util/ranges.hpp>
 #include <arcstd/util/uid.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include <cstdint>
 #include <format>
+#include <ranges>
 #include <set>
 #include <type_traits>
 
@@ -15,7 +17,7 @@ struct uid_test_tag_a final
 struct uid_test_tag_b final
 {};
 
-TEST_CASE("uid typedefs", "[util]")
+TEST_CASE("uid_typedefs", "[util]")
 {
   static_assert(std::is_same_v<uid<uid_test_tag_a>::tag_type, uid_test_tag_a>);
   static_assert(std::is_same_v<uid<uid_test_tag_a>::underlying_type, std::uint64_t>);
@@ -24,7 +26,7 @@ TEST_CASE("uid typedefs", "[util]")
   static_assert(!std::is_constructible_v<uid<uid_test_tag_a>, std::uint64_t>);
 }
 
-TEST_CASE("uid is unique", "[util]")
+TEST_CASE("uid_is_unique", "[util]")
 {
   using uid_type = uid<uid_test_tag_a>;
 
@@ -36,15 +38,13 @@ TEST_CASE("uid is unique", "[util]")
   CHECK(second != third);
   CHECK(first != third);
 
-  auto ids = std::set<uid_type>{};
-  for(auto i = 0; i < 100; ++i)
-  {
-    ids.insert(uid_type::new_uid());
-  }
+  const auto ids = util::ranges::index_view_to(100) |
+                   std::views::transform([](const auto) { return uid_type::new_uid(); }) |
+                   std::ranges::to<std::set>();
   CHECK(ids.size() == 100);
 }
 
-TEST_CASE("uid is copyable and comparable", "[util]")
+TEST_CASE("uid_is_copyable_and_comparable", "[util]")
 {
   using uid_type = uid<uid_test_tag_a>;
 
@@ -55,14 +55,14 @@ TEST_CASE("uid is copyable and comparable", "[util]")
   CHECK(!(copy > id));
 }
 
-TEST_CASE("uid counters are per tag type", "[util]")
+TEST_CASE("uid_counts_per_tag_type", "[util]")
 {
   const auto a = uid<uid_test_tag_b>{};
   const auto b = uid<uid_test_tag_b>{};
   CHECK(a != b);
 }
 
-TEST_CASE("uid formatter", "[util]")
+TEST_CASE("uid_formatter", "[util]")
 {
   using uid_type = uid<uid_test_tag_a>;
 

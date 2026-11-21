@@ -28,7 +28,7 @@ public:
   auto fire_multi_args(int i, float f) -> void { notify(&test_signals::on_multi_args, i, f); }
 };
 
-TEST_CASE("adapter connect and notify void signal", "[signal]")
+TEST_CASE("adapter_notifies_a_void_signal", "[signal]")
 {
   auto a = test_adapter{};
   auto called = false;
@@ -39,7 +39,7 @@ TEST_CASE("adapter connect and notify void signal", "[signal]")
   CHECK(called);
 }
 
-TEST_CASE("adapter connect and notify with argument", "[signal]")
+TEST_CASE("adapter_notifies_a_signal_with_an_argument", "[signal]")
 {
   auto a = test_adapter{};
   auto received = 0;
@@ -53,7 +53,7 @@ TEST_CASE("adapter connect and notify with argument", "[signal]")
   CHECK(received == 100);
 }
 
-TEST_CASE("adapter connect and notify with multiple arguments", "[signal]")
+TEST_CASE("adapter_notifies_a_signal_with_arguments", "[signal]")
 {
   auto a = test_adapter{};
   auto received_int = 0;
@@ -73,7 +73,7 @@ TEST_CASE("adapter connect and notify with multiple arguments", "[signal]")
   CHECK(received_float == 3.14f);
 }
 
-TEST_CASE("adapter multiple slots on same signal", "[signal]")
+TEST_CASE("adapter_notifies_every_slot_of_a_signal", "[signal]")
 {
   auto a = test_adapter{};
   auto count = 0;
@@ -85,7 +85,7 @@ TEST_CASE("adapter multiple slots on same signal", "[signal]")
   CHECK(count == 2);
 }
 
-TEST_CASE("adapter scoped_connection disconnects on destruction", "[signal]")
+TEST_CASE("adapter_scoped_connection_disconnects_on_destruction", "[signal]")
 {
   auto a = test_adapter{};
   auto count = 0;
@@ -100,7 +100,7 @@ TEST_CASE("adapter scoped_connection disconnects on destruction", "[signal]")
   CHECK(count == 1);
 }
 
-TEST_CASE("adapter connect_extended returns connection", "[signal]")
+TEST_CASE("adapter_connect_extended_returns_the_connection", "[signal]")
 {
   auto a = test_adapter{};
   auto called = false;
@@ -118,7 +118,7 @@ TEST_CASE("adapter connect_extended returns connection", "[signal]")
   CHECK_FALSE(called);
 }
 
-TEST_CASE("adapter independent signals do not interfere", "[signal]")
+TEST_CASE("adapter_signals_are_independent", "[signal]")
 {
   auto a = test_adapter{};
   auto notify_count = 0;
@@ -137,7 +137,7 @@ TEST_CASE("adapter independent signals do not interfere", "[signal]")
   CHECK(value_received == 5);
 }
 
-TEST_CASE("adapter with connection_store", "[signal]")
+TEST_CASE("adapter_connections_kept_in_a_connection_store", "[signal]")
 {
   auto a = test_adapter{};
   auto count = 0;

@@ -30,7 +30,7 @@ constexpr auto test_map = make_const_map<int, int>({
   {2, 2},
 });
 
-TEST_CASE("const_map typedefs and size", "[util]")
+TEST_CASE("const_map_typedefs_and_size", "[util]")
 {
   static_assert(std::is_same_v<decltype(test_bimap)::first_type, const_map_test_enum>);
   static_assert(std::is_same_v<decltype(test_bimap)::second_type, std::string_view>);
@@ -38,7 +38,7 @@ TEST_CASE("const_map typedefs and size", "[util]")
   static_assert(test_map.size() == 3);
 }
 
-TEST_CASE("const_map contains", "[util]")
+TEST_CASE("const_map_contains", "[util]")
 {
   static_assert(test_bimap.contains(const_map_test_enum::a));
   static_assert(test_bimap.contains(const_map_test_enum::c));
@@ -52,7 +52,7 @@ TEST_CASE("const_map contains", "[util]")
   static_assert(!test_map.contains(3));
 }
 
-TEST_CASE("const_map at", "[util]")
+TEST_CASE("const_map_at", "[util]")
 {
   static_assert(test_bimap.at(const_map_test_enum::a) == "a");
   static_assert(test_bimap.at(const_map_test_enum::b) == "b");
@@ -63,14 +63,14 @@ TEST_CASE("const_map at", "[util]")
   static_assert(test_map.at(2) == 2);
 }
 
-TEST_CASE("const_map at throws for unknown keys", "[util]")
+TEST_CASE("const_map_at_throws_for_an_unknown_key", "[util]")
 {
   CHECK_THROWS_AS(test_bimap.at(static_cast<const_map_test_enum>(42)), util::exception);
   CHECK_THROWS_AS(test_bimap.at(std::string_view{"d"}), util::exception);
   CHECK_THROWS_AS(test_map.at(3), util::exception);
 }
 
-TEST_CASE("const_map iteration", "[util]")
+TEST_CASE("const_map_iteration", "[util]")
 {
   static_assert(std::ranges::distance(test_bimap) == 3);
   static_assert(test_bimap.begin()->first == const_map_test_enum::a);
@@ -91,7 +91,7 @@ TEST_CASE("const_map iteration", "[util]")
   CHECK(count == 3);
 }
 
-TEST_CASE("const_map type traits", "[util]")
+TEST_CASE("const_map_type_traits", "[util]")
 {
   static_assert(is_const_map_v<const_map<int, double, 1>>);
   static_assert(!is_const_map_v<int>);
@@ -99,7 +99,7 @@ TEST_CASE("const_map type traits", "[util]")
   static_assert(!const_map_type<int>);
 }
 
-TEST_CASE("const_map rejects duplicated keys", "[util]")
+TEST_CASE("const_map_rejects_duplicated_keys", "[util]")
 {
   using map_type = const_map<int, int, 2, false>;
   CHECK_THROWS_AS(map_type(std::pair{0, 1}, std::pair{0, 2}), util::exception);

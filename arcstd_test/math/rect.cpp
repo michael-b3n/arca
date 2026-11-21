@@ -6,9 +6,9 @@
 namespace arcstd::math
 {
 
-TEST_CASE("rect", "[math]")
+TEST_CASE("rect_size_overlap_and_containment", "[math]")
 {
-  GIVEN("empty double rect")
+  SECTION("empty double rect")
   {
     constexpr auto first = rect<double>(coordinates{1.0, 1.0}, 0.0, 0.0);
     constexpr auto second = rect<double>(coordinates{2.0, 2.0}, 0.0, 0.0);
@@ -25,7 +25,7 @@ TEST_CASE("rect", "[math]")
     static_assert(math::surrounding_rect(first, second) == rect<double>(coordinates{1, 1}, 1u, 1u));
   }
 
-  GIVEN("overlapping double rect")
+  SECTION("overlapping double rect")
   {
     constexpr auto first = rect<double>(coordinates{1.0, 1.0}, 2.0, 2.0);
     constexpr auto second = rect<double>(coordinates{2.0, 2.0}, 3.0, 3.0);
@@ -42,7 +42,7 @@ TEST_CASE("rect", "[math]")
     static_assert(math::surrounding_rect(first, second) == rect<double>(coordinates{1, 1}, 4u, 4u));
   }
 
-  GIVEN("containing double rect")
+  SECTION("containing double rect")
   {
     constexpr auto first = rect<double>(coordinates{1.0, 1.0}, 4.0, 4.0);
     constexpr auto second = rect<double>(coordinates{2.0, 2.0}, 3.0, 3.0);
@@ -54,7 +54,7 @@ TEST_CASE("rect", "[math]")
     static_assert(math::surrounding_rect(first, second) == rect<double>(coordinates{1, 1}, 4u, 4u));
   }
 
-  GIVEN("empty integer rect")
+  SECTION("empty integer rect")
   {
     constexpr auto first = rect<int>(coordinates{1, 1}, 0u, 0u);
     constexpr auto second = rect<int>(coordinates{2, 2}, 0u, 0u);
@@ -71,7 +71,7 @@ TEST_CASE("rect", "[math]")
     static_assert(math::surrounding_rect(first, second) == rect<int>(coordinates{0, 0}, 0u, 0u));
   }
 
-  GIVEN("overlapping integer rect")
+  SECTION("overlapping integer rect")
   {
     constexpr auto first = rect<int>(coordinates{1, 1}, 2u, 2u);
     constexpr auto second = rect<int>(coordinates{2, 2}, 3u, 3u);
@@ -88,7 +88,7 @@ TEST_CASE("rect", "[math]")
     static_assert(math::surrounding_rect(first, second) == rect<int>(coordinates{1, 1}, 4u, 4u));
   }
 
-  GIVEN("containing integer rect")
+  SECTION("containing integer rect")
   {
     constexpr auto first = rect<int>(coordinates{1, 1}, 4u, 4u);
     constexpr auto second = rect<int>(coordinates{2, 2}, 3u, 3u);
@@ -100,7 +100,7 @@ TEST_CASE("rect", "[math]")
     static_assert(math::surrounding_rect(first, second) == rect<int>(coordinates{1, 1}, 4u, 4u));
   }
 
-  GIVEN("constructor variations")
+  SECTION("constructor variations")
   {
     [[maybe_unused]] constexpr auto e1 =
       rect<std::int64_t>(coordinates{std::int16_t{1}, 1}, std::uint32_t{4}, std::uint8_t{2});

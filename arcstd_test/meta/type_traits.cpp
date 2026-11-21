@@ -14,7 +14,7 @@ namespace arcstd::meta
 struct type_traits_test_struct final
 {};
 
-TEST_CASE("is_templated", "[meta]")
+TEST_CASE("is_templated_detects_template_instances", "[meta]")
 {
   static_assert(is_templated_v<std::vector<int>>);
   static_assert(is_templated_v<std::optional<int>>);
@@ -28,7 +28,7 @@ TEST_CASE("is_templated", "[meta]")
   static_assert(!is_templated_v<const int&>);
 }
 
-TEST_CASE("remove_wrapper", "[meta]")
+TEST_CASE("remove_wrapper_unwraps_one_level", "[meta]")
 {
   static_assert(std::is_same_v<remove_wrapper_t<std::optional<int>>, int>);
   // Defaulted template arguments, such as the allocator of std::vector, are ignored.
@@ -44,7 +44,7 @@ TEST_CASE("remove_wrapper", "[meta]")
   static_assert(std::is_same_v<remove_wrapper_t<const int&>, const int&>);
 }
 
-TEST_CASE("are_same", "[meta]")
+TEST_CASE("are_same_compares_types", "[meta]")
 {
   static_assert(are_same_v<>);
   static_assert(are_same_v<int>);
@@ -58,7 +58,7 @@ TEST_CASE("are_same", "[meta]")
   static_assert(!are_same_v<int, int&>);
 }
 
-TEST_CASE("conditional_unsigned", "[meta]")
+TEST_CASE("conditional_unsigned_makes_integers_unsigned", "[meta]")
 {
   static_assert(std::is_same_v<conditional_unsigned_t<std::int8_t>, std::uint8_t>);
   static_assert(std::is_same_v<conditional_unsigned_t<std::int32_t>, std::uint32_t>);

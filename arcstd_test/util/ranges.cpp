@@ -25,7 +25,7 @@ constexpr auto to_vector(const auto& view) -> std::vector<std::size_t>
 
 } // namespace
 
-TEST_CASE("index_view", "[util]")
+TEST_CASE("index_view_lists_the_indices", "[util]")
 {
   static constexpr auto values = std::array{1, 2, 3};
   CHECK(to_vector(index_view(values)) == std::vector<std::size_t>{0, 1, 2});
@@ -33,7 +33,7 @@ TEST_CASE("index_view", "[util]")
   CHECK(to_vector(index_view(std::vector{1, 2, 3, 4})) == std::vector<std::size_t>{0, 1, 2, 3});
 }
 
-TEST_CASE("index_view_from", "[util]")
+TEST_CASE("index_view_from_a_begin_index", "[util]")
 {
   static constexpr auto values = std::array{1, 2, 3, 4};
   CHECK(to_vector(index_view_from(values, 0)) == std::vector<std::size_t>{0, 1, 2, 3});
@@ -43,7 +43,7 @@ TEST_CASE("index_view_from", "[util]")
   CHECK(to_vector(index_view_from(values, 10)).empty());
 }
 
-TEST_CASE("index_view_to with range", "[util]")
+TEST_CASE("index_view_to_of_a_range", "[util]")
 {
   static constexpr auto values = std::array{1, 2, 3, 4};
   CHECK(to_vector(index_view_to(values, 0)).empty());
@@ -53,7 +53,7 @@ TEST_CASE("index_view_to with range", "[util]")
   CHECK(to_vector(index_view_to(values, 10)) == std::vector<std::size_t>{0, 1, 2, 3});
 }
 
-TEST_CASE("index_view_to with end index", "[util]")
+TEST_CASE("index_view_to_an_end_index", "[util]")
 {
   CHECK(to_vector(index_view_to(0)).empty());
   CHECK(to_vector(index_view_to(3)) == std::vector<std::size_t>{0, 1, 2});
@@ -62,7 +62,7 @@ TEST_CASE("index_view_to with end index", "[util]")
   CHECK(to_vector(index_view_to(-5)).empty());
 }
 
-TEST_CASE("index_view_between", "[util]")
+TEST_CASE("index_view_between_two_indices", "[util]")
 {
   CHECK(to_vector(index_view_between(0, 3)) == std::vector<std::size_t>{0, 1, 2});
   CHECK(to_vector(index_view_between(2, 5)) == std::vector<std::size_t>{2, 3, 4});

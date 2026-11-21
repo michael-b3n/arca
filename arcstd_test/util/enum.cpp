@@ -27,7 +27,7 @@ enum class enum_test_offset_type : std::int8_t
   c = 1,
 };
 
-TEST_CASE("enum_type concept", "[util]")
+TEST_CASE("enum_type_concept", "[util]")
 {
   static_assert(enum_type<enum_test_type>);
   static_assert(!enum_type<int>);
@@ -35,7 +35,7 @@ TEST_CASE("enum_type concept", "[util]")
   static_assert(enum_type<enum_test_offset_type>);
 }
 
-TEST_CASE("enum to_integral and to_enum", "[util]")
+TEST_CASE("enum_to_integral_and_back", "[util]")
 {
   using enum enum_test_type;
 
@@ -51,7 +51,7 @@ TEST_CASE("enum to_integral and to_enum", "[util]")
   static_assert(std::is_same_v<decltype(to_integral(enum_test_offset_type::a)), std::int8_t>);
 }
 
-TEST_CASE("enum names and values", "[util]")
+TEST_CASE("enum_names_and_values", "[util]")
 {
   using enum enum_test_type;
 
@@ -65,7 +65,7 @@ TEST_CASE("enum names and values", "[util]")
   static_assert(enum_name(enum_test_offset_type::a) == "a");
 }
 
-TEST_CASE("enum to_enum from name", "[util]")
+TEST_CASE("enum_to_enum_from_a_name", "[util]")
 {
   using enum enum_test_type;
 
@@ -77,7 +77,7 @@ TEST_CASE("enum to_enum from name", "[util]")
   static_assert(to_enum<enum_test_type>("A") == std::nullopt);
 }
 
-TEST_CASE("enum next and prev", "[util]")
+TEST_CASE("enum_next_and_prev", "[util]")
 {
   using enum enum_test_type;
 
@@ -99,7 +99,7 @@ TEST_CASE("enum next and prev", "[util]")
   CHECK(!has_next(enum_test_offset_type::c));
 }
 
-TEST_CASE("enum prev throws on underflow", "[util]")
+TEST_CASE("enum_prev_throws_on_underflow", "[util]")
 {
   // The underlying type of enum_test_offset_type cannot hold a value below its minimum.
   CHECK_THROWS_AS(
@@ -112,7 +112,7 @@ TEST_CASE("enum prev throws on underflow", "[util]")
   );
 }
 
-TEST_CASE("enum valid", "[util]")
+TEST_CASE("enum_valid", "[util]")
 {
   using enum enum_test_type;
 

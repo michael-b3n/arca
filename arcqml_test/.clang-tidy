@@ -1,0 +1,16 @@
+---
+#
+# Clang-Tidy configuration of the tests of ArcQml. Inherits the checks of the repository root,
+# names things like the Qt layer, see arcqml/.clang-tidy, and relaxes the checks for tests as
+# arcstd_test/.clang-tidy does.
+#
+InheritParentConfig: true
+Checks: >
+  -readability-identifier-naming,
+  -readability-convert-member-functions-to-static,
+  -cppcoreguidelines-avoid-non-const-global-variables,
+  -misc-use-internal-linkage,
+  -readability-function-size,
+  -bugprone-unchecked-optional-access,
+  -bugprone-throwing-static-initialization,
+  -cert-err58-cpp

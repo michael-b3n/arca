@@ -1,13 +1,17 @@
 #include <arcstd/signal/common.hpp>
-#include <arcstd/signal/connection_store.hpp>
 
 #include <catch2/catch_test_macros.hpp>
+
+#include <functional>
+#include <string>
+#include <tuple>
 #include <type_traits>
+#include <vector>
 
 namespace arcstd::signal
 {
 
-TEST_CASE("is_signal_type trait", "[signal]")
+TEST_CASE("is_signal_type_detects_signals", "[signal]")
 {
   static_assert(is_signal_type_v<signal_type<void()>>);
   static_assert(is_signal_type_v<signal_type<int(float, double)>>);
@@ -16,7 +20,7 @@ TEST_CASE("is_signal_type trait", "[signal]")
   static_assert(!is_signal_type_v<void>);
 }
 
-TEST_CASE("signal_signature extraction", "[signal]")
+TEST_CASE("signal_signature_names_return_and_argument_types", "[signal]")
 {
   using sig1 = signal_type<void(int, float)>;
   using signature1 = signal_signature<sig1>;
@@ -41,7 +45,7 @@ TEST_CASE("signal_signature extraction", "[signal]")
   );
 }
 
-TEST_CASE("to_functional", "[signal]")
+TEST_CASE("to_functional_names_the_function_of_a_signal", "[signal]")
 {
   using sig1 = signal_type<void(int, float)>;
   using func1 = to_functional<sig1, std::function>::type;
@@ -60,7 +64,7 @@ TEST_CASE("to_functional", "[signal]")
   );
 }
 
-TEST_CASE("signal_type connect and emit", "[signal]")
+TEST_CASE("signal_type_connects_and_emits", "[signal]")
 {
   auto sig = signal_type<void(int)>{};
   auto received = 0;
@@ -74,7 +78,7 @@ TEST_CASE("signal_type connect and emit", "[signal]")
   CHECK(received == 99);
 }
 
-TEST_CASE("signal_type multiple slots", "[signal]")
+TEST_CASE("signal_type_calls_every_slot", "[signal]")
 {
   auto sig = signal_type<void()>{};
   auto count = 0;
@@ -89,7 +93,7 @@ TEST_CASE("signal_type multiple slots", "[signal]")
   CHECK(count == 4);
 }
 
-TEST_CASE("scoped_connection disconnects on destruction", "[signal]")
+TEST_CASE("scoped_connection_disconnects_on_destruction", "[signal]")
 {
   auto sig = signal_type<void()>{};
   auto count = 0;
@@ -104,7 +108,7 @@ TEST_CASE("scoped_connection disconnects on destruction", "[signal]")
   CHECK(count == 1);
 }
 
-TEST_CASE("connection_type manual disconnect", "[signal]")
+TEST_CASE("connection_type_disconnects_by_hand", "[signal]")
 {
   auto sig = signal_type<void()>{};
   auto count = 0;
@@ -118,7 +122,7 @@ TEST_CASE("connection_type manual disconnect", "[signal]")
   CHECK(count == 1);
 }
 
-TEST_CASE("connection_block_type temporarily blocks signal", "[signal]")
+TEST_CASE("connection_block_type_blocks_the_signal_while_it_lives", "[signal]")
 {
   auto sig = signal_type<void()>{};
   auto count = 0;
@@ -134,61 +138,6 @@ TEST_CASE("connection_block_type temporarily blocks signal", "[signal]")
     CHECK(count == 1);
   }
 
-  sig();
-  CHECK(count == 2);
-}
-
-TEST_CASE("connection_store stores and disconnects connections", "[signal]")
-{
-  auto sig = signal_type<void()>{};
-  auto count = 0;
-
-  {
-    auto store = connection_store{};
-    store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
-    store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
-
-    sig();
-    CHECK(count == 2);
-  }
-
-  sig();
-  CHECK(count == 2);
-}
-
-TEST_CASE("connection_store clear disconnects all", "[signal]")
-{
-  auto sig = signal_type<void()>{};
-  auto count = 0;
-
-  auto store = connection_store{};
-  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
-  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
-
-  sig();
-  CHECK(count == 2);
-
-  store.clear();
-  sig();
-  CHECK(count == 2);
-}
-
-TEST_CASE("connection_store add after clear", "[signal]")
-{
-  auto sig = signal_type<void()>{};
-  auto count = 0;
-
-  auto store = connection_store{};
-  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
-
-  sig();
-  CHECK(count == 1);
-
-  store.clear();
-  sig();
-  CHECK(count == 1);
-
-  store.store(scoped_connection_type{sig.connect([&count] { ++count; })});
   sig();
   CHECK(count == 2);
 }

@@ -23,7 +23,7 @@ constexpr auto max = std::numeric_limits<T>::max();
 template<typename T>
 constexpr auto min = std::numeric_limits<T>::lowest();
 
-TEST_CASE("Integer arithmetic", "[math]")
+TEST_CASE("arithmetic_of_integers", "[math]")
 {
   // Typedefs
   using unsigned_types = std::tuple<std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t>;
@@ -82,7 +82,7 @@ TEST_CASE("Integer arithmetic", "[math]")
   // clang-format on
 }
 
-TEST_CASE("Floating point arithmetic", "[math]")
+TEST_CASE("arithmetic_of_floating_points", "[math]")
 {
   // Typedefs
   using fp_types = std::tuple<float, double>;

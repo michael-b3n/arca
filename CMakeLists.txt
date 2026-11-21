@@ -46,6 +46,9 @@ option(ARCA_BUILD_TESTS "Build the tests of arca and arcstd_test_utils" ${PROJEC
 # For an application linked with -static: the third party libraries are taken as static libraries.
 option(ARCA_STATIC_DEPENDENCIES "Link the static libraries of the third party libraries" OFF)
 
+# Measures which lines of arcstd the tests run, gcovr reports it, see the preset gcc-coverage.
+option(ARCA_COVERAGE "Build arcstd and its tests with the coverage instrumentation of GCC" OFF)
+
 # For a project that finds arca with find_package(arca). One that includes it with
 # add_subdirectory uses it from the build.
 option(ARCA_INSTALL "Install arcstd as the CMake package arca" ${PROJECT_IS_TOP_LEVEL})
@@ -57,8 +60,21 @@ add_subdirectory(libs_external)
 # Below the external libraries, their switches need not name every value.
 add_compile_options(-Wswitch-enum)
 
+if(ARCA_COVERAGE)
+  add_compile_options(--coverage)
+  add_link_options(--coverage)
+endif()
+
 add_subdirectory(arcstd)
-add_subdirectory(arcqml)
+# A coverage build leaves ArcQml out: its coverage is not measured, and its debug build takes very
+# long.
+if(NOT ARCA_COVERAGE)
+  add_subdirectory(arcqml)
+endif()
 if(ARCA_BUILD_TESTS)
   add_subdirectory(arcstd_test)
+  # The Qt of MSYS2 comes as DLLs only, a static build has no test of ArcQml.
+  if(TARGET ArcQml AND NOT ARCA_STATIC_DEPENDENCIES)
+    add_subdirectory(arcqml_test)
+  endif()
 endif()

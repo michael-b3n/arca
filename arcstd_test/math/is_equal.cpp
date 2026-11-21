@@ -8,7 +8,7 @@
 namespace arcstd::math
 {
 
-TEST_CASE("is_equal floating point", "[math]")
+TEST_CASE("is_equal_floating_points", "[math]")
 {
   static_assert(is_equal(1.0, 1.0));
   static_assert(!is_equal(1.0, 1.5));
@@ -30,7 +30,7 @@ TEST_CASE("is_equal floating point", "[math]")
   static_assert(!is_equal(-1.0, 1.0, 0.2));
 }
 
-TEST_CASE("is_equal same signedness integrals", "[math]")
+TEST_CASE("is_equal_integrals_of_the_same_signedness", "[math]")
 {
   static_assert(is_equal(1, 1));
   static_assert(!is_equal(1, 2));
@@ -42,7 +42,7 @@ TEST_CASE("is_equal same signedness integrals", "[math]")
   ));
 }
 
-TEST_CASE("is_equal mixed signedness integrals", "[math]")
+TEST_CASE("is_equal_integrals_of_mixed_signedness", "[math]")
 {
   static_assert(is_equal(1, 1u));
   static_assert(is_equal(1u, 1));
@@ -59,7 +59,7 @@ TEST_CASE("is_equal mixed signedness integrals", "[math]")
   static_assert(!is_equal(std::numeric_limits<std::int32_t>::max(), std::uint32_t{2147483648}));
 }
 
-TEST_CASE("is_equal integral with comparable type", "[math]")
+TEST_CASE("is_equal_integral_and_comparable_type", "[math]")
 {
   enum class scoped_enum : int
   {
@@ -76,7 +76,7 @@ TEST_CASE("is_equal integral with comparable type", "[math]")
   static_assert(!is_equal(std::int32_t{98}, 'a'));
 }
 
-TEST_CASE("is_equal non integral comparable type", "[math]")
+TEST_CASE("is_equal_non_integral_comparable_types", "[math]")
 {
   static_assert(is_equal(1, 1.0));
   static_assert(!is_equal(1, 1.5));

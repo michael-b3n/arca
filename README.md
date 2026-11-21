@@ -1,6 +1,7 @@
 # arca
 
 [![CI](https://github.com/michael-b3n/arca/actions/workflows/ci.yml/badge.svg)](https://github.com/michael-b3n/arca/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/michael-b3n/arca/graph/badge.svg)](https://codecov.io/gh/michael-b3n/arca)
 
 arca is a foundation for scriptable desktop applications in C++26. It holds what such an
 application needs besides its own domain: settings that are validated and kept in a settings file,
@@ -48,7 +49,8 @@ The other targets, not installed, only with `add_subdirectory`:
 | `ArcQmlplugin` | static plugin of the module, an application links it so QML finds `import ArcQml` | `ArcQml` |
 | `arcstd_test_utils` | test helpers of `arcstd_test/test_utils`, also for the tests of projects built on arca, e.g. `"test_utils/temp_folder.hpp"` | Catch2, `arca::arcstd` |
 | `arcstd_test` | tests of the public headers, built like a project on arca | `arcstd_test_utils` |
-| `arcstd_private_test` | tests of the internals in `arcstd_test/private`, with the private headers | `arcstd_internals` |
+| `arcstd_private_test` | tests of the internals in `arcstd_test/private`, with the private headers | `arcstd_test_utils`, `arcstd_internals` |
+| `arcqml_test` | tests of the C++ types of ArcQml that need no window, under a `QCoreApplication`, with helpers of their own in `arcqml_test/qml_test_utils`; not in the static and coverage builds | `arcstd_test_utils`, `ArcQml` |
 
 The tests and `arcstd_test_utils` are built with `ARCA_BUILD_TESTS`, on by default when arca is the
 top level project, as is `ARCA_INSTALL`, which installs the libraries as the package `arca`.
@@ -93,9 +95,22 @@ ctest --preset gcc-release
 ```
 
 `gcc-release-static` links the tests fully static, they also check that they load DLLs of Windows
-only. All presets build into `build`, `--fresh` replaces the configuration of the previous one. The
-target `all_verify_interface_header_sets` compiles each public header on its own, the target
-`install` installs into `install/<preset>`.
+only; it leaves `arcqml_test` out, the Qt of MSYS2 has DLLs only. All presets build into `build`,
+`--fresh` replaces the configuration of the previous one. The target
+`all_verify_interface_header_sets` compiles each public header on its own, the target `install`
+installs into `install/<preset>`.
+
+`gcc-coverage` builds arcstd and its tests with the coverage instrumentation of GCC, ArcQml is left
+out. After its tests, `gcovr` in the repository root reports the lines of arcstd they run, as set
+in `gcovr.cfg`. CI sends the report to Codecov, which shows it in the badge above.
+
+A test file tests one object, at the path of its source: `arcstd_test/io/csv_reader.cpp` tests
+`arcstd/io/csv_reader.hpp`, the private ones in `arcstd_test/private`. A test is named
+`<object>_<what it does>` in snake_case, e.g. `csv_reader_reads_a_file`, a type of ArcQml keeps its
+name, e.g. `SettingBinding_binds_the_value_to_the_setting`. Its tag is its area, e.g. `[io]`.
+Cases share a setup in a `SECTION`, a test for several types is a `TEMPLATE_LIST_TEST_CASE`, and a
+check that throws names the exception with `CHECK_THROWS_AS`. ctest lists the tests before it runs
+them.
 
 ## License
 

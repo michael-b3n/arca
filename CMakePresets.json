@@ -14,6 +14,7 @@
       "installDir": "${sourceDir}/install/${presetName}",
       "cacheVariables": {
         "ARCA_STATIC_DEPENDENCIES": "OFF",
+        "ARCA_COVERAGE": "OFF",
         "CMAKE_EXE_LINKER_FLAGS": ""
       }
     },
@@ -45,6 +46,11 @@
         "CMAKE_EXE_LINKER_FLAGS": "-static"
       }
     },
+    {
+      "name": "coverage",
+      "hidden": true,
+      "cacheVariables": { "ARCA_COVERAGE": "ON" }
+    },
     { "name": "clang-debug", "displayName": "Clang Debug", "inherits": ["base", "clang", "debug"] },
     { "name": "clang-release", "displayName": "Clang Release", "inherits": ["base", "clang", "release"] },
     { "name": "gcc-debug", "displayName": "GCC Debug", "inherits": ["base", "gcc", "debug"] },
@@ -53,6 +59,11 @@
       "name": "gcc-release-static",
       "displayName": "GCC Release Static",
       "inherits": ["static", "base", "gcc", "release"]
+    },
+    {
+      "name": "gcc-coverage",
+      "displayName": "GCC Coverage",
+      "inherits": ["coverage", "base", "gcc", "debug"]
     }
   ],
   "buildPresets": [
@@ -60,7 +71,8 @@
     { "name": "clang-release", "configurePreset": "clang-release" },
     { "name": "gcc-debug", "configurePreset": "gcc-debug" },
     { "name": "gcc-release", "configurePreset": "gcc-release" },
-    { "name": "gcc-release-static", "configurePreset": "gcc-release-static" }
+    { "name": "gcc-release-static", "configurePreset": "gcc-release-static" },
+    { "name": "gcc-coverage", "configurePreset": "gcc-coverage" }
   ],
   "testPresets": [
     {
@@ -73,6 +85,7 @@
     { "name": "clang-release", "inherits": "base", "configurePreset": "clang-release" },
     { "name": "gcc-debug", "inherits": "base", "configurePreset": "gcc-debug" },
     { "name": "gcc-release", "inherits": "base", "configurePreset": "gcc-release" },
-    { "name": "gcc-release-static", "inherits": "base", "configurePreset": "gcc-release-static" }
+    { "name": "gcc-release-static", "inherits": "base", "configurePreset": "gcc-release-static" },
+    { "name": "gcc-coverage", "inherits": "base", "configurePreset": "gcc-coverage" }
   ]
 }

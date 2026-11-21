@@ -9,7 +9,7 @@
 namespace arcstd::util
 {
 
-TEST_CASE("visit_lambdas dispatches on the active alternative", "[util]")
+TEST_CASE("visit_lambdas_dispatches_on_the_active_alternative", "[util]")
 {
   using variant_type = std::variant<int, double, std::string>;
 
@@ -28,7 +28,7 @@ TEST_CASE("visit_lambdas dispatches on the active alternative", "[util]")
   CHECK(to_name(variant_type{std::string{"a"}}) == "string");
 }
 
-TEST_CASE("visit_lambdas with a generic fallback", "[util]")
+TEST_CASE("visit_lambdas_with_a_generic_fallback", "[util]")
 {
   using variant_type = std::variant<int, double>;
 
@@ -39,7 +39,7 @@ TEST_CASE("visit_lambdas with a generic fallback", "[util]")
   CHECK(!is_int(variant_type{1.0}));
 }
 
-TEST_CASE("visit_lambdas can mutate the visited variant", "[util]")
+TEST_CASE("visit_lambdas_can_mutate_the_visited_variant", "[util]")
 {
   auto v = std::variant<int, double>{1};
   visit_lambdas(v, [](int& e) { e += 1; }, [](double& e) { e += 0.5; });
@@ -50,7 +50,7 @@ TEST_CASE("visit_lambdas can mutate the visited variant", "[util]")
   CHECK(std::get<double>(v) == 0.5 + 1.0);
 }
 
-TEST_CASE("visit_lambdas returns a reference when the lambdas do", "[util]")
+TEST_CASE("visit_lambdas_returns_a_reference_when_the_lambdas_do", "[util]")
 {
   auto v = std::variant<int, double>{1};
   auto& ref = visit_lambdas(
