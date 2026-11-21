@@ -12,7 +12,7 @@ template<typename...>
 struct remove_duplicates_test_pack final
 {};
 
-TEST_CASE("remove_duplicates", "[meta]")
+TEST_CASE("remove_duplicates_removes_repeated_types", "[meta]")
 {
   using pack = remove_duplicates_test_pack<int, double, char>;
 

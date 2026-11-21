@@ -9,7 +9,7 @@
 namespace arcstd::util
 {
 
-TEST_CASE("numeric_cast_rt at compile time", "[util]")
+TEST_CASE("numeric_cast_rt_at_compile_time", "[util]")
 {
   static_assert(numeric_cast_rt<int>(1.0) == 1);
   static_assert(numeric_cast_rt<int>(1.9) == 1);
@@ -25,7 +25,7 @@ TEST_CASE("numeric_cast_rt at compile time", "[util]")
   static_assert(std::is_same_v<decltype(numeric_cast_rt<int>(value)), int>);
 }
 
-TEST_CASE("numeric_cast_rt at runtime", "[util]")
+TEST_CASE("numeric_cast_rt_at_runtime", "[util]")
 {
   CHECK(numeric_cast_rt<int>(1.9) == 1);
   CHECK(numeric_cast_rt<std::uint8_t>(255) == 255);

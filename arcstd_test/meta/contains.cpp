@@ -12,7 +12,7 @@ template<typename...>
 struct contains_test_pack final
 {};
 
-TEST_CASE("contains", "[meta]")
+TEST_CASE("contains_finds_a_type_of_a_pack", "[meta]")
 {
   using pack_type = contains_test_pack<int, double, char>;
 

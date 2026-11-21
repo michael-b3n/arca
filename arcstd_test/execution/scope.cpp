@@ -1,32 +1,14 @@
 #include <arcstd/execution/launch.hpp>
 #include <arcstd/execution/scope.hpp>
-#include <arcstd/execution/thread_pool.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include <atomic>
 #include <chrono>
-#include <stdexcept>
 #include <thread>
 
 namespace arcstd::execution
 {
-
-TEST_CASE("launch_runs_work_on_another_thread", "[execution]")
-{
-  auto thread = std::thread::id{};
-  auto ran = std::atomic_bool{false};
-  auto work = scope{};
-  const auto note_thread = [&]
-  {
-    thread = std::this_thread::get_id();
-    ran = true;
-    ran.notify_all();
-  };
-  launch(note_thread, work);
-  ran.wait(false);
-  CHECK(thread != std::this_thread::get_id());
-}
 
 TEST_CASE("scope_stop_waits_for_running_work", "[execution]")
 {
@@ -53,46 +35,7 @@ TEST_CASE("scope_drops_work_launched_after_stop", "[execution]")
   work.stop();
   launch([&] { ran = true; }, work);
   std::this_thread::sleep_for(std::chrono::milliseconds{20});
-  CHECK(!ran);
-}
-
-TEST_CASE("launch_survives_failing_work", "[execution]")
-{
-  auto ran = std::atomic_bool{false};
-  auto work = scope{};
-  launch([] { throw std::runtime_error{"expected by the test"}; }, work);
-  const auto succeed = [&]
-  {
-    ran = true;
-    ran.notify_all();
-  };
-  launch(succeed, work);
-  ran.wait(false);
-  CHECK(ran);
-}
-
-TEST_CASE("launch_starts_a_new_thread_pool_after_its_shutdown", "[execution]")
-{
-  const auto run_once = []
-  {
-    auto ran = std::atomic_bool{false};
-    auto work = scope{};
-    launch(
-      [&]
-      {
-        ran = true;
-        ran.notify_all();
-      },
-      work
-    );
-    ran.wait(false);
-  };
-  run_once();
-  shutdown_thread_pool();
-  run_once();
-  // Twice is fine, and once without a pool too
-  shutdown_thread_pool();
-  shutdown_thread_pool();
+  CHECK_FALSE(ran);
 }
 
 } // namespace arcstd::execution

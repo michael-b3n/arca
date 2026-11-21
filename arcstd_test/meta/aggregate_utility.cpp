@@ -16,7 +16,7 @@ struct test_aggregate final
   T3 t3;
 };
 
-TEST_CASE("aggregate_utility", "[meta]")
+TEST_CASE("aggregate_utility_counts_and_converts_the_members", "[meta]")
 {
   static_assert(data_member_count<test_aggregate<int&>>() == 3);
   static_assert(std::is_same_v<to_tuple_t<test_aggregate<>>, std::tuple<int, int, int>>);

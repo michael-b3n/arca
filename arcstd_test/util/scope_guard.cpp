@@ -8,7 +8,7 @@
 namespace arcstd::util
 {
 
-TEST_CASE("scope_guard calls the callable on destruction", "[util]")
+TEST_CASE("scope_guard_calls_the_callable_on_destruction", "[util]")
 {
   auto called = 0;
   {
@@ -18,13 +18,13 @@ TEST_CASE("scope_guard calls the callable on destruction", "[util]")
   CHECK(called == 1);
 }
 
-TEST_CASE("scope_guard default constructed does nothing", "[util]")
+TEST_CASE("scope_guard_default_constructed_does_nothing", "[util]")
 {
   auto guard = scope_guard{};
   CHECK_NOTHROW(guard.reset());
 }
 
-TEST_CASE("scope_guard reset calls the callable once", "[util]")
+TEST_CASE("scope_guard_reset_calls_the_callable_once", "[util]")
 {
   auto called = 0;
   auto guard = scope_guard{[&] { ++called; }};
@@ -35,7 +35,7 @@ TEST_CASE("scope_guard reset calls the callable once", "[util]")
   CHECK(called == 1);
 }
 
-TEST_CASE("scope_guard reset prevents the call on destruction", "[util]")
+TEST_CASE("scope_guard_reset_prevents_the_call_on_destruction", "[util]")
 {
   auto called = 0;
   {
@@ -46,7 +46,7 @@ TEST_CASE("scope_guard reset prevents the call on destruction", "[util]")
   CHECK(called == 1);
 }
 
-TEST_CASE("scope_guard move transfers the callable", "[util]")
+TEST_CASE("scope_guard_move_transfers_the_callable", "[util]")
 {
   auto called = 0;
   {
@@ -62,7 +62,7 @@ TEST_CASE("scope_guard move transfers the callable", "[util]")
   CHECK(called == 1);
 }
 
-TEST_CASE("scope_guard move construction transfers the callable", "[util]")
+TEST_CASE("scope_guard_move_construction_transfers_the_callable", "[util]")
 {
   auto called = 0;
   {
@@ -73,7 +73,7 @@ TEST_CASE("scope_guard move construction transfers the callable", "[util]")
   CHECK(called == 1);
 }
 
-TEST_CASE("scope_guard move assignment resets the previous callable", "[util]")
+TEST_CASE("scope_guard_move_assignment_resets_the_previous_callable", "[util]")
 {
   auto previous_called = 0;
   auto next_called = 0;
@@ -87,7 +87,7 @@ TEST_CASE("scope_guard move assignment resets the previous callable", "[util]")
   CHECK(next_called == 1);
 }
 
-TEST_CASE("scope_guard destruction order is reverse", "[util]")
+TEST_CASE("scope_guard_destruction_order_is_reverse", "[util]")
 {
   auto order = std::vector<int>{};
   {
@@ -97,7 +97,7 @@ TEST_CASE("scope_guard destruction order is reverse", "[util]")
   CHECK(order == std::vector<int>{2, 1});
 }
 
-TEST_CASE("shared_scope_guard calls the callable once all guards are gone", "[util]")
+TEST_CASE("shared_scope_guard_calls_the_callable_once_all_guards_are_gone", "[util]")
 {
   auto called = 0;
   auto creator = shared_scope_guard::creator{};
@@ -113,7 +113,7 @@ TEST_CASE("shared_scope_guard calls the callable once all guards are gone", "[ut
   CHECK(called == 1);
 }
 
-TEST_CASE("shared_scope_guard reports the initial instance", "[util]")
+TEST_CASE("shared_scope_guard_reports_the_initial_instance", "[util]")
 {
   auto creator = shared_scope_guard::creator{};
   const auto first = creator.create([] {});
@@ -122,7 +122,7 @@ TEST_CASE("shared_scope_guard reports the initial instance", "[util]")
   CHECK(!second.is_initial_instance());
 }
 
-TEST_CASE("shared_scope_guard creates a new instance once all guards are gone", "[util]")
+TEST_CASE("shared_scope_guard_creates_a_new_instance_once_all_guards_are_gone", "[util]")
 {
   auto called = 0;
   auto creator = shared_scope_guard::creator{};
@@ -139,7 +139,7 @@ TEST_CASE("shared_scope_guard creates a new instance once all guards are gone", 
   CHECK(called == 2);
 }
 
-TEST_CASE("shared_scope_guard reset releases the guard", "[util]")
+TEST_CASE("shared_scope_guard_reset_releases_the_guard", "[util]")
 {
   auto called = 0;
   auto creator = shared_scope_guard::creator{};
@@ -151,7 +151,7 @@ TEST_CASE("shared_scope_guard reset releases the guard", "[util]")
   CHECK(called == 1);
 }
 
-TEST_CASE("shared_scope_guard default constructed does nothing", "[util]")
+TEST_CASE("shared_scope_guard_default_constructed_does_nothing", "[util]")
 {
   auto guard = shared_scope_guard{};
   CHECK(!guard.is_initial_instance());

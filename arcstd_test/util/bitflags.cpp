@@ -17,7 +17,7 @@ enum class test_flags
   flag_e,
 };
 
-TEST_CASE("bitflags construction", "[util]")
+TEST_CASE("bitflags_construction", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -36,7 +36,7 @@ TEST_CASE("bitflags construction", "[util]")
   static_assert(!flags{flag_a, flag_b, flag_c}.test(flag_d));
 }
 
-TEST_CASE("bitflags set/reset/flip", "[util]")
+TEST_CASE("bitflags_set_reset_and_flip", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -142,7 +142,7 @@ TEST_CASE("bitflags set/reset/flip", "[util]")
   }
 }
 
-TEST_CASE("bitflags test/has", "[util]")
+TEST_CASE("bitflags_test_and_has", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -157,7 +157,7 @@ TEST_CASE("bitflags test/has", "[util]")
   static_assert(flags{flag_a, flag_b}.test(flag_c) == flags{flag_a, flag_b}.has(flag_c));
 }
 
-TEST_CASE("bitflags has_any/has_all", "[util]")
+TEST_CASE("bitflags_has_any_and_has_all", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -185,7 +185,7 @@ TEST_CASE("bitflags has_any/has_all", "[util]")
   static_assert(!flags{flag_a, flag_b}.has_all(flags{flag_c}));
 }
 
-TEST_CASE("bitflags all/any/none", "[util]")
+TEST_CASE("bitflags_all_any_and_none", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -210,7 +210,7 @@ TEST_CASE("bitflags all/any/none", "[util]")
   }
 }
 
-TEST_CASE("bitflags count/size", "[util]")
+TEST_CASE("bitflags_count_and_size", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -225,7 +225,7 @@ TEST_CASE("bitflags count/size", "[util]")
   static_assert(flags{flag_a, flag_b, flag_c, flag_d, flag_e}.size() == 5);
 }
 
-TEST_CASE("bitflags operator|=", "[util]")
+TEST_CASE("bitflags_or_assignment", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -261,7 +261,7 @@ TEST_CASE("bitflags operator|=", "[util]")
   }
 }
 
-TEST_CASE("bitflags operator&=", "[util]")
+TEST_CASE("bitflags_and_assignment", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -295,7 +295,7 @@ TEST_CASE("bitflags operator&=", "[util]")
   }
 }
 
-TEST_CASE("bitflags operator^=", "[util]")
+TEST_CASE("bitflags_xor_assignment", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -333,7 +333,7 @@ TEST_CASE("bitflags operator^=", "[util]")
   }
 }
 
-TEST_CASE("bitflags operator~", "[util]")
+TEST_CASE("bitflags_complement", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -370,7 +370,7 @@ TEST_CASE("bitflags operator~", "[util]")
   }
 }
 
-TEST_CASE("bitflags operator==", "[util]")
+TEST_CASE("bitflags_equality", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;
@@ -384,7 +384,7 @@ TEST_CASE("bitflags operator==", "[util]")
   static_assert(flags{flag_a, flag_b} != flags{flag_a, flag_c});
 }
 
-TEST_CASE("bitflags complex scenarios", "[util]")
+TEST_CASE("bitflags_combined_operations", "[util]")
 {
   using flags = bitflags<test_flags>;
   using enum test_flags;

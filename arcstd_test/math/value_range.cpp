@@ -6,9 +6,9 @@
 namespace arcstd::math
 {
 
-TEST_CASE("value_range", "[math]")
+TEST_CASE("value_range_size_overlap_and_containment", "[math]")
 {
-  GIVEN("empty double value_range")
+  SECTION("empty double value_range")
   {
     constexpr auto first_range = value_range<double>(1.0, 1.0);
     constexpr auto second_range = value_range<double>(2.0, 2.0);
@@ -27,7 +27,7 @@ TEST_CASE("value_range", "[math]")
     static_assert(!adjacent(first_range, second_range));
   }
 
-  GIVEN("overlapping double value_range")
+  SECTION("overlapping double value_range")
   {
     constexpr auto first_range = value_range<double>(0.0, 1.0);
     constexpr auto second_range = value_range<double>(0.5, 2.0);
@@ -47,7 +47,7 @@ TEST_CASE("value_range", "[math]")
     static_assert(!adjacent(first_range, second_range));
   }
 
-  GIVEN("containing double value_range")
+  SECTION("containing double value_range")
   {
     constexpr auto first_range = value_range<double>(0.5, 1.5);
     constexpr auto second_range = value_range<double>(0.5, 2.0);
@@ -64,7 +64,7 @@ TEST_CASE("value_range", "[math]")
     static_assert(!adjacent(first_range, second_range));
   }
 
-  GIVEN("adjacent double value_range")
+  SECTION("adjacent double value_range")
   {
     constexpr auto first_range = value_range<double>(0.0, 1.5);
     constexpr auto second_range = value_range<double>(1.5, 2.0);
@@ -81,7 +81,7 @@ TEST_CASE("value_range", "[math]")
     static_assert(adjacent(first_range, second_range));
   }
 
-  GIVEN("empty integer value_range")
+  SECTION("empty integer value_range")
   {
     constexpr auto first_range = value_range<int>(1, 1);
     constexpr auto second_range = value_range<int>(2, 2);
@@ -99,7 +99,7 @@ TEST_CASE("value_range", "[math]")
     static_assert(!adjacent(first_range, second_range));
   }
 
-  GIVEN("overlapping integer value_range")
+  SECTION("overlapping integer value_range")
   {
     constexpr auto first_range = value_range<int>(0, 2);
     constexpr auto second_range = value_range<int>(1, 3);
@@ -120,7 +120,7 @@ TEST_CASE("value_range", "[math]")
     static_assert(!adjacent(first_range, second_range));
   }
 
-  GIVEN("containing integer value_range")
+  SECTION("containing integer value_range")
   {
     constexpr auto first_range = value_range<int>(1, 2);
     constexpr auto second_range = value_range<int>(1, 3);
@@ -137,7 +137,7 @@ TEST_CASE("value_range", "[math]")
     static_assert(!adjacent(first_range, second_range));
   }
 
-  GIVEN("adjacent integer value_range")
+  SECTION("adjacent integer value_range")
   {
     constexpr auto first_range = value_range<int>(0, 2);
     constexpr auto second_range = value_range<int>(2, 4);

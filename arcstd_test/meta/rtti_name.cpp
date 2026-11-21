@@ -18,7 +18,7 @@ struct nested_test_struct final
 
 } // namespace test
 
-TEST_CASE("rtti_name", "[meta]")
+TEST_CASE("rtti_name_names_a_type_without_its_scope", "[meta]")
 {
   struct test_struct final
   {};

@@ -7,7 +7,7 @@
 namespace arcstd::meta
 {
 
-TEST_CASE("is_duration", "[meta]")
+TEST_CASE("is_duration_detects_durations", "[meta]")
 {
   static_assert(is_duration_v<std::chrono::seconds>);
   static_assert(is_duration_v<std::chrono::milliseconds>);

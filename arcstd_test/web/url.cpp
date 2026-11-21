@@ -5,7 +5,7 @@
 namespace arcstd::web
 {
 
-TEST_CASE("is_web_url", "[web]")
+TEST_CASE("is_web_url_takes_web_pages_only", "[web]")
 {
   CHECK(is_web_url("https://www.bibleserver.com/NG%C3%9C.ELB/Johannes3%2C16-18"));
   CHECK(is_web_url("http://example.com"));

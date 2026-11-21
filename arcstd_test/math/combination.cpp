@@ -6,9 +6,9 @@
 namespace arcstd::math
 {
 
-TEST_CASE("combination", "[math]")
+TEST_CASE("combination_lists_every_combination", "[math]")
 {
-  GIVEN("list of variants")
+  SECTION("list of variants")
   {
     using matrix_type = std::vector<std::vector<int>>;
     const auto nested = matrix_type{

@@ -58,7 +58,7 @@ template<setting::underlying_setting_type T>
 
 } // namespace
 
-TEST_CASE("lua_state_register_function", "[lua]")
+TEST_CASE("lua_state_registers_a_function", "[lua]")
 {
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
@@ -71,7 +71,7 @@ TEST_CASE("lua_state_register_function", "[lua]")
   );
 }
 
-TEST_CASE("lua_state_register_function_converts_the_values", "[lua]")
+TEST_CASE("lua_state_registered_function_converts_the_values", "[lua]")
 {
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
@@ -146,7 +146,7 @@ TEST_CASE("lua_state_register_function_converts_the_values", "[lua]")
   STATIC_REQUIRE_FALSE(function_convertible<decltype(generic)>);
 }
 
-TEST_CASE("lua_state_register_rejects_a_path", "[lua]")
+TEST_CASE("lua_state_rejects_a_taken_path", "[lua]")
 {
   const auto state_owner = lua::state_owner{};
   auto s = state_owner.lock();
@@ -317,7 +317,7 @@ TEST_CASE("lua_state_registration_waits_for_the_running_script", "[lua]")
   CHECK(state_owner.lock().run_script("after.lua", "return 1"));
 }
 
-TEST_CASE("lua_state_register_setting", "[lua]")
+TEST_CASE("lua_state_registers_a_setting", "[lua]")
 {
   // The properties reach the tree through shared_from_this
   const auto tree = std::make_shared<setting::property_tree>();
@@ -547,6 +547,20 @@ TEST_CASE("lua_state_protects_shared_tables", "[lua]")
   // The app still changes them
   REQUIRE(keep(s.register_function("b.f", to_function([]() { return 2; }))));
   CHECK(s->script("return root.interface.b.f()").get<int>() == 2);
+}
+
+TEST_CASE("lua_state_registers_no_name_the_state_has", "[lua]")
+{
+  const auto owner = state_owner{};
+  auto s = owner.lock();
+  auto keep = test_utils::registrations{};
+  CHECK(s->script("return util == nil").get<bool>());
+  CHECK_FALSE(keep(s.register_function("util", to_function([]() { return 1; }))));
+  CHECK_FALSE(keep(s.register_function("util.split", to_function([]() { return 1; }))));
+  // Neither what scripts have of Lua
+  CHECK_FALSE(keep(s.register_function("pairs", to_function([]() { return 1; }))));
+  CHECK_FALSE(keep(s.register_function("string.upper", to_function([]() { return 1; }))));
+  CHECK(s->script("return type(root.interface.util.split) == 'function'").get<bool>());
 }
 
 } // namespace arcstd::lua

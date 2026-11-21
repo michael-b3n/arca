@@ -15,7 +15,7 @@ constexpr auto signaling_nan = std::numeric_limits<T>::signaling_NaN();
 template<typename T>
 constexpr auto inf = std::numeric_limits<T>::infinity();
 
-TEST_CASE("is_valid single value", "[math]")
+TEST_CASE("is_valid_single_value", "[math]")
 {
   CHECK(is_valid(0.0));
   CHECK(is_valid(-0.0));
@@ -33,7 +33,7 @@ TEST_CASE("is_valid single value", "[math]")
   CHECK(!is_valid(inf<float>));
 }
 
-TEST_CASE("is_valid multiple values", "[math]")
+TEST_CASE("is_valid_multiple_values", "[math]")
 {
   CHECK(is_valid(0.0, 1.0, 2.0));
   CHECK(!is_valid(0.0, nan<double>, 2.0));

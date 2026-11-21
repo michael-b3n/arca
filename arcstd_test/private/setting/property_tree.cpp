@@ -41,9 +41,10 @@ namespace
 
 } // namespace
 
-TEST_CASE("property_tree_whitespace", "[setting]")
+TEST_CASE("property_tree_drops_the_whitespace_between_elements", "[setting]")
 {
-  const auto folder = test_utils::temp_folder{"property_tree_whitespace"};
+  const auto folder =
+    test_utils::temp_folder{"property_tree_drops_the_whitespace_between_elements"};
   const auto file = folder.path() / "settings.xml";
   // Whitespace an earlier version piled up between the elements on every write
   test_utils::write_file(

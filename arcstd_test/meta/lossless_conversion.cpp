@@ -8,7 +8,7 @@
 namespace arcstd::meta
 {
 
-TEST_CASE("is_lossless_conversion identity", "[meta]")
+TEST_CASE("is_lossless_conversion_to_the_same_type", "[meta]")
 {
   static_assert(is_lossless_conversion_v<int, int>);
   static_assert(is_lossless_conversion_v<double, double>);
@@ -20,7 +20,7 @@ TEST_CASE("is_lossless_conversion identity", "[meta]")
   static_assert(!is_lossless_conversion_v<void*, void*>);
 }
 
-TEST_CASE("is_lossless_conversion widening", "[meta]")
+TEST_CASE("is_lossless_conversion_widening", "[meta]")
 {
   static_assert(is_lossless_conversion_v<std::int8_t, std::int16_t>);
   static_assert(is_lossless_conversion_v<std::int8_t, std::int64_t>);
@@ -33,7 +33,7 @@ TEST_CASE("is_lossless_conversion widening", "[meta]")
   static_assert(is_lossless_conversion_v<bool, double>);
 }
 
-TEST_CASE("is_lossless_conversion narrowing", "[meta]")
+TEST_CASE("is_lossless_conversion_narrowing", "[meta]")
 {
   static_assert(!is_lossless_conversion_v<std::int16_t, std::int8_t>);
   static_assert(!is_lossless_conversion_v<std::int64_t, std::int32_t>);
@@ -49,13 +49,13 @@ TEST_CASE("is_lossless_conversion narrowing", "[meta]")
   static_assert(!is_lossless_conversion_v<std::int64_t, double>);
 }
 
-TEST_CASE("lossless_convertible concept", "[meta]")
+TEST_CASE("lossless_convertible_concept", "[meta]")
 {
   static_assert(lossless_convertible<std::int8_t, std::int32_t>);
   static_assert(!lossless_convertible<std::int32_t, std::int8_t>);
 }
 
-TEST_CASE("lossless_common_type single type", "[meta]")
+TEST_CASE("lossless_common_type_of_one_type", "[meta]")
 {
   static_assert(std::is_same_v<lossless_common_type_t<int>, int>);
   static_assert(std::is_same_v<lossless_common_type_t<double>, double>);
@@ -63,14 +63,14 @@ TEST_CASE("lossless_common_type single type", "[meta]")
   static_assert(std::is_void_v<lossless_common_type_t<void>>);
 }
 
-TEST_CASE("lossless_common_type same types", "[meta]")
+TEST_CASE("lossless_common_type_of_the_same_types", "[meta]")
 {
   static_assert(std::is_same_v<lossless_common_type_t<int, int>, int>);
   static_assert(std::is_same_v<lossless_common_type_t<double, double, double>, double>);
   static_assert(std::is_same_v<lossless_common_type_t<const int, int>, int>);
 }
 
-TEST_CASE("lossless_common_type integrals", "[meta]")
+TEST_CASE("lossless_common_type_of_integrals", "[meta]")
 {
   // If one type converts losslessly into the other, that other type is the common one.
   static_assert(std::is_same_v<lossless_common_type_t<std::int8_t, std::int32_t>, std::int32_t>);
@@ -85,13 +85,13 @@ TEST_CASE("lossless_common_type integrals", "[meta]")
   static_assert(std::is_void_v<lossless_common_type_t<std::uint64_t, std::int64_t>>);
 }
 
-TEST_CASE("lossless_common_type floating points", "[meta]")
+TEST_CASE("lossless_common_type_of_floating_points", "[meta]")
 {
   static_assert(std::is_same_v<lossless_common_type_t<float, double>, double>);
   static_assert(std::is_same_v<lossless_common_type_t<double, float>, double>);
 }
 
-TEST_CASE("lossless_common_type mixed integral and floating point", "[meta]")
+TEST_CASE("lossless_common_type_of_integrals_and_floating_points", "[meta]")
 {
   static_assert(std::is_same_v<lossless_common_type_t<std::int8_t, float>, float>);
   static_assert(std::is_same_v<lossless_common_type_t<float, std::int8_t>, float>);
@@ -103,7 +103,7 @@ TEST_CASE("lossless_common_type mixed integral and floating point", "[meta]")
   static_assert(std::is_void_v<lossless_common_type_t<std::int64_t, double>>);
 }
 
-TEST_CASE("lossless_common_type variadic", "[meta]")
+TEST_CASE("lossless_common_type_of_many_types", "[meta]")
 {
   static_assert(
     std::is_same_v<lossless_common_type_t<std::int8_t, std::int16_t, std::int32_t>, std::int32_t>
@@ -114,7 +114,7 @@ TEST_CASE("lossless_common_type variadic", "[meta]")
   );
 }
 
-TEST_CASE("has_lossless_common_type concept", "[meta]")
+TEST_CASE("has_lossless_common_type_concept", "[meta]")
 {
   static_assert(has_lossless_common_type<std::int8_t, std::int32_t>);
   static_assert(has_lossless_common_type<std::uint32_t, std::int32_t>);

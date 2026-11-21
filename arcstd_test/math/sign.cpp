@@ -8,7 +8,7 @@
 namespace arcstd::math
 {
 
-TEST_CASE("sign of signed integrals", "[math]")
+TEST_CASE("sign_of_signed_integrals", "[math]")
 {
   static_assert(sign(std::int8_t{0}) == sign_value::zero);
   static_assert(sign(std::int8_t{1}) == sign_value::positive);
@@ -19,7 +19,7 @@ TEST_CASE("sign of signed integrals", "[math]")
   static_assert(sign(std::int64_t{-42}) == sign_value::negative);
 }
 
-TEST_CASE("sign of unsigned integrals", "[math]")
+TEST_CASE("sign_of_unsigned_integrals", "[math]")
 {
   static_assert(sign(std::uint8_t{0}) == sign_value::zero);
   static_assert(sign(std::uint8_t{1}) == sign_value::positive);
@@ -27,7 +27,7 @@ TEST_CASE("sign of unsigned integrals", "[math]")
   static_assert(sign(std::uint64_t{0}) == sign_value::zero);
 }
 
-TEST_CASE("sign of floating points", "[math]")
+TEST_CASE("sign_of_floating_points", "[math]")
 {
   static_assert(sign(0.0) == sign_value::zero);
   static_assert(sign(-0.0) == sign_value::zero);
@@ -37,7 +37,7 @@ TEST_CASE("sign of floating points", "[math]")
   static_assert(sign(-1.0f) == sign_value::negative);
 }
 
-TEST_CASE("sign concepts", "[math]")
+TEST_CASE("sign_concepts", "[math]")
 {
   static_assert(signed_type<std::int32_t>);
   static_assert(signed_type<double>);
@@ -47,7 +47,7 @@ TEST_CASE("sign concepts", "[math]")
   static_assert(!unsigned_type<double>);
 }
 
-TEST_CASE("sign values", "[math]")
+TEST_CASE("sign_values", "[math]")
 {
   static_assert(sign_value::negative == -1);
   static_assert(sign_value::zero == 0);

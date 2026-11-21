@@ -15,7 +15,7 @@
 namespace arcstd::lua
 {
 
-TEST_CASE("lua_state_owner_setup", "[lua]")
+TEST_CASE("lua_state_owner_sets_up_the_state", "[lua]")
 {
   const auto owner = state_owner{};
   const auto s = owner.lock();
@@ -26,7 +26,7 @@ TEST_CASE("lua_state_owner_setup", "[lua]")
   );
 }
 
-TEST_CASE("lua_state_keeps_the_state_alive", "[lua]")
+TEST_CASE("lua_state_owner_keeps_the_state_alive", "[lua]")
 {
   const auto s = state_owner{}.lock();
   CHECK(s->script("return type(root) == 'table'").get<bool>());
@@ -43,7 +43,7 @@ TEST_CASE("lua_state_owner_keeps_the_state_when_moved", "[lua]")
   CHECK(moved.lock()->get<int>("value") == 1);
 }
 
-TEST_CASE("lua_state_owner_logs", "[lua]")
+TEST_CASE("lua_state_owner_logs_for_the_scripts", "[lua]")
 {
   const auto owner = state_owner{};
   auto s = owner.lock();

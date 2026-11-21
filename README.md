@@ -104,6 +104,14 @@ installs into `install/<preset>`.
 out. After its tests, `gcovr` in the repository root reports the lines of arcstd they run, as set
 in `gcovr.cfg`. CI sends the report to Codecov, which shows it in the badge above.
 
+A test file tests one object, at the path of its source: `arcstd_test/io/csv_reader.cpp` tests
+`arcstd/io/csv_reader.hpp`, the private ones in `arcstd_test/private`. A test is named
+`<object>_<what it does>` in snake_case, e.g. `csv_reader_reads_a_file`, a type of ArcQml keeps its
+name, e.g. `SettingBinding_binds_the_value_to_the_setting`. Its tag is its area, e.g. `[io]`.
+Cases share a setup in a `SECTION`, a test for several types is a `TEMPLATE_LIST_TEST_CASE`, and a
+check that throws names the exception with `CHECK_THROWS_AS`. ctest lists the tests before it runs
+them.
+
 ## License
 
 [MIT](LICENSE)

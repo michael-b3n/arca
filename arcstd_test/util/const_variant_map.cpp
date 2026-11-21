@@ -32,7 +32,7 @@ constexpr auto make_test_map() -> auto
 
 } // namespace
 
-TEST_CASE("const_variant_map typedefs", "[util]")
+TEST_CASE("const_variant_map_typedefs", "[util]")
 {
   using map_type = decltype(make_test_map());
 
@@ -44,7 +44,7 @@ TEST_CASE("const_variant_map typedefs", "[util]")
   static_assert(std::is_same_v<map_type::value_variant_type, std::variant<int, double>>);
 }
 
-TEST_CASE("const_variant_map contains", "[util]")
+TEST_CASE("const_variant_map_contains", "[util]")
 {
   const auto map = make_test_map();
 
@@ -56,7 +56,7 @@ TEST_CASE("const_variant_map contains", "[util]")
   CHECK(!map.contains('b'));
 }
 
-TEST_CASE("const_variant_map at", "[util]")
+TEST_CASE("const_variant_map_at", "[util]")
 {
   const auto map = make_test_map();
 
@@ -68,7 +68,7 @@ TEST_CASE("const_variant_map at", "[util]")
   CHECK_THROWS_AS(map.at('b'), util::exception);
 }
 
-TEST_CASE("const_variant_map visit", "[util]")
+TEST_CASE("const_variant_map_visit", "[util]")
 {
   const auto map = make_test_map();
 
@@ -87,7 +87,7 @@ TEST_CASE("const_variant_map visit", "[util]")
   CHECK(visited == 0.0);
 }
 
-TEST_CASE("const_variant_map visit_until", "[util]")
+TEST_CASE("const_variant_map_visit_until", "[util]")
 {
   const auto map = make_test_map();
 
@@ -124,7 +124,7 @@ TEST_CASE("const_variant_map visit_until", "[util]")
   CHECK(keys == std::vector<std::size_t>{0, 1, 2});
 }
 
-TEST_CASE("const_variant_map rejects duplicated keys", "[util]")
+TEST_CASE("const_variant_map_rejects_duplicated_keys", "[util]")
 {
   CHECK_THROWS_AS(const_variant_map(int_to_double{1, 1.5}, int_to_double{1, 2.5}), util::exception);
   // Equal values under different keys are fine.

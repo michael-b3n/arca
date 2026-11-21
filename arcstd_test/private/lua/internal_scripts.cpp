@@ -12,7 +12,7 @@
 namespace arcstd::lua
 {
 
-TEST_CASE("lua_util", "[lua]")
+TEST_CASE("lua_interface_util_offers_its_helpers", "[lua]")
 {
   const auto owner = state_owner{};
   auto s = owner.lock();
@@ -113,21 +113,7 @@ TEST_CASE("lua_util", "[lua]")
   }
 }
 
-TEST_CASE("lua_state_register_takes_no_name_of_the_state", "[lua]")
-{
-  const auto owner = state_owner{};
-  auto s = owner.lock();
-  auto keep = test_utils::registrations{};
-  CHECK(s->script("return util == nil").get<bool>());
-  CHECK_FALSE(keep(s.register_function("util", to_function([]() { return 1; }))));
-  CHECK_FALSE(keep(s.register_function("util.split", to_function([]() { return 1; }))));
-  // Neither what scripts have of Lua
-  CHECK_FALSE(keep(s.register_function("pairs", to_function([]() { return 1; }))));
-  CHECK_FALSE(keep(s.register_function("string.upper", to_function([]() { return 1; }))));
-  CHECK(s->script("return type(root.interface.util.split) == 'function'").get<bool>());
-}
-
-TEST_CASE("lua_embedded_scripts_add_themselves", "[lua]")
+TEST_CASE("lua_internal_scripts_add_themselves", "[lua]")
 {
   const auto owner = state_owner{};
   const auto s = owner.lock();
@@ -169,7 +155,7 @@ TEST_CASE("lua_system_util_removes_a_path", "[lua]")
   CHECK(check("return i.a.e == 3 and type(i.util.split) == 'function'"));
 }
 
-TEST_CASE("lua_scripts_compile", "[lua]")
+TEST_CASE("lua_internal_scripts_compile", "[lua]")
 {
   const auto owner = state_owner{};
   const auto s = owner.lock();

@@ -9,7 +9,7 @@
 namespace arcstd::util
 {
 
-TEST_CASE("path", "[util]")
+TEST_CASE("path_splits_into_sections", "[util]")
 {
   CHECK(path{"ocr"}.sections() == std::vector<std::string>{"ocr"});
   CHECK(
