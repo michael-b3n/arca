@@ -40,7 +40,7 @@ auto integer_cast(const std::integral auto value) -> std::optional<T>
 {
   try
   {
-    const auto v = numeric_cast<T>(value);
+    const auto v = arcstd::util::numeric_cast_rt<T>(value);
     return v;
   }
   catch(...)

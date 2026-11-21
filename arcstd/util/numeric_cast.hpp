@@ -4,13 +4,11 @@
 
 #include <type_traits>
 
-#define numeric_cast boost::numeric_cast
-
 namespace arcstd::util
 {
 
 ///
-/// \return \p v as T, a static_cast in a constant expression, else a numeric_cast
+/// \return \p v as T, a static_cast in a constant expression, else a boost::numeric_cast
 /// \throws boost::numeric::bad_numeric_cast at runtime if T can not hold \p v
 ///
 template<typename T>
@@ -23,7 +21,7 @@ template<typename T>
   }
   else
   {
-    return numeric_cast<T>(std::forward<decltype(v)>(v));
+    return boost::numeric_cast<T>(std::forward<decltype(v)>(v));
   }
 }
 

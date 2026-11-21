@@ -45,7 +45,7 @@ constexpr auto rollback_sql = "ROLLBACK;";
 {
   // With its size, so a text holds any character
   return sqlite3_bind_text(
-    statement, index, text.data(), numeric_cast<int>(text.size()), SQLITE_STATIC
+    statement, index, text.data(), util::numeric_cast_rt<int>(text.size()), SQLITE_STATIC
   );
 }
 
@@ -104,7 +104,7 @@ auto cache_database::get(const std::string& key) const -> std::optional<std::str
     // The bytes as they were set, the size is only valid once they are read
     const auto text =
       static_cast<util::non_owning_ptr<const char>>(sqlite3_column_blob(get_.get(), 0));
-    const auto size = numeric_cast<std::size_t>(sqlite3_column_bytes(get_.get(), 0));
+    const auto size = util::numeric_cast_rt<std::size_t>(sqlite3_column_bytes(get_.get(), 0));
     value = text != nullptr ? std::string{text, size} : std::string{};
   }
   else
@@ -177,7 +177,7 @@ auto cache_database::open() const -> database_ptr
     return nullptr;
   }
   sqlite3_busy_timeout(
-    database.get(), numeric_cast<int>(std::chrono::milliseconds{busy_timeout}.count())
+    database.get(), util::numeric_cast_rt<int>(std::chrono::milliseconds{busy_timeout}.count())
   );
   if(
     const auto setup = sqlite3_exec(database.get(), setup_sql, nullptr, nullptr, nullptr);
@@ -206,7 +206,7 @@ auto cache_database::prepare(const std::string_view sql) const -> statement_ptr
   auto prepared = util::non_owning_ptr<sqlite3_stmt>{nullptr};
   // NOLINTBEGIN(bugprone-suspicious-stringview-data-usage) the size is given, sqlite reads no further
   const auto status = sqlite3_prepare_v2(
-    database_.get(), sql.data(), numeric_cast<int>(sql.size()), &prepared, nullptr
+    database_.get(), sql.data(), util::numeric_cast_rt<int>(sql.size()), &prepared, nullptr
   );
   // NOLINTEND(bugprone-suspicious-stringview-data-usage)
   auto statement = statement_ptr{prepared};
