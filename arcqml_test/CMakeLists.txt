@@ -16,5 +16,9 @@ target_link_libraries(arcqml_test PRIVATE
   Catch2::Catch2 arcstd_test_utils ArcQml Qt6::Core Qt6::Gui Qt6::Qml
 )
 
-# The Qt DLLs are found by the listing of the tests and by ctest, also with no Qt on the PATH.
-catch_discover_tests(arcqml_test DL_PATHS "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
+# ctest lists the tests before it runs them. The Qt DLLs are found by the listing and by the tests,
+# also with no Qt on the PATH.
+catch_discover_tests(arcqml_test
+  DISCOVERY_MODE PRE_TEST
+  DL_PATHS "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}"
+)

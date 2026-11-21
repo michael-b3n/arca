@@ -30,8 +30,9 @@ target_link_libraries(arcstd_private_test PRIVATE
   Catch2::Catch2WithMain arcstd_test_utils arcstd_internals $<$<PLATFORM_ID:Windows>:ws2_32>
 )
 
-catch_discover_tests(arcstd_test)
-catch_discover_tests(arcstd_private_test)
+# ctest lists the tests before it runs them, the build runs no test executable.
+catch_discover_tests(arcstd_test DISCOVERY_MODE PRE_TEST)
+catch_discover_tests(arcstd_private_test DISCOVERY_MODE PRE_TEST)
 
 # Linked with -static, the tests load no DLL of the toolchain or of a third party library.
 if(ARCA_STATIC_DEPENDENCIES)
