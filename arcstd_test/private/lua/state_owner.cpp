@@ -2,9 +2,12 @@
 
 #include <arcstd/lua/function.hpp>
 #include <arcstd/lua/state_owner.hpp>
+#include <arcstd/util/ranges.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
+#include <ranges>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -68,19 +71,18 @@ TEST_CASE("lua_state_owner_is_locked_from_several_threads", "[lua]")
   const auto owner = state_owner{};
   owner.lock()->set("counter", 0);
   {
-    auto threads = std::vector<std::jthread>{};
-    for(auto i = 0; i < thread_count; ++i)
+    const auto increment = [copy = owner]
     {
-      threads.emplace_back(
-        [copy = owner]
-        {
-          for(auto j = 0; j < increments; ++j)
-          {
-            copy.lock()->script("counter = counter + 1");
-          }
-        }
+      std::ranges::for_each(
+        util::ranges::index_view_to(increments),
+        [&](const auto) { copy.lock()->script("counter = counter + 1"); }
       );
-    }
+    };
+    // Joined at the end of the scope
+    const auto threads =
+      util::ranges::index_view_to(thread_count) |
+      std::views::transform([&](const auto) { return std::jthread{increment}; }) |
+      std::ranges::to<std::vector>();
   }
   CHECK(owner.lock()->get<int>("counter") == thread_count * increments);
 }

@@ -2,6 +2,8 @@
 
 #include "arcqml/model/SimpleListModel.hpp"
 
+#include <arcstd/util/ranges.hpp>
+
 #include <catch2/catch_test_macros.hpp>
 
 #include <QJSEngine>
@@ -9,6 +11,8 @@
 #include <QString>
 #include <QVariant>
 #include <QVariantList>
+
+#include <ranges>
 
 namespace arcqml
 {
@@ -20,12 +24,12 @@ namespace
 ///
 [[nodiscard]] auto texts(const SimpleListModel& model) -> QStringList
 {
-  auto result = QStringList{};
-  for(auto row = 0; row < model.rowCount(); ++row)
-  {
-    result.append(model.data(model.index(row), SimpleListModel::ValueRole).toString());
-  }
-  return result;
+  return arcstd::util::ranges::index_view_to(model.rowCount()) |
+         std::views::transform(
+           [&](const auto row)
+           { return model.data(model.index(row), SimpleListModel::ValueRole).toString(); }
+         ) |
+         std::ranges::to<QStringList>();
 }
 
 } // namespace

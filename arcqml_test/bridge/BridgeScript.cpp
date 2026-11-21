@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <format>
 #include <memory>
+#include <ranges>
 #include <string>
 
 namespace arcqml
@@ -46,12 +47,10 @@ namespace
 ///
 [[nodiscard]] auto scriptNames(const BridgeScript& bridge) -> QStringList
 {
-  auto names = QStringList{};
-  for(const auto& entry : bridge.property("scripts").toList())
-  {
-    names.append(entry.toMap().value(QStringLiteral("name")).toString());
-  }
-  return names;
+  return bridge.property("scripts").toList() |
+         std::views::transform([](const QVariant& entry)
+                               { return entry.toMap().value(QStringLiteral("name")).toString(); }) |
+         std::ranges::to<QStringList>();
 }
 
 ///

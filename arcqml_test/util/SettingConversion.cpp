@@ -1,9 +1,11 @@
 #include "test_utils/qt_strings.hpp"
+#include "test_utils/settings.hpp"
 #include "test_utils/temp_folder.hpp"
 
 #include "arcqml/util/SettingConversion.hpp"
 
 #include <arcstd/setting/setting_store.hpp>
+#include <arcstd/util/exception.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -33,25 +35,12 @@ namespace
 
 // Typedefs
 using DefaultValueType = arcstd::setting::setting_store::setting_type_erased_variant_type;
-template<typename T>
-using ErasedSettingType =
-  arcstd::setting::setting_store::setting_type_erased_non_owning_ptr_type<T>;
 
 enum class mode
 {
   light,
   dark,
 };
-
-///
-/// \return the type erased setting \p T of \p setting, which must hold one
-///
-template<typename T>
-[[nodiscard]] auto erased(const SettingVariantType& setting) -> ErasedSettingType<T>
-{
-  REQUIRE(std::holds_alternative<ErasedSettingType<T>>(setting));
-  return std::get<ErasedSettingType<T>>(setting);
-}
 
 } // namespace
 
@@ -110,13 +99,11 @@ TEST_CASE("SettingConversion_reads_the_value_of_a_setting", "[util]")
     toQmlValue(store.type_erased_setting("test.pause", std::chrono::milliseconds{250})) ==
     QVariant{250}
   );
+  const auto counts = std::vector<std::int64_t>{1, 2};
   CHECK(
-    toQmlValue(store.type_erased_setting(
-      "test.counts",
-      std::vector<std::int64_t>{
-        1, 2
+    toQmlValue(store.type_erased_setting("test.counts", counts)) == QVariant{
+                                                                      QVariantList{1, 2}
   }
-    )) == QVariant{QVariantList{1, 2}}
   );
   CHECK(
     toQmlValue(store.type_erased_setting("test.some", std::optional<std::int32_t>{5})) ==
@@ -140,36 +127,48 @@ TEST_CASE("SettingConversion_writes_the_value_of_a_setting", "[util]")
 
   const auto flag = store.type_erased_setting("test.flag", false);
   CHECK(setQmlValue(flag, true));
-  CHECK(erased<bool>(flag)->value() == true);
+  CHECK(arcstd::test_utils::type_erased_setting<bool>(flag)->value() == true);
 
   const auto count = store.type_erased_setting("test.count", std::int32_t{0});
   CHECK(setQmlValue(count, 7));
-  CHECK(erased<std::int32_t>(count)->value() == 7);
+  CHECK(arcstd::test_utils::type_erased_setting<std::int32_t>(count)->value() == 7);
 
   const auto name = store.type_erased_setting("test.name", std::string{});
   CHECK(setQmlValue(name, QStringLiteral("name")));
-  CHECK(erased<std::string>(name)->value() == "name");
+  CHECK(arcstd::test_utils::type_erased_setting<std::string>(name)->value() == "name");
 
   const auto pause = store.type_erased_setting("test.pause", std::chrono::seconds{1});
   CHECK(setQmlValue(pause, 30));
-  CHECK(erased<std::chrono::seconds>(pause)->value() == std::chrono::seconds{30});
+  CHECK(
+    arcstd::test_utils::type_erased_setting<std::chrono::seconds>(pause)->value() ==
+    std::chrono::seconds{30}
+  );
 
   const auto some = store.type_erased_setting("test.some", std::optional<double>{});
   CHECK(setQmlValue(some, 1.5));
-  CHECK(erased<std::optional<double>>(some)->value() == std::optional{1.5});
+  CHECK(
+    arcstd::test_utils::type_erased_setting<std::optional<double>>(some)->value() ==
+    std::optional{1.5}
+  );
 
   // Lists, also as JavaScript arrays
   const auto counts = store.type_erased_setting("test.counts", std::vector<std::uint64_t>{});
   CHECK(setQmlValue(counts, QVariantList{1, 2}));
-  CHECK(erased<std::vector<std::uint64_t>>(counts)->value() == std::vector<std::uint64_t>{1, 2});
+  CHECK(
+    arcstd::test_utils::type_erased_setting<std::vector<std::uint64_t>>(counts)->value() ==
+    std::vector<std::uint64_t>{1, 2}
+  );
   auto engine = QJSEngine{};
   const auto names = store.type_erased_setting("test.names", std::vector<std::string>{});
   CHECK(setQmlValue(names, QVariant::fromValue(engine.evaluate(QStringLiteral("['a', 'b']")))));
-  CHECK(erased<std::vector<std::string>>(names)->value() == std::vector<std::string>{"a", "b"});
+  CHECK(
+    arcstd::test_utils::type_erased_setting<std::vector<std::string>>(names)->value() ==
+    std::vector<std::string>{"a", "b"}
+  );
   const auto pauses = store.type_erased_setting("test.pauses", std::vector<std::chrono::minutes>{});
   CHECK(setQmlValue(pauses, QVariantList{2}));
   CHECK(
-    erased<std::vector<std::chrono::minutes>>(pauses)->value() ==
+    arcstd::test_utils::type_erased_setting<std::vector<std::chrono::minutes>>(pauses)->value() ==
     std::vector{std::chrono::minutes{2}}
   );
 }
@@ -183,25 +182,28 @@ TEST_CASE("SettingConversion_rejects_a_value_the_setting_does_not_take", "[util]
   // A negative number for an unsigned setting
   const auto count = store.type_erased_setting("test.count", std::uint32_t{3});
   CHECK_FALSE(setQmlValue(count, -1));
-  CHECK(erased<std::uint32_t>(count)->value() == 3);
+  CHECK(arcstd::test_utils::type_erased_setting<std::uint32_t>(count)->value() == 3);
   const auto counts = store.type_erased_setting("test.counts", std::vector<std::uint32_t>{3});
   CHECK_FALSE(setQmlValue(counts, QVariantList{1, -1}));
-  CHECK(erased<std::vector<std::uint32_t>>(counts)->value() == std::vector<std::uint32_t>{3});
+  CHECK(
+    arcstd::test_utils::type_erased_setting<std::vector<std::uint32_t>>(counts)->value() ==
+    std::vector<std::uint32_t>{3}
+  );
 
   // The validator corrects a value out of its range
   const auto range =
     std::make_shared<arcstd::setting::setting_validator_range<std::int32_t>>(0, 10);
   const auto size = store.type_erased_setting("test.size", std::int32_t{3}, range);
   CHECK_FALSE(setQmlValue(size, 20));
-  CHECK(erased<std::int32_t>(size)->value() == 9);
+  CHECK(arcstd::test_utils::type_erased_setting<std::int32_t>(size)->value() == 9);
 
   // An enum takes the names of its values only
   std::ignore = store.create_setting("test.mode", mode::light);
   const auto modeSetting = store.type_erased_setting("test.mode");
   REQUIRE(modeSetting);
   CHECK(setQmlValue(*modeSetting, QStringLiteral("dark")));
-  CHECK_THROWS(setQmlValue(*modeSetting, QStringLiteral("purple")));
-  CHECK(erased<std::string>(*modeSetting)->value() == "dark");
+  CHECK_THROWS_AS(setQmlValue(*modeSetting, QStringLiteral("purple")), arcstd::util::exception);
+  CHECK(arcstd::test_utils::type_erased_setting<std::string>(*modeSetting)->value() == "dark");
 }
 
 TEST_CASE("SettingConversion_names_the_postfix_of_a_setting", "[util]")

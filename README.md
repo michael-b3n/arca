@@ -49,7 +49,7 @@ The other targets, not installed, only with `add_subdirectory`:
 | `ArcQmlplugin` | static plugin of the module, an application links it so QML finds `import ArcQml` | `ArcQml` |
 | `arcstd_test_utils` | test helpers of `arcstd_test/test_utils`, also for the tests of projects built on arca, e.g. `"test_utils/temp_folder.hpp"` | Catch2, `arca::arcstd` |
 | `arcstd_test` | tests of the public headers, built like a project on arca | `arcstd_test_utils` |
-| `arcstd_private_test` | tests of the internals in `arcstd_test/private`, with the private headers | `arcstd_internals` |
+| `arcstd_private_test` | tests of the internals in `arcstd_test/private`, with the private headers | `arcstd_test_utils`, `arcstd_internals` |
 | `arcqml_test` | tests of the C++ types of ArcQml that need no window, under a `QCoreApplication`; not in the static and coverage builds | `arcstd_test_utils`, `ArcQml` |
 
 The tests and `arcstd_test_utils` are built with `ARCA_BUILD_TESTS`, on by default when arca is the

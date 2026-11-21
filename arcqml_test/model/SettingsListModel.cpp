@@ -5,6 +5,7 @@
 #include "arcqml/model/SettingsListModel.hpp"
 
 #include <arcstd/setting/setting_store.hpp>
+#include <arcstd/util/ranges.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -19,6 +20,7 @@
 #include <filesystem>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -48,12 +50,12 @@ enum class mode
 ///
 [[nodiscard]] auto paths(const SettingsListModel& model) -> QStringList
 {
-  auto result = QStringList{};
-  for(auto row = 0; row < model.rowCount(); ++row)
-  {
-    result.append(roleData(model, row, SettingsListModel::PathRole).toString());
-  }
-  return result;
+  return arcstd::util::ranges::index_view_to(model.rowCount()) |
+         std::views::transform(
+           [&](const auto row)
+           { return roleData(model, row, SettingsListModel::PathRole).toString(); }
+         ) |
+         std::ranges::to<QStringList>();
 }
 
 } // namespace

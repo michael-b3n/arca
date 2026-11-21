@@ -2,6 +2,7 @@
 #include "test_utils/temp_folder.hpp"
 
 #include <arcstd/util/log.hpp>
+#include <arcstd/util/ranges.hpp>
 #include <arcstd/util/timer.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -105,7 +106,7 @@ TEST_CASE("logger_keeps_the_newest_session_log_files", "[util]")
   const auto log_folder = folder.path() / "logs";
   std::filesystem::create_directories(log_folder);
   const auto now = std::filesystem::file_time_type::clock::now();
-  for(const auto age : std::views::iota(0, 25))
+  for(const auto age : ranges::index_view_to(25))
   {
     const auto file = log_folder / std::format("old_{:02}.log", age);
     test_utils::write_file(file, "old");

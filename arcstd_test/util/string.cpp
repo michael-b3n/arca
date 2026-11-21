@@ -1,6 +1,10 @@
+#include <arcstd/util/exception.hpp>
 #include <arcstd/util/string.hpp>
 
 #include <catch2/catch_test_macros.hpp>
+
+#include <string>
+#include <vector>
 
 namespace arcstd::util
 {
@@ -40,7 +44,7 @@ TEST_CASE("starts_with", "[util]")
   static_assert(!string::starts_with("Test", 't'));
   static_assert(!string::starts_with("", 'a'));
   static_assert(!string::starts_with("", "any"));
-  CHECK_THROWS(string::starts_with("Example", ""));
+  CHECK_THROWS_AS(string::starts_with("Example", ""), exception);
 }
 
 TEST_CASE("ends_with", "[util]")
@@ -53,7 +57,7 @@ TEST_CASE("ends_with", "[util]")
   static_assert(!string::ends_with("Test", 'T'));
   static_assert(!string::ends_with("", 'a'));
   static_assert(!string::ends_with("", "any"));
-  CHECK_THROWS(string::ends_with("Example", ""));
+  CHECK_THROWS_AS(string::ends_with("Example", ""), exception);
 }
 
 TEST_CASE("ends_with_formatted_uint", "[util]")

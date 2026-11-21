@@ -1,4 +1,5 @@
 #include "test_utils/qt_strings.hpp"
+#include "test_utils/settings.hpp"
 #include "test_utils/temp_folder.hpp"
 
 #include "arcqml/bridge/BridgeSettings.hpp"
@@ -31,10 +32,8 @@ using SettingStore = arcstd::setting::setting_store;
 template<typename T, typename V>
 [[nodiscard]] auto hasValidator(const SettingStore& store, const std::string& path) -> bool
 {
-  using SettingType = SettingStore::setting_type_erased_non_owning_ptr_type<T>;
-  const auto setting = store.type_erased_setting(path);
-  return setting && std::holds_alternative<SettingType>(*setting) &&
-         std::holds_alternative<typename V::sptr_type>(std::get<SettingType>(*setting)->validator);
+  const auto* const setting = arcstd::test_utils::type_erased_setting<T>(store, path);
+  return std::holds_alternative<typename V::sptr_type>(setting->validator);
 }
 
 } // namespace

@@ -25,12 +25,10 @@ target_link_libraries(arcstd_test PRIVATE Catch2::Catch2WithMain arcstd_test_uti
 #
 file(GLOB ARCSTD_PRIVATE_TEST_SRC_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/private/*/*.cpp")
 add_executable(arcstd_private_test ${ARCSTD_PRIVATE_TEST_SRC_FILES})
-target_include_directories(arcstd_private_test PRIVATE ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(arcstd_private_test PRIVATE Catch2::Catch2WithMain arcstd_internals)
 # The local HTTP server of the web_request test uses the sockets of Windows.
-if(WIN32)
-  target_link_libraries(arcstd_private_test PRIVATE ws2_32 mswsock)
-endif()
+target_link_libraries(arcstd_private_test PRIVATE
+  Catch2::Catch2WithMain arcstd_test_utils arcstd_internals $<$<PLATFORM_ID:Windows>:ws2_32>
+)
 
 catch_discover_tests(arcstd_test)
 catch_discover_tests(arcstd_private_test)

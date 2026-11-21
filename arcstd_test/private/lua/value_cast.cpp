@@ -3,6 +3,8 @@
 #include <arcstd/lua/sol_conversion.hpp>
 #include <arcstd/lua/value_cast.hpp>
 
+#include <boost/numeric/conversion/cast.hpp>
+
 #include <catch2/catch_test_macros.hpp>
 
 #include <chrono>
@@ -71,9 +73,10 @@ TEST_CASE("lua_value_cast_throws_for_an_integer_lua_can_not_hold", "[lua]")
   const auto largest = static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max());
   CHECK(round_trip(lua, largest) == largest);
   // It would be another, negative number for the script
-  CHECK_THROWS(to_value<std::uint64_t>(largest + 1));
-  CHECK_THROWS(to_value<std::uint64_t>(limits::max()));
-  CHECK_THROWS(to_value<std::vector<std::uint64_t>>({1, limits::max()}));
+  using error_type = boost::numeric::bad_numeric_cast;
+  CHECK_THROWS_AS(to_value<std::uint64_t>(largest + 1), error_type);
+  CHECK_THROWS_AS(to_value<std::uint64_t>(limits::max()), error_type);
+  CHECK_THROWS_AS(to_value<std::vector<std::uint64_t>>({1, limits::max()}), error_type);
   CHECK(
     round_trip(lua, std::numeric_limits<std::int64_t>::min()) ==
     std::numeric_limits<std::int64_t>::min()

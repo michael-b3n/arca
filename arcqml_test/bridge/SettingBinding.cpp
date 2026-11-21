@@ -1,5 +1,6 @@
 #include "test_utils/events.hpp"
 #include "test_utils/qt_strings.hpp"
+#include "test_utils/settings.hpp"
 #include "test_utils/temp_folder.hpp"
 
 #include "arcqml/bridge/BridgeSettings.hpp"
@@ -19,28 +20,9 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include <variant>
 
 namespace arcqml
 {
-namespace
-{
-
-///
-/// \return the type erased setting \p T of \p path in \p store, which must exist
-///
-template<typename T>
-[[nodiscard]] auto erased(const arcstd::setting::setting_store& store, const std::string& path)
-  -> arcstd::setting::setting_store::setting_type_erased_non_owning_ptr_type<T>
-{
-  const auto setting = store.type_erased_setting(path);
-  REQUIRE(setting);
-  return std::get<arcstd::setting::setting_store::setting_type_erased_non_owning_ptr_type<T>>(
-    *setting
-  );
-}
-
-} // namespace
 
 TEST_CASE("SettingBinding_without_a_registry_keeps_its_default_value", "[bridge]")
 {
@@ -65,7 +47,7 @@ TEST_CASE("SettingBinding_binds_the_value_to_the_setting", "[bridge]")
   REQUIRE(binding.bound());
   CHECK(binding.value() == QVariant{3});
   // QML numbers make 64 bit settings
-  auto* const size = erased<std::int64_t>(*store, "ui.size");
+  auto* const size = arcstd::test_utils::type_erased_setting<std::int64_t>(*store, "ui.size");
   CHECK(size->value() == 3);
 
   binding.setValue(5);
@@ -118,12 +100,8 @@ TEST_CASE("SettingBinding_stays_unbound_without_a_fitting_setting", "[bridge]")
 
   // No path, a default value of no setting type, or one of another type than the setting has
   CHECK_FALSE(SettingBinding{QString{}, 3}.bound());
-  CHECK_FALSE(
-    SettingBinding{
-      QStringLiteral("ui.point"), QPointF{1.0, 2.0}
-  }
-      .bound()
-  );
+  const auto point = QPointF{1.0, 2.0};
+  CHECK_FALSE(SettingBinding{QStringLiteral("ui.point"), point}.bound());
   const auto name = SettingBinding{QStringLiteral("ui.name"), 3};
   CHECK_FALSE(name.bound());
   CHECK(name.value() == QVariant{3});

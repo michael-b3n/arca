@@ -1,9 +1,11 @@
+#include <arcstd/util/ranges.hpp>
 #include <arcstd/util/uid.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include <cstdint>
 #include <format>
+#include <ranges>
 #include <set>
 #include <type_traits>
 
@@ -36,11 +38,9 @@ TEST_CASE("uid is unique", "[util]")
   CHECK(second != third);
   CHECK(first != third);
 
-  auto ids = std::set<uid_type>{};
-  for(auto i = 0; i < 100; ++i)
-  {
-    ids.insert(uid_type::new_uid());
-  }
+  const auto ids = util::ranges::index_view_to(100) |
+                   std::views::transform([](const auto) { return uid_type::new_uid(); }) |
+                   std::ranges::to<std::set>();
   CHECK(ids.size() == 100);
 }
 

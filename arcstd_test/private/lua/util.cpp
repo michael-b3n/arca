@@ -2,6 +2,7 @@
 
 #include <arcstd/lua/function.hpp>
 #include <arcstd/lua/internal_scripts.hpp>
+#include <arcstd/lua/sol.hpp>
 #include <arcstd/lua/state_owner.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -24,7 +25,7 @@ TEST_CASE("lua_util", "[lua]")
     CHECK(check("table.concat(root.interface.util.split('a,,b', ','), '|') == 'a||b'"));
     CHECK(check("#root.interface.util.split('', ',') == 1"));
     CHECK(check("root.interface.util.split('a--b', '--')[2] == 'b'"));
-    CHECK_THROWS(s->script("root.interface.util.split('a', '')"));
+    CHECK_THROWS_AS(s->script("root.interface.util.split('a', '')"), sol::error);
     CHECK(check("root.interface.util.trim('  a b \\t') == 'a b'"));
     CHECK(check(
       "root.interface.util.starts_with('abc', 'ab') and not root.interface.util.starts_with('abc', "
@@ -101,7 +102,7 @@ TEST_CASE("lua_util", "[lua]")
     CHECK(fails("<a>"));
     CHECK(fails("<a/><b/>"));
     CHECK(fails("text"));
-    CHECK_THROWS(s->script("root.interface.util.parse_xml(1)"));
+    CHECK_THROWS_AS(s->script("root.interface.util.parse_xml(1)"), sol::error);
     CHECK(check(
       "root.interface.util.xml_text(root.interface.util.parse_xml('<a> <b>x</b> y</a>')) == ' x y'"
     ));
