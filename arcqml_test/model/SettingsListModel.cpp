@@ -1,5 +1,5 @@
-#include "test_utils/events.hpp"
-#include "test_utils/qt_strings.hpp"
+#include "qml_test_utils/events.hpp"
+#include "qml_test_utils/qt_strings.hpp"
 #include "test_utils/temp_folder.hpp"
 
 #include "arcqml/model/SettingsListModel.hpp"

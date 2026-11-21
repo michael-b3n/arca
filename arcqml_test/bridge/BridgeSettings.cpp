@@ -1,4 +1,4 @@
-#include "test_utils/qt_strings.hpp"
+#include "qml_test_utils/qt_strings.hpp"
 #include "test_utils/settings.hpp"
 #include "test_utils/temp_folder.hpp"
 

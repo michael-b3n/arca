@@ -1,4 +1,4 @@
-#include "test_utils/qt_strings.hpp"
+#include "qml_test_utils/qt_strings.hpp"
 
 #include "arcqml/util/LocalPath.hpp"
 
